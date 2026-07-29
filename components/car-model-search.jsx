@@ -17,7 +17,7 @@ const CAR_MODELS = [
 
 const PLACEHOLDERS = ["أسعار الفحص...", "كامري | تويوتا", "أكورد | هوندا", "التيما | نيسان"];
 
-export function CarModelSearch({ className }) {
+export function CarModelSearch({ className, isStuck }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
@@ -63,7 +63,8 @@ export function CarModelSearch({ className }) {
         <PopoverTrigger
           className={cn(
             "flex h-16 cursor-pointer items-center justify-between rounded-full border-none bg-[#edebe0] px-6 text-base font-normal text-[#002623] shadow-xl hover:bg-[#edebe0] sm:text-lg",
-            "w-[92%] sm:w-full",
+            "transition-[width] duration-300 ease-out",
+            isStuck ? "w-full" : "w-[92%] sm:w-full",
             "mx-auto",
             className
           )}

@@ -358,14 +358,34 @@ const WHATSAPP_HREF = "https://wa.me/966920019948?text=*اختر من القائ
 /* -------------------------------------------------------------------------- */
 
 export default function Home() {
+  const [isStuck, setIsStuck] = useState(false);
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const STICKY_TOP = 16; // matches sticky top-[16px]
+    const EARLY_TRIGGER = 32; // fire 16px before it actually sticks
+
+    const observer = new IntersectionObserver(([entry]) => setIsStuck(!entry.isIntersecting), { threshold: 0, rootMargin: `-${STICKY_TOP + EARLY_TRIGGER + 1}px 0px 0px 0px` });
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div dir="rtl">
       <div className="mx-auto lg:max-w-[1500px] lg:px-10 lg:pt-10">
         <HeroSection />
       </div>
 
-      <div className="relative z-20 mx-auto -mt-8 w-full max-w-xl px-4">
-        <CarModelSearch />
+      <div ref={sentinelRef} />
+
+      <div className="sticky top-[16px] z-30">
+        <div className="relative z-20 mx-auto -mt-8 w-full max-w-xl px-4">
+          <CarModelSearch isStuck={isStuck} />
+        </div>
       </div>
 
       <ImageCarousel />

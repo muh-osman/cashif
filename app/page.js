@@ -408,6 +408,7 @@ export default function Home() {
 function HeroSection() {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -419,22 +420,26 @@ function HeroSection() {
 
     const handleOrientation = (event) => {
       if (event.beta !== null && event.gamma !== null) {
-        // Wider clamp range + stronger multipliers for a more visible tilt
-        const x = Math.max(-30, Math.min(30, event.gamma * 0.6)); // Left-right rotation
-        const y = Math.max(-20, Math.min(20, event.beta * 0.4)); // Front-back rotation
+        const x = Math.max(-30, Math.min(30, event.gamma * 0.6));
+        const y = Math.max(-20, Math.min(20, event.beta * 0.4));
         setRotation({ x, y });
       }
     };
 
-    const fallbackAnimation = () => {
-      let angle = 0;
-      const interval = setInterval(() => {
-        angle += 1.2; // faster cycle
-        const x = Math.sin((angle * Math.PI) / 180) * 12; // wider swing
-        const y = Math.cos((angle * Math.PI) / 180) * 8;
-        setRotation({ x, y });
-      }, 50);
-      return () => clearInterval(interval);
+    const handleMouseMove = (event) => {
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const px = (event.clientX - rect.left) / rect.width - 0.5;
+      const py = (event.clientY - rect.top) / rect.height - 0.5;
+
+      const x = Math.max(-15, Math.min(15, px * 20)); // was 60, now gentler
+      const y = Math.max(-10, Math.min(10, py * 15)); // was 40, now gentler
+      setRotation({ x, y });
+    };
+
+    const handleMouseLeave = () => {
+      setRotation({ x: 0, y: 0 });
     };
 
     let cleanupFallback = null;
@@ -451,8 +456,14 @@ function HeroSection() {
       } else {
         window.addEventListener("deviceorientation", handleOrientation);
       }
-    } else {
-      cleanupFallback = fallbackAnimation();
+    } else if (!isMobile) {
+      const section = sectionRef.current;
+      section?.addEventListener("mousemove", handleMouseMove);
+      section?.addEventListener("mouseleave", handleMouseLeave);
+      cleanupFallback = () => {
+        section?.removeEventListener("mousemove", handleMouseMove);
+        section?.removeEventListener("mouseleave", handleMouseLeave);
+      };
     }
 
     return () => {
@@ -462,7 +473,7 @@ function HeroSection() {
   }, [isMobile]);
 
   return (
-    <section className="relative overflow-hidden rounded-b-[40px] bg-[#002623] px-4 pb-32 pt-4 lg:rounded-[40px] lg:px-8 lg:pt-8">
+    <section ref={sectionRef} className="relative overflow-hidden rounded-b-[40px] bg-[#002623] px-4 pb-32 pt-4 lg:rounded-[40px] lg:px-8 lg:pt-8">
       <div
         className="absolute inset-0 z-0 opacity-[0.03]"
         style={{
@@ -497,13 +508,13 @@ function HeroSection() {
 function HeaderNav() {
   return (
     <div className="relative z-20 flex items-center justify-end">
-      <a
-        href="https://cashif.cc/dashboard/login"
+      <Link
+        href="/"
         className="inline-flex items-center justify-center gap-2 rounded-full border border-[#fef8fb] px-4 py-1.5 text-sm text-[#fef8fb] transition hover:bg-[#fef8fb] hover:text-[#002623]"
       >
         <span>دخول</span>
         <LogIn size={18} />
-      </a>
+      </Link>
     </div>
   );
 }
@@ -514,21 +525,61 @@ function HeaderNav() {
 
 function ImageCarousel() {
   const [index, setIndex] = useState(0);
+  const touchStartX = useRef(null);
+  const touchDeltaX = useRef(0);
+  const autoplayRef = useRef(null);
+
+  const goNext = () => setIndex((i) => (i + 1) % CAROUSEL_SLIDES.length);
+  const goPrev = () => setIndex((i) => (i - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length);
+
+  const startAutoplay = () => {
+    clearInterval(autoplayRef.current);
+    autoplayRef.current = setInterval(goNext, 3000);
+  };
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % CAROUSEL_SLIDES.length);
-    }, 3000);
-    return () => clearInterval(id);
+    startAutoplay();
+    return () => clearInterval(autoplayRef.current);
   }, []);
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+    clearInterval(autoplayRef.current); // pause autoplay while interacting
+  };
+
+  const handleTouchMove = (e) => {
+    if (touchStartX.current === null) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+
+  const handleTouchEnd = () => {
+    const SWIPE_THRESHOLD = 50;
+    if (touchDeltaX.current > SWIPE_THRESHOLD) {
+      // swiped right -> previous
+      goPrev();
+    } else if (touchDeltaX.current < -SWIPE_THRESHOLD) {
+      // swiped left -> next
+      goNext();
+    }
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
+    startAutoplay(); // resume autoplay
+  };
+
   return (
-    <div dir="ltr" className="mx-auto mt-20 max-w-[1000px] px-4 sm:mt-24">
-      <div className="relative overflow-hidden rounded-none shadow-lg sm:rounded-xl">
-        <div className="relative aspect-[16/9] w-full">
+    <div dir="rtl" className="mx-auto mt-20 max-w-[1000px] px-4 sm:mt-24">
+      <div
+        className="relative overflow-hidden rounded-[40px] shadow-lg touch-pan-y select-none"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="relative aspect-square w-full sm:aspect-[16/9]">
           {CAROUSEL_SLIDES.map((slide, i) => (
             <div key={slide.desktop} className={`absolute inset-0 transition-opacity duration-700 ${i === index ? "opacity-100" : "pointer-events-none opacity-0"}`}>
-              <Image src={slide.desktop} alt={slide.alt} fill className="object-cover" />
+              <Image src={slide.mobile} alt={slide.alt} fill className="object-cover sm:hidden" draggable={false} />
+              <Image src={slide.desktop} alt={slide.alt} fill className="hidden object-cover sm:block" draggable={false} />
             </div>
           ))}
         </div>
@@ -538,7 +589,10 @@ function ImageCarousel() {
             <button
               key={i}
               aria-label={`Slide ${i + 1}`}
-              onClick={() => setIndex(i)}
+              onClick={() => {
+                setIndex(i);
+                startAutoplay();
+              }}
               className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-[#e6d39c]" : "w-1.5 bg-white/60"}`}
             />
           ))}
@@ -555,7 +609,7 @@ function ImageCarousel() {
 function SectionTitle({ children }) {
   return (
     <div className="mb-8 mt-12 flex justify-center">
-      <h2 className="border-b-[5px] border-[#e6d39c] pb-2 text-center text-2xl font-semibold text-[#002623]">{children}</h2>
+      <h2 className="border-b-[5px] border-[#e6d39c] text-center text-2xl font-semibold text-[#002623] font-display">{children}</h2>
     </div>
   );
 }

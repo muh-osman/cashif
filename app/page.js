@@ -386,14 +386,88 @@ export default function Home() {
 /* -------------------------------------------------------------------------- */
 
 function HeroSection() {
+  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Check if device supports orientation
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|windows phone/.test(userAgent);
+      setIsMobile(isMobileDevice);
+    };
+    checkMobile();
+
+    // Handle orientation events
+    const handleOrientation = (event) => {
+      if (event.beta !== null && event.gamma !== null) {
+        // beta: front-back tilt (-180 to 180), gamma: left-right tilt (-90 to 90)
+        // Normalize values for smoother animation
+        const x = Math.max(-15, Math.min(15, event.gamma * 0.3)); // Left-right rotation
+        const y = Math.max(-10, Math.min(10, event.beta * 0.2)); // Front-back rotation
+        setRotation({ x, y });
+      }
+    };
+
+    // Fallback for devices that don't support orientation
+    const fallbackAnimation = () => {
+      let angle = 0;
+      const interval = setInterval(() => {
+        angle += 0.5;
+        const x = Math.sin((angle * Math.PI) / 180) * 5;
+        const y = Math.cos((angle * Math.PI) / 180) * 3;
+        setRotation({ x, y });
+      }, 50);
+      return () => clearInterval(interval);
+    };
+
+    let cleanupFallback = null;
+
+    if (isMobile && window.DeviceOrientationEvent) {
+      // Request permission for iOS 13+
+      if (typeof DeviceOrientationEvent.requestPermission === "function") {
+        DeviceOrientationEvent.requestPermission()
+          .then((state) => {
+            if (state === "granted") {
+              window.addEventListener("deviceorientation", handleOrientation);
+            }
+          })
+          .catch(console.error);
+      } else {
+        window.addEventListener("deviceorientation", handleOrientation);
+      }
+    } else {
+      // Fallback animation for desktop or unsupported devices
+      cleanupFallback = fallbackAnimation();
+    }
+
+    return () => {
+      window.removeEventListener("deviceorientation", handleOrientation);
+      if (cleanupFallback) cleanupFallback();
+    };
+  }, [isMobile]);
+
   return (
     <section className="relative overflow-hidden rounded-b-[40px] bg-[#002623] px-4 pb-32 pt-4 lg:rounded-[40px] lg:px-8 lg:pt-8">
-      <div className="pointer-events-none absolute -right-24 top-1/3 h-[450px] w-[450px] rounded-full bg-gradient-to-br from-white/10 via-[#054239]/40 to-[#988561]/10 blur-2xl" />
-      <div className="pointer-events-none absolute -left-16 top-4 hidden h-[250px] w-[250px] rounded-full bg-gradient-to-br from-white/10 via-[#428177]/25 to-[#988561]/10 blur-2xl sm:block" />
+      {/* Background Image with Gyroscope Animation */}
+      <div
+        className="absolute inset-0 z-0 opacity-[0.02]"
+        style={{
+          transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(1.05)`,
+          transition: "transform 0.1s ease-out",
+          transformOrigin: "center center",
+        }}
+      >
+        <Image src="/images/cars-brands-abstract-background.jpg" alt="Cars brands abstract background" fill className="object-cover" priority />
+      </div>
+
+      {/* Gradient overlays - keep them on top */}
+      <div className="pointer-events-none absolute -right-24 top-1/3 z-10 h-[450px] w-[450px] rounded-full bg-gradient-to-br from-white/10 via-[#054239]/40 to-[#988561]/10 blur-2xl" />
+      <div className="pointer-events-none absolute -left-16 top-4 z-10 hidden h-[250px] w-[250px] rounded-full bg-gradient-to-br from-white/10 via-[#428177]/25 to-[#988561]/10 blur-2xl sm:block" />
 
       <HeaderNav />
 
-      <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center pt-16 text-center sm:pt-20">
+      <div className="relative z-20 mx-auto flex max-w-3xl flex-col items-center pt-16 text-center sm:pt-20">
         <div className="mb-10 h-24 w-40 sm:mb-16 sm:h-28 sm:w-44">
           <Image src="/images/logo.webp" alt="Cashif logo" width={180} height={115} className="h-full w-full object-contain" priority />
         </div>
@@ -792,11 +866,11 @@ function MobileBottomNav() {
             <li key={label}>
               <Link href={href} onClick={() => setActive(i)} className="flex flex-col items-center justify-center gap-1">
                 <span
-                  className={`flex h-8 items-center justify-center rounded-2xl transition-all duration-300 ease-out ${isActive ? "w-14 bg-[#4281777d]" : "w-8 bg-transparent"}`}
+                  className={`flex h-8 items-center justify-center rounded-2xl transition-all duration-200 ease-out ${isActive ? "w-14 bg-[#4281775e]" : "w-8 bg-transparent"}`}
                 >
-                  <Icon className={`h-6 w-6 shrink-0 ${isActive ? "text-[#002623]" : "text-[#444746]"}`} strokeWidth={isActive ? 2.2 : 1.8} />
+                  <Icon className={`h-6 w-6 shrink-0 ${isActive ? "text-[#054239]" : "text-[#444746]"}`} strokeWidth={isActive ? 2.2 : 1.8} />
                 </span>
-                <span className={`text-[11px] leading-none tracking-wide ${isActive ? "font-semibold text-[#002623]" : "font-medium text-[#444746]"}`}>{label}</span>
+                <span className={`text-[11px] leading-none tracking-wide ${isActive ? "font-semibold text-[#054239]" : "font-medium text-[#444746]"}`}>{label}</span>
               </Link>
             </li>
           );

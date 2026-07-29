@@ -410,7 +410,6 @@ function HeroSection() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Check if device supports orientation
     const checkMobile = () => {
       const userAgent = navigator.userAgent.toLowerCase();
       const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|windows phone/.test(userAgent);
@@ -418,24 +417,21 @@ function HeroSection() {
     };
     checkMobile();
 
-    // Handle orientation events
     const handleOrientation = (event) => {
       if (event.beta !== null && event.gamma !== null) {
-        // beta: front-back tilt (-180 to 180), gamma: left-right tilt (-90 to 90)
-        // Normalize values for smoother animation
-        const x = Math.max(-15, Math.min(15, event.gamma * 0.3)); // Left-right rotation
-        const y = Math.max(-10, Math.min(10, event.beta * 0.2)); // Front-back rotation
+        // Wider clamp range + stronger multipliers for a more visible tilt
+        const x = Math.max(-30, Math.min(30, event.gamma * 0.6)); // Left-right rotation
+        const y = Math.max(-20, Math.min(20, event.beta * 0.4)); // Front-back rotation
         setRotation({ x, y });
       }
     };
 
-    // Fallback for devices that don't support orientation
     const fallbackAnimation = () => {
       let angle = 0;
       const interval = setInterval(() => {
-        angle += 0.5;
-        const x = Math.sin((angle * Math.PI) / 180) * 5;
-        const y = Math.cos((angle * Math.PI) / 180) * 3;
+        angle += 1.2; // faster cycle
+        const x = Math.sin((angle * Math.PI) / 180) * 12; // wider swing
+        const y = Math.cos((angle * Math.PI) / 180) * 8;
         setRotation({ x, y });
       }, 50);
       return () => clearInterval(interval);
@@ -444,7 +440,6 @@ function HeroSection() {
     let cleanupFallback = null;
 
     if (isMobile && window.DeviceOrientationEvent) {
-      // Request permission for iOS 13+
       if (typeof DeviceOrientationEvent.requestPermission === "function") {
         DeviceOrientationEvent.requestPermission()
           .then((state) => {
@@ -457,7 +452,6 @@ function HeroSection() {
         window.addEventListener("deviceorientation", handleOrientation);
       }
     } else {
-      // Fallback animation for desktop or unsupported devices
       cleanupFallback = fallbackAnimation();
     }
 
@@ -469,11 +463,10 @@ function HeroSection() {
 
   return (
     <section className="relative overflow-hidden rounded-b-[40px] bg-[#002623] px-4 pb-32 pt-4 lg:rounded-[40px] lg:px-8 lg:pt-8">
-      {/* Background Image with Gyroscope Animation */}
       <div
-        className="absolute inset-0 z-0 opacity-[0.02]"
+        className="absolute inset-0 z-0 opacity-[0.03]"
         style={{
-          transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(1.05)`,
+          transform: `perspective(800px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(1.12)`,
           transition: "transform 0.1s ease-out",
           transformOrigin: "center center",
         }}

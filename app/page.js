@@ -716,7 +716,7 @@ function ServicesSection() {
 
 function StagesSection() {
   return (
-    <section className="px-4">
+    <section className="overflow-x-hidden px-4 h-[906px]">
       <SectionTitle>أجزاء ومراحل الفحص</SectionTitle>
       <div className="mx-auto max-w-[480px] rounded-lg bg-white m-auto">
         <div className="flex flex-col gap-4">

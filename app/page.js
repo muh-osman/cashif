@@ -33,6 +33,12 @@ import {
   Handshake,
 } from "lucide-react";
 
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Bubble, BubbleContent, BubbleReactions } from "@/components/ui/bubble";
+
 /* -------------------------------------------------------------------------- */
 /*  DATA                                                                      */
 /* -------------------------------------------------------------------------- */
@@ -58,7 +64,7 @@ const CAROUSEL_SLIDES = Array.from({ length: 10 }, (_, i) => {
 const SERVICES = [
   {
     id: "inspection-before-buying",
-    icon: Car,
+    number: 1,
     title: "فحص الشراء",
     description: "فحص جميع أجزاء المركبة المستعملة لمعرفة واكتشاف الأعطال والعيوب قبل اتخاذ قرار الشراء.",
     points: ["فحص اجزاء السيارة", "تجربة السيارة ميدانًيا", "تقرير مفصل عن حالة السيارة", "نقاط ومكافئات"],
@@ -66,7 +72,7 @@ const SERVICES = [
   },
   {
     id: "makhdoom",
-    icon: Wrench,
+    number: 2,
     title: "خدمة مخدوم",
     description: (
       <>
@@ -89,7 +95,7 @@ const SERVICES = [
   },
   {
     id: "passnger-check",
-    icon: ShieldCheck,
+    number: 3,
     title: "فحص المسافر",
     description: (
       <>
@@ -102,18 +108,18 @@ const SERVICES = [
 ];
 
 const STAGES = [
-  { img: "/images/x1.webp", label: "تسجيل بيانات المركبة" },
-  { img: "/images/x2.webp", label: "فحص ميكانيكا المحرك والقير" },
-  { img: "/images/x3.webp", label: "فحص الحساسات بالكمبيوتر" },
-  { img: "/images/x4.webp", label: "فحص سلامة الوسائد الهوائية" },
-  { img: "/images/x5.webp", label: "فحص ميكانيكا أسفل السيارة" },
-  { img: "/images/x6.webp", label: "فحص الزيوت والسوائل والتسريبات" },
-  { img: "/images/x7.webp", label: "فحص أنظمة الفرامل والتعليق" },
-  { img: "/images/x8.webp", label: "فحص الهيكل والسمكرة" },
-  { img: "/images/x9.webp", label: "فحص الديكور والداخلية" },
-  { img: "/images/x10.webp", label: "فحص سلامة الإطارات" },
-  { img: "/images/x11.webp", label: "تجربة المركبة على الطريق" },
-  { img: "/images/x12.webp", label: "طباعة التقرير وشرحه" },
+  { img: "/images/x1.png", label: "تسجيل بيانات المركبة" },
+  { img: "/images/x2.png", label: "فحص ميكانيكا المحرك والقير" },
+  { img: "/images/x3.png", label: "فحص الحساسات بالكمبيوتر" },
+  { img: "/images/x4.png", label: "فحص سلامة الوسائد الهوائية" },
+  { img: "/images/x5.png", label: "فحص ميكانيكا أسفل السيارة" },
+  { img: "/images/x6.png", label: "فحص الزيوت والسوائل والتسريبات" },
+  { img: "/images/x7.png", label: "فحص أنظمة الفرامل والتعليق" },
+  { img: "/images/x8.png", label: "فحص الهيكل والسمكرة" },
+  { img: "/images/x9.png", label: "فحص الديكور والداخلية" },
+  { img: "/images/x10.png", label: "فحص سلامة الإطارات" },
+  { img: "/images/x11.png", label: "تجربة المركبة على الطريق" },
+  { img: "/images/x12.png", label: "طباعة التقرير وشرحه" },
 ];
 
 const WHY_US = [
@@ -352,6 +358,51 @@ const SOCIALS = [
 ];
 
 const WHATSAPP_HREF = "https://wa.me/966920019948?text=*اختر من القائمة الرئيسية*";
+
+/* -------------------------------------------------------------------------- */
+/*  ANIMATED BUBBLE WRAPPER                                                    */
+/* -------------------------------------------------------------------------- */
+
+function AnimatedBubble({ align, children }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.3, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // RTL: "start" sits on the right, "end" sits on the left
+  const slideFrom = align === "start" ? "slide-in-from-right-8" : "slide-in-from-left-8";
+  const justify = align === "start" ? "justify-start" : "justify-end";
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "flex w-full", // keeps the row, pushes Bubble to the correct side
+        justify,
+        "transition-opacity duration-500",
+        isVisible ? cn("animate-in fade-in-0 duration-500 ease-out", slideFrom) : "opacity-0"
+      )}
+    >
+      {children}
+    </div>
+  );
+}
 
 /* -------------------------------------------------------------------------- */
 /*  PAGE                                                                       */
@@ -609,7 +660,10 @@ function ImageCarousel() {
 function SectionTitle({ children }) {
   return (
     <div className="mb-8 mt-12 flex justify-center">
-      <h2 className="border-b-[5px] border-[#e6d39c] text-center text-2xl font-semibold text-[#002623] font-display">{children}</h2>
+      <h2 className="relative inline-block text-center text-2xl font-semibold text-[#002623] font-display">
+        {children}
+        <span className="absolute bottom-[1px] left-0 h-[14px] w-full bg-[#e6d39c] -z-10" />
+      </h2>
     </div>
   );
 }
@@ -622,30 +676,34 @@ function ServicesSection() {
   return (
     <section className="px-4 py-4">
       <SectionTitle>خدماتنا</SectionTitle>
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {SERVICES.map(({ id, icon: Icon, title, description, points, cta }) => (
-          <div
+      <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-6">
+        {SERVICES.map(({ id, number, title, description, points, cta }) => (
+          <Card
             id={id}
             key={id}
-            className="flex min-h-[350px] flex-col rounded-md bg-white p-6 transition hover:shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] sm:min-h-[415px] sm:p-11"
+            className="flex min-h-[350px] w-full flex-col justify-between rounded-[40px] border-none p-6 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] transition sm:min-h-[415px] sm:w-[calc(50%-12px)] sm:p-11 lg:w-[calc(33.333%-16px)]"
           >
-            <div className="mx-auto mb-6 flex h-[100px] w-[100px] items-center justify-center rounded-full bg-[#002623]">
-              <Icon className="h-8 w-8 text-[#e6d39c]" />
-            </div>
-            <h4 className="text-center font-bold text-2xl text-[#002623] sm:text-[25px]">{title}</h4>
-            <p className="mt-1.5 mb-4 text-center text-sm text-[#757575]">{description}</p>
-            <ul className="mb-0 space-y-4">
-              {points.map((point, i) => (
-                <li key={i} className="flex items-center gap-2 text-base font-medium text-[#757575]">
-                  <ShieldCheck className="h-[25px] w-[25px] shrink-0 text-[#4caf50]" />
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-            <a href={cta} className="mt-auto block rounded-md bg-[#002623] py-2 text-center text-white transition hover:bg-[#1a292e]">
-              أطلب الأن
-            </a>
-          </div>
+            <CardContent className="flex flex-1 flex-col p-0">
+              <div className="mx-auto mb-6 h-[164px] w-[164px]">
+                <Image src={`/images/wheel-${number}.jpg`} alt={`${title} icon`} width={100} height={100} className="h-full w-full object-contain" />
+              </div>
+              <h4 className="text-center font-bold text-2xl text-[#002623] sm:text-[25px]">{title}</h4>
+              <p className="mt-1.5 mb-4 text-center text-sm text-[#757575] font-heading-bold">{description}</p>
+              <ul className="mb-0 space-y-4">
+                {points.map((point, i) => (
+                  <li key={i} className="flex items-center gap-2 text-base font-medium text-[#757575]">
+                    <ShieldCheck className="h-[25px] w-[25px] shrink-0 text-[#4caf50]" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+            <CardFooter className="mt-auto p-0">
+              <a href={cta} className={cn(buttonVariants({ variant: "default" }), "w-full rounded-full bg-[#002623] py-2 text-white hover:bg-[#1a292e]")}>
+                أطلب الأن
+              </a>
+            </CardFooter>
+          </Card>
         ))}
       </div>
     </section>
@@ -660,24 +718,28 @@ function StagesSection() {
   return (
     <section className="px-4">
       <SectionTitle>أجزاء ومراحل الفحص</SectionTitle>
-      <div className="mx-auto mb-16 max-w-5xl rounded-lg bg-white p-4 pt-8 sm:m-16 sm:mb-24 sm:p-10">
-        <div className="flex flex-col justify-evenly gap-x-8 sm:flex-row">
-          <ul className="w-full space-y-0 sm:w-1/2">
-            {STAGES.slice(0, 6).map(({ img, label }) => (
-              <li key={label} className="flex items-center gap-3 py-2.5 text-[#707171]">
-                <Image src={img} alt={label} width={32} height={32} className="w-8 shrink-0" />
-                <span>{label}</span>
-              </li>
-            ))}
-          </ul>
-          <ul className="w-full space-y-0 sm:w-1/2">
-            {STAGES.slice(6).map(({ img, label }) => (
-              <li key={label} className="flex items-center gap-3 py-2.5 text-[#707171]">
-                <Image src={img} alt={label} width={32} height={32} className="w-8 shrink-0" />
-                <span>{label}</span>
-              </li>
-            ))}
-          </ul>
+      <div className="mx-auto max-w-[480px] rounded-lg bg-white m-auto">
+        <div className="flex flex-col gap-4">
+          {STAGES.map(({ img, label }, i) => {
+            const isLast = i === STAGES.length - 1;
+            return (
+              <AnimatedBubble key={label} align={i % 2 === 0 ? "start" : "end"}>
+                <Bubble align={i % 2 === 0 ? "start" : "end"} variant={i % 2 === 0 ? "secondary" : "tinted"}>
+                  <BubbleContent className="flex items-center gap-3">
+                    <Image src={img} alt={label} width={28} height={28} className="w-7 shrink-0" />
+                    <span className="text-[#002623] text-sm sm:text-base">{label}</span>
+                  </BubbleContent>
+
+                  {isLast && (
+                    <BubbleReactions align="start" role="img" aria-label="Reactions: thumbs up, surprised">
+                      <span>🎉</span>
+                      <span>🚀</span>
+                    </BubbleReactions>
+                  )}
+                </Bubble>
+              </AnimatedBubble>
+            );
+          })}
         </div>
       </div>
     </section>

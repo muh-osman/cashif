@@ -62,7 +62,7 @@ export function CarModelSearch({ className, isStuck }) {
       <Popover open={open} onOpenChange={setOpen} className="w-full sm:w-auto">
         <PopoverTrigger
           className={cn(
-            "flex h-16 cursor-pointer items-center justify-between rounded-full border-none bg-[#edebe0] px-6 text-base font-normal text-[#002623] shadow-xl hover:bg-[#edebe0] sm:text-lg",
+            "flex h-16 cursor-pointer items-center justify-between rounded-full border-none bg-[#f0f1f3cf] backdrop-saturate-150 backdrop-blur-xl px-6 text-base font-normal text-[#002623] shadow-xl sm:text-lg",
             "transition-[width] duration-300 ease-out",
             isStuck ? "w-full" : "w-[92%] sm:w-full",
             "mx-auto",

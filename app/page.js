@@ -33,6 +33,8 @@ import {
   Handshake,
 } from "lucide-react";
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
@@ -68,7 +70,7 @@ const SERVICES = [
     title: "فحص الشراء",
     description: "فحص جميع أجزاء المركبة المستعملة لمعرفة واكتشاف الأعطال والعيوب قبل اتخاذ قرار الشراء.",
     points: ["فحص اجزاء السيارة", "تجربة السيارة ميدانًيا", "تقرير مفصل عن حالة السيارة", "نقاط ومكافئات"],
-    cta: "https://cashif.cc/dashboard/plans?purchaseInspection=true",
+    cta: "plans/purchase-inspection",
   },
   {
     id: "makhdoom",
@@ -85,13 +87,13 @@ const SERVICES = [
       "فحص دقيق للسيارة مع تسجيل مرئي وشرح التقرير بمقطع فيديو مسجل",
       <>
         تحميل تقرير الفحص عبر{" "}
-        <a href="https://cashif.cc/dashboard/reports" className="underline">
+        <Link href="reports" className="underline">
           موقعنا
-        </a>
+        </Link>
       </>,
       "إتمام نقل الملكية والتأمين وشحن السيارة",
     ],
-    cta: "https://cashif.cc/check-it/",
+    cta: "makdom",
   },
   {
     id: "passnger-check",
@@ -103,7 +105,7 @@ const SERVICES = [
       </>
     ),
     points: ["فحص الزيوت والسوائل", "فحص الكفرات والفرامل والأنوار", "فحص أدوات السلامة والمساحات", "تجربة السيارة على الطريق"],
-    cta: "https://cashif.cc/dashboard/plans?passengerCheck=true",
+    cta: "plans/passenger-check",
   },
 ];
 
@@ -290,7 +292,7 @@ const PAYMENT_LOGOS = [
 ];
 
 const MOBILE_NAV = [
-  { label: "حسابي", icon: UserRound, href: "/" },
+  { label: "حسابي", icon: Menu, href: "/" },
   { label: "الأسعار", icon: SaudiRiyal, href: "/" },
   { label: "الرئيسية", icon: HomeIcon, href: "/" },
   { label: "تقاريري", icon: FileText, href: "/" },
@@ -558,7 +560,7 @@ function HeroSection() {
 
 function HeaderNav() {
   return (
-    <div className="relative z-20 flex items-center justify-end">
+    <div className="relative z-20 flex items-center justify-start">
       <Link
         href="/"
         className="inline-flex items-center justify-center gap-2 rounded-full border border-[#fef8fb] px-4 py-1.5 text-sm text-[#fef8fb] transition hover:bg-[#fef8fb] hover:text-[#002623]"
@@ -699,9 +701,9 @@ function ServicesSection() {
               </ul>
             </CardContent>
             <CardFooter className="mt-auto p-0">
-              <a href={cta} className={cn(buttonVariants({ variant: "default" }), "w-full rounded-full bg-[#002623] py-2 text-white hover:bg-[#1a292e]")}>
+              <Link href={cta} className={cn(buttonVariants({ variant: "default" }), "w-full rounded-full bg-[#002623] py-2 text-white hover:bg-[#1a292e]")}>
                 أطلب الأن
-              </a>
+              </Link>
             </CardFooter>
           </Card>
         ))}
@@ -774,32 +776,28 @@ function WhyUsSection() {
 /* -------------------------------------------------------------------------- */
 
 function FaqSection() {
-  const [openIndex, setOpenIndex] = useState(null);
-
   return (
     <section className="px-4 py-4">
       <SectionTitle>الاسئلة الشائعة</SectionTitle>
       <div className="mx-auto max-w-3xl">
-        {FAQS.map((item, i) => {
-          const isOpen = openIndex === i;
-          return (
-            <div key={item.q} className="mb-2.5 overflow-hidden rounded-xl bg-white">
-              <button
-                onClick={() => setOpenIndex(isOpen ? null : i)}
-                aria-expanded={isOpen}
-                className="flex w-full items-center justify-between px-5 py-4 text-right font-semibold text-[#002623]"
+        <Accordion className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+          {FAQS.map((item, i) => (
+            <AccordionItem key={item.q} value={`faq-${i}`} className="border-b border-gray-200 last:border-b-0">
+              <AccordionTrigger
+                dir="rtl"
+                className="cursor-pointer px-5 py-4 text-right font-semibold text-[#002623]
+    **:data-[slot=accordion-trigger-icon]:ml-0
+    **:data-[slot=accordion-trigger-icon]:shrink-0
+    [&[data-panel-open]>svg]:rotate-0"
               >
-                <span>{item.q}</span>
-                <ChevronDown className={`h-5 w-5 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
-              </button>
-              <div className={`grid transition-all duration-300 ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
-                <div className="overflow-hidden">
-                  <div className="space-y-1 border-t border-gray-200 p-5 text-[15px] leading-relaxed text-[#707171]">{item.a}</div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+                {item.q}
+              </AccordionTrigger>
+              <AccordionContent className="px-1 pb-5 text-[15px] leading-relaxed text-[#707171]" dir="rtl">
+                <div className="space-y-1">{item.a}</div>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );
@@ -818,26 +816,28 @@ function TestimonialsCarousel() {
 
   return (
     <section className="relative z-10 -mb-24 mt-8 px-4">
-      <div className="relative mx-auto max-w-[900px] overflow-hidden rounded-[22px] bg-[#002623] px-6 py-10 sm:px-16 sm:py-16">
-        <p className="text-center text-sm italic leading-6 text-white sm:text-xl sm:leading-8">{TESTIMONIALS[index].text}</p>
-        <div className="mt-3 text-center text-xs text-[#bbb] underline sm:mt-4 sm:text-base">{TESTIMONIALS[index].name}</div>
+      <SectionTitle>آراء العملاء</SectionTitle>
+
+      <div className="relative mx-auto max-w-[900px] overflow-hidden rounded-[22px] bg-[#f0f1f3b5] backdrop-saturate-150 backdrop-blur-xl px-6 py-10 sm:px-16 sm:py-16">
+        <p className="text-center text-sm italic leading-6 text-[#002623] sm:text-xl sm:leading-8">{TESTIMONIALS[index].text}</p>
+        <div className="mt-3 text-center text-xs text-[#002623] underline sm:mt-4 sm:text-base">{TESTIMONIALS[index].name}</div>
 
         <button
           onClick={prev}
           aria-label="السابق"
-          className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#e6d39c] text-[#002623] sm:h-11 sm:w-11"
+          className="cursor-pointer absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#e6d39c] text-[#002623] sm:h-11 sm:w-11"
         >
           <ChevronLeft size={20} />
         </button>
         <button
           onClick={next}
           aria-label="التالي"
-          className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#e6d39c] text-[#002623] sm:h-11 sm:w-11"
+          className="cursor-pointer absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#e6d39c] text-[#002623] sm:h-11 sm:w-11"
         >
           <ChevronRight size={20} />
         </button>
 
-        <div className="mt-6 flex justify-center gap-2">
+        <div className="mt-6 flex justify-center gap-2 flex-row-reverse">
           {TESTIMONIALS.map((_, i) => (
             <button
               key={i}
@@ -858,7 +858,7 @@ function TestimonialsCarousel() {
 
 function SiteFooter() {
   return (
-    <footer className="relative bg-[#002623] bg-[url('/images/footer-bg.svg')] bg-cover bg-no-repeat pb-24 pt-52 text-white sm:pt-[210px]">
+    <footer className="relative bg-[#002623] pb-24 pt-52 text-white sm:pt-[210px] rounded-t-[40px] ">
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid grid-cols-1 gap-y-8 md:grid-cols-4">
           {/* Brand */}
@@ -869,7 +869,7 @@ function SiteFooter() {
                 alt="Cashif logo"
                 width={125}
                 height={83}
-                className="h-full w-full object-contain brightness-0 invert transition hover:brightness-100 hover:invert-0"
+                className="h-full w-full object-contain brightness-0 invert"
               />
             </div>
             <p className="my-6 w-full text-center text-sm leading-7 md:w-[90%] md:text-right">
@@ -987,8 +987,8 @@ function MobileBottomNav() {
   const [active, setActive] = useState(2); // "الرئيسية" active by default
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-50 w-full -translate-x-1/2 border-t border-[#e2e5e9] bg-[#f0f1f3] sm:w-[450px] sm:rounded-t-[10px] pt-3 pb-4">
-      <ul className="flex h-[51px] items-center justify-evenly">
+    <nav className="fixed bottom-0 left-1/2 z-50 w-full -translate-x-1/2 bg-[#f0f1f3cf] backdrop-saturate-150 backdrop-blur-xl sm:w-[450px] sm:rounded-t-[10px] pt-3 pb-4">
+      <ul className="flex h-[52px] items-center justify-evenly">
         {MOBILE_NAV.map(({ label, icon: Icon, href }, i) => {
           const isActive = active === i;
           return (

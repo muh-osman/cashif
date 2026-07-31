@@ -756,14 +756,20 @@ function WhyUsSection() {
   return (
     <section className="px-4 py-4">
       <SectionTitle>لماذا تتعامل معنا ؟</SectionTitle>
-      <div className="mx-auto flex max-w-6xl flex-wrap items-stretch justify-evenly gap-y-6">
+
+      <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-4">
         {WHY_US.map(({ icon: Icon, title, description }) => (
-          <div key={title} className="flex w-[180px] flex-shrink-0 flex-col items-center overflow-hidden rounded-xl bg-white shadow-[0_0.25em_0_rgb(195,198,209)] sm:w-[228px]">
-            <div className="flex h-[105px] w-full items-center justify-center bg-[#002623]">
-              <Icon className="h-16 w-16 text-[#e6d39c]" strokeWidth={1.5} />
+          <div
+            key={title}
+            className="flex w-full max-w-none flex-col items-center overflow-hidden rounded-[40px] bg-white p-3 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] sm:max-w-[280px]"
+          >
+            <div className="flex h-[82px] w-full items-center justify-center rounded-[28px] bg-[#002623] sm:h-[100px]">
+              <Icon className="h-10 w-10 text-[#e6d39c] sm:h-16 sm:w-16" strokeWidth={1.5} />
             </div>
-            <h3 className="pt-5 px-4 text-center text-lg font-semibold text-[#002623]">{title}</h3>
-            <p className="p-4 pt-0 text-center text-base font-light text-[#757575]">{description}</p>
+
+            <h3 className="px-4 pt-5 pb-2 text-center text-lg font-semibold text-[#002623]">{title}</h3>
+
+            <p className="px-4 pb-4 text-center text-base font-light text-[#757575]">{description}</p>
           </div>
         ))}
       </div>
@@ -870,7 +876,7 @@ function TestimonialsCarousel() {
 
 function SiteFooter() {
   return (
-    <footer className="relative bg-[#002623] pb-6 sm:pb-24 pt-40 text-white sm:pt-[210px] rounded-t-[40px] ">
+    <footer className="relative bg-[#174545] pb-6 sm:pb-28 pt-40 text-white sm:pt-[210px] rounded-t-[40px] ">
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid grid-cols-1 gap-y-8 md:grid-cols-4">
           {/* Brand */}
@@ -879,7 +885,7 @@ function SiteFooter() {
               <Image src="/images/logo.webp" alt="Cashif logo" width={125} height={83} className="h-full w-full object-contain brightness-0 invert" />
             </div>
             <p className="my-6 w-full text-center text-sm leading-7 md:w-[90%] md:text-right">
-              نسعى في كاشف، لإبراز رسالة توعوية غاية في الأهمية؛ تتمثل في رفع الوعي لدى المستهلك بضرورة الكشف على المركبة المستعملة لدى مركز متخصص قبل الشروع في الشراء .
+              نسعى في كاشف، لإبراز رسالة توعوية غاية في الأهمية؛ تتمثل في رفع الوعي لدى المستهلك بضرورة الكشف على المركبة المستعملة لدى مركز متخصص قبل الشروع في الشراء.
             </p>
             <div className="mb-8 flex justify-center gap-1.5 md:justify-start">
               {SOCIALS.map(({ icon: Icon, href, label }) => (
@@ -889,7 +895,7 @@ function SiteFooter() {
                   aria-label={label}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex h-[38px] w-[38px] items-center justify-center rounded-md text-[#e6d39c] transition-colors hover:bg-white/10 hover:text-[#e6d39c]"
+                  className="flex h-[38px] w-[38px] items-center justify-center rounded-md text-[#e6d39c] transition-colors hover:bg-white/10"
                 >
                   <Icon className="h-6 w-6 fill-current" />
                 </a>
@@ -905,7 +911,7 @@ function SiteFooter() {
                   href={b.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10 hover:text-[#e6d39c]"
+                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10"
                 >
                   {b.name} <ExternalLink size={12} />
                 </a>
@@ -917,7 +923,7 @@ function SiteFooter() {
           <FooterColumn title="خدمات كاشف">
             {FOOTER_SERVICES.map((s) => (
               <li key={s.label}>
-                <a href={s.href} className="inline-block py-1.5 rounded-md px-2 text-sm text-white transition-colors hover:bg-white/10 hover:text-[#e6d39c]">
+                <a href={s.href} className="inline-block py-1.5 rounded-md px-2 text-sm text-white transition-colors hover:bg-white/10">
                   {s.label}
                 </a>
               </li>
@@ -929,7 +935,7 @@ function SiteFooter() {
             <FooterColumn title="روابط مهمة">
               {FOOTER_LINKS.map((l) => (
                 <li key={l.label}>
-                  <a href={l.href} className="inline-block py-1.5 rounded-md px-2 text-sm text-white transition-colors hover:bg-white/10 hover:text-[#e6d39c]">
+                  <a href={l.href} className="inline-block py-1.5 rounded-md px-2 text-sm text-white transition-colors hover:bg-white/10">
                     {l.label}
                   </a>
                 </li>
@@ -942,11 +948,8 @@ function SiteFooter() {
               </h4>
               <div className="flex flex-col gap-1 text-sm">
                 <span className="text-white px-2">خدمة العملاء</span>
-                <a
-                  href="tel:920019948"
-                  className="inline-flex w-fit items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10 hover:text-[#e6d39c]"
-                >
-                  920019948
+                <a href="tel:0920019948" className="inline-flex w-fit items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10">
+                  0920019948
                   <Phone size={14} />
                 </a>
               </div>
@@ -1005,13 +1008,14 @@ function WhatsAppButton() {
 /* -------------------------------------------------------------------------- */
 
 function MobileBottomNav() {
-  const [active, setActive] = useState(2); // "الرئيسية" active by default
+  const [active, setActive] = useState(2);
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-50 w-full -translate-x-1/2 bg-[#f0f1f3cf] backdrop-saturate-150 backdrop-blur-xl sm:w-[450px] sm:rounded-t-[10px] pt-3 pb-4">
+    <nav className="fixed bottom-0 left-1/2 z-50 w-full -translate-x-1/2 bg-[#f0f1f3cf] backdrop-saturate-150 backdrop-blur-xl sm:bottom-4 sm:w-[450px] sm:rounded-[40px] pt-3 pb-4">
       <ul className="flex h-[52px] items-center justify-evenly">
         {MOBILE_NAV.map(({ label, icon: Icon, href }, i) => {
           const isActive = active === i;
+
           return (
             <li key={label}>
               <Link href={href} onClick={() => setActive(i)} className="flex flex-col items-center justify-center gap-1">
@@ -1020,7 +1024,8 @@ function MobileBottomNav() {
                 >
                   <Icon className={`h-6 w-6 shrink-0 ${isActive ? "text-[#054239]" : "text-[#444746]"}`} strokeWidth={isActive ? 2.2 : 1.8} />
                 </span>
-                <span className={`text-[11px] leading-none tracking-wide ${isActive ? "font-semibold text-[#054239]" : "font-medium text-[#444746]"}`}>{label}</span>
+
+                <span className={`text-[12px] leading-none tracking-wide ${isActive ? "font-semibold text-[#054239]" : "font-medium text-[#444746]"}`}>{label}</span>
               </Link>
             </li>
           );

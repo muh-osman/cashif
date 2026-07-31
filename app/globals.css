@@ -172,7 +172,10 @@ html {
 
 body {
   font-family: "thmanyah-sans-regular", ui-sans-serif, system-ui, sans-serif;
-  padding-bottom: 90px;
+
+  @media (max-width: 550px) {
+    padding-bottom: 80px;
+  }
 }
 
 .font-display {

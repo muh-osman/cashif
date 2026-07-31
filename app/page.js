@@ -701,7 +701,7 @@ function ServicesSection() {
               </ul>
             </CardContent>
             <CardFooter className="mt-auto p-0">
-              <Link href={cta} className={cn(buttonVariants({ variant: "default" }), "w-full rounded-full bg-[#002623] py-2 text-white hover:bg-[#1a292e]")}>
+              <Link href={cta} className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full rounded-full bg-[#002623] py-2 text-white hover:bg-[#1a292e]")}>
                 أطلب الأن
               </Link>
             </CardFooter>
@@ -780,7 +780,7 @@ function FaqSection() {
     <section className="px-4 py-4">
       <SectionTitle>الاسئلة الشائعة</SectionTitle>
       <div className="mx-auto max-w-3xl">
-        <Accordion className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <Accordion className="overflow-hidden rounded-[40px] border border-gray-200 bg-white border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
           {FAQS.map((item, i) => (
             <AccordionItem key={item.q} value={`faq-${i}`} className="border-b border-gray-200 last:border-b-0">
               <AccordionTrigger
@@ -809,7 +809,15 @@ function FaqSection() {
 
 function TestimonialsCarousel() {
   const [index, setIndex] = useState(0);
+  const [height, setHeight] = useState(null);
+  const contentRef = useRef(null);
   const count = TESTIMONIALS.length;
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setHeight(contentRef.current.scrollHeight);
+    }
+  }, [index]);
 
   const next = () => setIndex((i) => (i + 1) % count);
   const prev = () => setIndex((i) => (i - 1 + count) % count);
@@ -818,9 +826,13 @@ function TestimonialsCarousel() {
     <section className="relative z-10 -mb-24 mt-8 px-4">
       <SectionTitle>آراء العملاء</SectionTitle>
 
-      <div className="relative mx-auto max-w-[900px] overflow-hidden rounded-[22px] bg-[#f0f1f3b5] backdrop-saturate-150 backdrop-blur-xl px-6 py-10 sm:px-16 sm:py-16">
-        <p className="text-center text-sm italic leading-6 text-[#002623] sm:text-xl sm:leading-8">{TESTIMONIALS[index].text}</p>
-        <div className="mt-3 text-center text-xs text-[#002623] underline sm:mt-4 sm:text-base">{TESTIMONIALS[index].name}</div>
+      <div className="relative mx-auto max-w-[900px] overflow-hidden rounded-[40px] bg-[#f0f1f3b5] backdrop-saturate-150 backdrop-blur-xl px-6 py-10 sm:px-16 sm:py-16">
+        <div className="overflow-hidden transition-[height] duration-500 ease-in-out" style={{ height: height ?? "auto" }}>
+          <div ref={contentRef}>
+            <p className="text-center text-sm italic leading-6 text-[#002623] sm:text-xl sm:leading-8">{TESTIMONIALS[index].text}</p>
+            <div className="mt-3 text-center text-xs text-[#002623] underline sm:mt-4 sm:text-base">{TESTIMONIALS[index].name}</div>
+          </div>
+        </div>
 
         <button
           onClick={prev}
@@ -858,27 +870,28 @@ function TestimonialsCarousel() {
 
 function SiteFooter() {
   return (
-    <footer className="relative bg-[#002623] pb-24 pt-52 text-white sm:pt-[210px] rounded-t-[40px] ">
+    <footer className="relative bg-[#002623] pb-6 sm:pb-24 pt-40 text-white sm:pt-[210px] rounded-t-[40px] ">
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid grid-cols-1 gap-y-8 md:grid-cols-4">
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="mx-auto h-[83px] w-[125px] md:mx-0">
-              <Image
-                src="/images/logo.webp"
-                alt="Cashif logo"
-                width={125}
-                height={83}
-                className="h-full w-full object-contain brightness-0 invert"
-              />
+              <Image src="/images/logo.webp" alt="Cashif logo" width={125} height={83} className="h-full w-full object-contain brightness-0 invert" />
             </div>
             <p className="my-6 w-full text-center text-sm leading-7 md:w-[90%] md:text-right">
               نسعى في كاشف، لإبراز رسالة توعوية غاية في الأهمية؛ تتمثل في رفع الوعي لدى المستهلك بضرورة الكشف على المركبة المستعملة لدى مركز متخصص قبل الشروع في الشراء .
             </p>
             <div className="mb-8 flex justify-center gap-1.5 md:justify-start">
               {SOCIALS.map(({ icon: Icon, href, label }) => (
-                <a key={label} href={href} aria-label={label} target="_blank" rel="noreferrer" className="flex h-[38px] w-[38px] items-center justify-center rounded-full">
-                  <Icon className="h-6 w-6 fill-[#e6d39c] text-[#e6d39c] transition hover:fill-yellow-400 hover:text-yellow-400" />
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-[38px] w-[38px] items-center justify-center rounded-md text-[#e6d39c] transition-colors hover:bg-white/10 hover:text-[#e6d39c]"
+                >
+                  <Icon className="h-6 w-6 fill-current" />
                 </a>
               ))}
             </div>
@@ -888,7 +901,12 @@ function SiteFooter() {
           <FooterColumn title="فروعنا">
             {BRANCHES.map((b) => (
               <li key={b.name}>
-                <a href={b.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 py-1.5 text-sm text-white transition hover:px-1 hover:text-[#e6d39c]">
+                <a
+                  href={b.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10 hover:text-[#e6d39c]"
+                >
                   {b.name} <ExternalLink size={12} />
                 </a>
               </li>
@@ -899,7 +917,7 @@ function SiteFooter() {
           <FooterColumn title="خدمات كاشف">
             {FOOTER_SERVICES.map((s) => (
               <li key={s.label}>
-                <a href={s.href} className="inline-block py-1.5 text-sm text-white transition hover:px-1 hover:text-[#e6d39c]">
+                <a href={s.href} className="inline-block py-1.5 rounded-md px-2 text-sm text-white transition-colors hover:bg-white/10 hover:text-[#e6d39c]">
                   {s.label}
                 </a>
               </li>
@@ -911,7 +929,7 @@ function SiteFooter() {
             <FooterColumn title="روابط مهمة">
               {FOOTER_LINKS.map((l) => (
                 <li key={l.label}>
-                  <a href={l.href} className="inline-block py-1.5 text-sm text-white transition hover:px-1 hover:text-[#e6d39c]">
+                  <a href={l.href} className="inline-block py-1.5 rounded-md px-2 text-sm text-white transition-colors hover:bg-white/10 hover:text-[#e6d39c]">
                     {l.label}
                   </a>
                 </li>
@@ -922,11 +940,14 @@ function SiteFooter() {
               <h4 className="relative mb-6 text-right text-lg font-medium text-[#e6d39c] after:mt-2.5 after:block after:h-[3px] after:w-[70px] after:rounded-sm after:bg-[#e6d39c] after:content-['']">
                 تواصل معنا
               </h4>
-              <div className="flex flex-col items-end gap-1 text-sm">
-                <span className="text-white">خدمة العملاء</span>
-                <a href="tel:920019948" className="flex items-center gap-1.5 text-white">
-                  <Phone size={14} />
+              <div className="flex flex-col gap-1 text-sm">
+                <span className="text-white px-2">خدمة العملاء</span>
+                <a
+                  href="tel:920019948"
+                  className="inline-flex w-fit items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10 hover:text-[#e6d39c]"
+                >
                   920019948
+                  <Phone size={14} />
                 </a>
               </div>
             </div>

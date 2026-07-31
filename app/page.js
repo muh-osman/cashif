@@ -115,7 +115,7 @@ const STAGES = [
   { img: "/images/x3.png", label: "فحص الحساسات بالكمبيوتر" },
   { img: "/images/x4.png", label: "فحص سلامة الوسائد الهوائية" },
   { img: "/images/x5.png", label: "فحص ميكانيكا أسفل السيارة" },
-  { img: "/images/x6.png", label: "فحص الزيوت والسوائل والتسريبات" },
+  { img: "/images/x6.png", label: "فحص الزيوت والتسريبات" },
   { img: "/images/x7.png", label: "فحص أنظمة الفرامل والتعليق" },
   { img: "/images/x8.png", label: "فحص الهيكل والسمكرة" },
   { img: "/images/x9.png", label: "فحص الديكور والداخلية" },
@@ -876,17 +876,19 @@ function TestimonialsCarousel() {
 
 function SiteFooter() {
   return (
-    <footer className="relative bg-[#174545] pb-6 sm:pb-28 pt-40 text-white sm:pt-[210px] rounded-t-[40px] ">
+    <footer className="relative rounded-t-[40px] bg-[#174545] pb-6 pt-40 text-white sm:pb-28 sm:pt-[210px]">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="grid grid-cols-1 gap-y-8 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
           {/* Brand */}
-          <div className="md:col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <div className="mx-auto h-[83px] w-[125px] md:mx-0">
-              <Image src="/images/logo.webp" alt="Cashif logo" width={125} height={83} className="h-full w-full object-contain brightness-0 invert" />
+              <Image src="/images/logo.webp" alt="Cashif logo" width={125} height={83} className="h-full w-full object-contain" />
             </div>
+
             <p className="my-6 w-full text-center text-sm leading-7 md:w-[90%] md:text-right">
               نسعى في كاشف، لإبراز رسالة توعوية غاية في الأهمية؛ تتمثل في رفع الوعي لدى المستهلك بضرورة الكشف على المركبة المستعملة لدى مركز متخصص قبل الشروع في الشراء.
             </p>
+
             <div className="mb-8 flex justify-center gap-1.5 md:justify-start">
               {SOCIALS.map(({ icon: Icon, href, label }) => (
                 <a
@@ -904,55 +906,63 @@ function SiteFooter() {
           </div>
 
           {/* Branches */}
-          <FooterColumn title="فروعنا">
-            {BRANCHES.map((b) => (
-              <li key={b.name}>
-                <a
-                  href={b.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10"
-                >
-                  {b.name} <ExternalLink size={12} />
-                </a>
-              </li>
-            ))}
-          </FooterColumn>
+          <div className="col-span-1 md:col-span-1">
+            <FooterColumn title="فروعنا">
+              {BRANCHES.map((b) => (
+                <li key={b.name}>
+                  <a
+                    href={b.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10"
+                  >
+                    {b.name}
+                    <ExternalLink size={12} />
+                  </a>
+                </li>
+              ))}
+            </FooterColumn>
+          </div>
 
           {/* Services */}
-          <FooterColumn title="خدمات كاشف">
-            {FOOTER_SERVICES.map((s) => (
-              <li key={s.label}>
-                <a href={s.href} className="inline-block py-1.5 rounded-md px-2 text-sm text-white transition-colors hover:bg-white/10">
-                  {s.label}
-                </a>
-              </li>
-            ))}
-          </FooterColumn>
+          <div className="col-span-1 md:col-span-1">
+            <FooterColumn title="خدمات كاشف">
+              {FOOTER_SERVICES.map((s) => (
+                <li key={s.label}>
+                  <a href={s.href} className="inline-block rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10">
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </FooterColumn>
+          </div>
 
-          {/* Links + Contact */}
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:col-span-1 md:grid-cols-1">
+          {/* Links */}
+          <div className="col-span-1 md:col-span-1">
             <FooterColumn title="روابط مهمة">
               {FOOTER_LINKS.map((l) => (
                 <li key={l.label}>
-                  <a href={l.href} className="inline-block py-1.5 rounded-md px-2 text-sm text-white transition-colors hover:bg-white/10">
+                  <a href={l.href} className="inline-block rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10">
                     {l.label}
                   </a>
                 </li>
               ))}
             </FooterColumn>
+          </div>
 
-            <div>
-              <h4 className="relative mb-6 text-right text-lg font-medium text-[#e6d39c] after:mt-2.5 after:block after:h-[3px] after:w-[70px] after:rounded-sm after:bg-[#e6d39c] after:content-['']">
-                تواصل معنا
-              </h4>
-              <div className="flex flex-col gap-1 text-sm">
-                <span className="text-white px-2">خدمة العملاء</span>
-                <a href="tel:0920019948" className="inline-flex w-fit items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10">
-                  0920019948
-                  <Phone size={14} />
-                </a>
-              </div>
+          {/* Contact */}
+          <div className="col-span-1 md:col-span-1">
+            <h4 className="relative mb-6 text-right text-lg font-medium text-[#e6d39c] after:mt-2.5 after:block after:h-[3px] after:w-[70px] after:rounded-sm after:bg-[#e6d39c] after:content-[''] font-display">
+              تواصل معنا
+            </h4>
+
+            <div className="flex flex-col gap-1 text-sm">
+              <span className="px-2 text-white">خدمة العملاء</span>
+
+              <a href="tel:0920019948" className="inline-flex w-fit items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10">
+                0920019948
+                <Phone size={14} />
+              </a>
             </div>
           </div>
         </div>
@@ -977,7 +987,7 @@ function SiteFooter() {
 function FooterColumn({ title, children }) {
   return (
     <div>
-      <h4 className="relative mb-6 text-right text-lg font-medium text-[#e6d39c] after:mt-2.5 after:block after:h-[3px] after:w-[70px] after:rounded-sm after:bg-[#e6d39c] after:content-['']">
+      <h4 className="relative mb-6 text-right text-lg font-medium text-[#e6d39c] after:mt-2.5 after:block after:h-[3px] after:w-[70px] after:rounded-sm after:bg-[#e6d39c] after:content-[''] font-display">
         {title}
       </h4>
       <ul className="space-y-1 text-right">{children}</ul>
@@ -1022,10 +1032,10 @@ function MobileBottomNav() {
                 <span
                   className={`flex h-8 items-center justify-center rounded-2xl transition-all duration-200 ease-out ${isActive ? "w-14 bg-[#4281775e]" : "w-8 bg-transparent"}`}
                 >
-                  <Icon className={`h-6 w-6 shrink-0 ${isActive ? "text-[#054239]" : "text-[#444746]"}`} strokeWidth={isActive ? 2.2 : 1.8} />
+                  <Icon className="h-6 w-6 shrink-0 text-[#002623]" strokeWidth={isActive ? 2.2 : 1.8} />
                 </span>
 
-                <span className={`text-[12px] leading-none tracking-wide ${isActive ? "font-semibold text-[#054239]" : "font-medium text-[#444746]"}`}>{label}</span>
+                <span className={`font-display text-[12px] text-[#002623] leading-none tracking-wide ${isActive ? "font-semibold" : "font-medium"}`}>{label}</span>
               </Link>
             </li>
           );

@@ -51,7 +51,7 @@ const BRANCHES = [
   { name: "القصيم", href: "https://maps.app.goo.gl/Gd7g3VScomNQP8DR7" },
   { name: "الدمام", href: "https://maps.app.goo.gl/9UiHq4kW7Mjh1Aik8" },
   { name: "جدة", href: "https://maps.app.goo.gl/697yXkaS4o6kYsos8" },
-  { name: "خميس مشيط", href: "#" },
+  { name: "خميس مشيط", href: "https://maps.app.goo.gl/6dMQqyhHiKgmrP6b7" },
 ];
 
 const CAROUSEL_SLIDES = Array.from({ length: 10 }, (_, i) => {
@@ -1022,20 +1022,22 @@ function MobileBottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-1/2 z-50 w-full -translate-x-1/2 bg-[#f0f1f3cf] backdrop-saturate-150 backdrop-blur-xl sm:bottom-4 sm:w-[450px] sm:rounded-[40px] pt-3 pb-4">
-      <ul className="flex h-[52px] items-center justify-evenly">
+      <ul className="flex h-[52px] items-center">
         {MOBILE_NAV.map(({ label, icon: Icon, href }, i) => {
           const isActive = active === i;
 
           return (
-            <li key={label}>
-              <Link href={href} onClick={() => setActive(i)} className="flex flex-col items-center justify-center gap-1">
-                <span
-                  className={`flex h-8 items-center justify-center rounded-2xl transition-all duration-200 ease-out ${isActive ? "w-14 bg-[#4281775e]" : "w-8 bg-transparent"}`}
-                >
-                  <Icon className="h-6 w-6 shrink-0 text-[#002623]" strokeWidth={isActive ? 2.2 : 1.8} />
+            <li key={label} className="min-w-0 flex-1">
+              <Link href={href} onClick={() => setActive(i)} className="flex w-full flex-col items-center justify-center gap-1">
+                <span className="flex h-8 w-14 items-center justify-center">
+                  <span
+                    className={`flex h-8 items-center justify-center rounded-2xl transition-all duration-200 ease-out ${isActive ? "w-14 bg-[#4281775e]" : "w-8 bg-transparent"}`}
+                  >
+                    <Icon className="h-6 w-6 shrink-0 text-[#002623]" strokeWidth={isActive ? 2.2 : 1.8} />
+                  </span>
                 </span>
 
-                <span className={`font-display text-[12px] text-[#002623] leading-none tracking-wide ${isActive ? "font-semibold" : "font-medium"}`}>{label}</span>
+                <span className="font-display text-[12px] font-medium leading-none tracking-wide text-[#002623]">{label}</span>
               </Link>
             </li>
           );

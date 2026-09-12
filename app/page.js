@@ -86,7 +86,8 @@ const SERVICES = [
       </>,
       "إتمام نقل الملكية والتأمين وشحن السيارة",
     ],
-    cta: "makdom",
+    cta: "/makdom",
+    ctaLabel: "المزيد من التفاصيل",
   },
   {
     id: "passnger-check",
@@ -264,7 +265,7 @@ const TESTIMONIALS = [
 
 const FOOTER_SERVICES = [
   { label: "فحص ما قبل الشراء", href: "#inspection-before-buying" },
-  { label: "خدمة مخدوم", href: "https://cashif.cc/check-it/" },
+  { label: "خدمة مخدوم", href: "/makdom" },
   { label: "فحص المسافر", href: "#passnger-check" },
 ];
 
@@ -649,7 +650,7 @@ function ServicesSection() {
     <section className="px-4 py-4">
       <SectionTitle>خدماتنا</SectionTitle>
       <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-6">
-        {SERVICES.map(({ id, number, title, description, points, cta }) => (
+        {SERVICES.map(({ id, number, title, description, points, cta, ctaLabel = "أطلب الأن" }) => (
           <Card
             id={id}
             key={id}
@@ -672,7 +673,7 @@ function ServicesSection() {
             </CardContent>
             <CardFooter className="mt-auto p-0">
               <Link href={cta} className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full rounded-full bg-[#002623] py-2 text-white hover:bg-[#1a292e]")}>
-                أطلب الأن
+                {ctaLabel}
               </Link>
             </CardFooter>
           </Card>

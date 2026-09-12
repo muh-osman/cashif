@@ -9,6 +9,7 @@ import { WhatsAppButton } from "@/components/whatsapp-button";
 export function SiteShell({ children }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const hideSearch = isHome || pathname === "/login" || pathname.startsWith("/login/");
 
   useEffect(() => {
     const toTop = () => window.scrollTo(0, 0);
@@ -23,8 +24,8 @@ export function SiteShell({ children }) {
 
   return (
     <>
-      {!isHome && <StickySearch />}
-      <div className={isHome ? undefined : "pt-24"}>{children}</div>
+      {!hideSearch && <StickySearch />}
+      <div className={hideSearch ? undefined : "pt-24"}>{children}</div>
       <WhatsAppButton />
       <MobileBottomNav />
     </>

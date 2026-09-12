@@ -23,15 +23,6 @@ function isValidLocal(local) {
   return /^5\d{8}$/.test(local);
 }
 
-function SaudiFlag({ className }) {
-  return (
-    <svg viewBox="0 0 24 16" className={className} aria-hidden>
-      <rect width="24" height="16" rx="2" fill="#006C35" />
-      <path d="M4 8.2h16" stroke="#fff" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
 export default function LoginPage() {
   const [step, setStep] = useState("phone");
   const [local, setLocal] = useState("");
@@ -87,7 +78,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 pb-6 pt-4 text-[#002623] sm:pb-36">
+    <main className="flex min-h-[calc(100dvh-5.5rem)] flex-col items-center justify-center px-4 py-6 text-[#002623] sm:min-h-[calc(100dvh-8rem)]">
       <div className="mb-8 space-y-3 text-center">
         <h1 className="font-display relative inline-block text-3xl text-[#002623]">
           {step === "phone" ? "تسجيل الدخول" : "كود التحقق"}
@@ -98,7 +89,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <Card className="mx-auto w-full max-w-lg rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
+      <Card className="w-full max-w-lg rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
         {step === "otp" ? (
           <CardHeader className="gap-3">
             <button
@@ -130,7 +121,7 @@ export default function LoginPage() {
               >
                 <InputGroupAddon align="inline-start">
                   <InputGroupText className="gap-2 text-base text-[#002623]">
-                    <SaudiFlag className="h-4 w-6 shrink-0" />
+                    <img src="/images/saudi-flag.svg" alt="" className="h-5 w-[1.875rem] shrink-0 rounded-[3px] object-cover" />
                     +966
                   </InputGroupText>
                 </InputGroupAddon>
@@ -153,7 +144,7 @@ export default function LoginPage() {
               {hint ? <p className="text-sm text-[#174545]">{hint}</p> : null}
               {error ? <p className="text-sm text-destructive">{error}</p> : null}
             </CardContent>
-            <CardFooter className="flex-col gap-4">
+            <CardFooter className="flex-col gap-4 pt-6">
               <Button
                 type="submit"
                 size="lg"
@@ -198,7 +189,7 @@ export default function LoginPage() {
               </div>
               {error ? <p className="text-center text-sm text-destructive">{error}</p> : null}
             </CardContent>
-            <CardFooter className="flex-col gap-4">
+            <CardFooter className="flex-col gap-4 pt-6">
               <Button
                 type="submit"
                 size="lg"

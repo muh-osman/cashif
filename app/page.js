@@ -31,6 +31,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/auth-provider";
 import { Bubble, BubbleContent, BubbleReactions } from "@/components/ui/bubble";
 import { Message, MessageContent, MessageGroup } from "@/components/ui/message";
 
@@ -530,15 +531,19 @@ function HeroSection() {
 }
 
 function HeaderNav() {
+  const { isLoggedIn } = useAuth();
+
   return (
     <div className="relative z-20 flex items-center justify-start">
-      <Link
-        href="/login"
-        className="inline-flex items-center justify-center gap-2 rounded-full border border-[#fef8fb] px-4 py-1.5 text-sm text-[#fef8fb] transition hover:bg-[#fef8fb] hover:text-[#002623]"
-      >
-        <span>دخول</span>
-        <LogIn size={18} />
-      </Link>
+      {isLoggedIn ? null : (
+        <Link
+          href="/login"
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-[#fef8fb] px-4 py-1.5 text-sm text-[#fef8fb] transition hover:bg-[#fef8fb] hover:text-[#002623]"
+        >
+          <span>دخول</span>
+          <LogIn size={18} />
+        </Link>
+      )}
     </div>
   );
 }

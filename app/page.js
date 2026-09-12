@@ -6,14 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { CarModelSearch } from "@/components/car-model-search";
 import {
-  Menu,
   LogIn,
-  LogOut,
   Bookmark,
-  ShoppingCart,
-  MapPin,
   ExternalLink,
-  Gift,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -24,13 +19,10 @@ import {
   Award,
   Calendar,
   Tag,
-  Home as HomeIcon,
   FileText,
   Phone,
   Search,
-  SaudiRiyal,
   UserRound,
-  Handshake,
 } from "lucide-react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -40,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Bubble, BubbleContent, BubbleReactions } from "@/components/ui/bubble";
+import { Message, MessageContent, MessageGroup } from "@/components/ui/message";
 
 /* -------------------------------------------------------------------------- */
 /*  DATA                                                                      */
@@ -291,25 +284,9 @@ const PAYMENT_LOGOS = [
   { src: "/images/tabby.png", alt: "tabby", light: true },
 ];
 
-const MOBILE_NAV = [
-  { label: "حسابي", icon: Menu, href: "/" },
-  { label: "الأسعار", icon: SaudiRiyal, href: "/" },
-  { label: "الرئيسية", icon: HomeIcon, href: "/" },
-  { label: "تقاريري", icon: FileText, href: "/" },
-  { label: "فالك", icon: Handshake, href: "/" },
-];
-
 /* -------------------------------------------------------------------------- */
 /*  SVG ICONS (brand-specific, not in lucide)                                 */
 /* -------------------------------------------------------------------------- */
-
-function WhatsAppIcon({ className }) {
-  return (
-    <svg viewBox="0 0 16 16" fill="currentColor" className={className}>
-      <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
-    </svg>
-  );
-}
 
 function YoutubeIcon({ className }) {
   return (
@@ -359,13 +336,11 @@ const SOCIALS = [
   { icon: SnapchatIcon, href: "https://www.snapchat.com/add/cashif_sa", label: "Snapchat" },
 ];
 
-const WHATSAPP_HREF = "https://wa.me/966920019948?text=*اختر من القائمة الرئيسية*";
-
 /* -------------------------------------------------------------------------- */
 /*  ANIMATED BUBBLE WRAPPER                                                    */
 /* -------------------------------------------------------------------------- */
 
-function AnimatedBubble({ align, children }) {
+function AnimatedMessage({ align, children }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef(null);
 
@@ -389,19 +364,16 @@ function AnimatedBubble({ align, children }) {
 
   // RTL: "start" sits on the right, "end" sits on the left
   const slideFrom = align === "start" ? "slide-in-from-right-8" : "slide-in-from-left-8";
-  const justify = align === "start" ? "justify-start" : "justify-end";
 
   return (
     <div
       ref={ref}
       className={cn(
-        "flex w-full", // keeps the row, pushes Bubble to the correct side
-        justify,
-        "transition-opacity duration-500",
+        "w-full transition-opacity duration-500",
         isVisible ? cn("animate-in fade-in-0 duration-500 ease-out", slideFrom) : "opacity-0"
       )}
     >
-      {children}
+      <Message align={align}>{children}</Message>
     </div>
   );
 }
@@ -448,8 +420,6 @@ export default function Home() {
       <FaqSection />
       <TestimonialsCarousel />
       <SiteFooter />
-      <WhatsAppButton />
-      <MobileBottomNav />
     </div>
   );
 }
@@ -562,7 +532,7 @@ function HeaderNav() {
   return (
     <div className="relative z-20 flex items-center justify-start">
       <Link
-        href="/"
+        href="/login"
         className="inline-flex items-center justify-center gap-2 rounded-full border border-[#fef8fb] px-4 py-1.5 text-sm text-[#fef8fb] transition hover:bg-[#fef8fb] hover:text-[#002623]"
       >
         <span>دخول</span>
@@ -721,28 +691,31 @@ function StagesSection() {
     <section className="overflow-x-hidden px-4 h-[906px]">
       <SectionTitle>أجزاء ومراحل الفحص</SectionTitle>
       <div className="mx-auto max-w-[480px] rounded-lg bg-white m-auto">
-        <div className="flex flex-col gap-4">
+        <MessageGroup className="gap-4">
           {STAGES.map(({ img, label }, i) => {
+            const align = i % 2 === 0 ? "start" : "end";
             const isLast = i === STAGES.length - 1;
             return (
-              <AnimatedBubble key={label} align={i % 2 === 0 ? "start" : "end"}>
-                <Bubble align={i % 2 === 0 ? "start" : "end"} variant={i % 2 === 0 ? "secondary" : "tinted"}>
-                  <BubbleContent className="flex items-center gap-3">
-                    <Image src={img} alt={label} width={28} height={28} className="w-7 shrink-0" />
-                    <span className="text-[#002623] text-sm sm:text-base">{label}</span>
-                  </BubbleContent>
+              <AnimatedMessage key={label} align={align}>
+                <MessageContent>
+                  <Bubble variant={align === "start" ? "secondary" : "tinted"}>
+                    <BubbleContent className="flex items-center gap-3">
+                      <Image src={img} alt={label} width={28} height={28} className="w-7 shrink-0" />
+                      <span className="text-[#002623] text-sm sm:text-base">{label}</span>
+                    </BubbleContent>
 
-                  {isLast && (
-                    <BubbleReactions align="start" role="img" aria-label="Reactions: thumbs up, surprised">
-                      <span>🎉</span>
-                      <span>🚀</span>
-                    </BubbleReactions>
-                  )}
-                </Bubble>
-              </AnimatedBubble>
+                    {isLast && (
+                      <BubbleReactions align="start" role="img" aria-label="Reactions: thumbs up, surprised">
+                        <span>🎉</span>
+                        <span>🚀</span>
+                      </BubbleReactions>
+                    )}
+                  </Bubble>
+                </MessageContent>
+              </AnimatedMessage>
             );
           })}
-        </div>
+        </MessageGroup>
       </div>
     </section>
   );
@@ -906,7 +879,7 @@ function SiteFooter() {
           </div>
 
           {/* Branches */}
-          <div className="col-span-1 md:col-span-1">
+          <div id="branches" className="col-span-1 scroll-mt-24 md:col-span-1">
             <FooterColumn title="فروعنا">
               {BRANCHES.map((b) => (
                 <li key={b.name}>
@@ -992,57 +965,5 @@ function FooterColumn({ title, children }) {
       </h4>
       <ul className="space-y-1 text-right">{children}</ul>
     </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  WHATSAPP FLOATING BUTTON                                                  */
-/* -------------------------------------------------------------------------- */
-
-function WhatsAppButton() {
-  return (
-    <a
-      href={WHATSAPP_HREF}
-      target="_blank"
-      rel="noreferrer"
-      aria-label="WhatsApp Customer Service"
-      className="fixed bottom-[100px] left-4 z-50 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[#25d366] text-white shadow-lg transition hover:scale-105 sm:bottom-8 sm:left-8 sm:h-14 sm:w-14"
-    >
-      <WhatsAppIcon className="h-6 w-6" />
-    </a>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  MOBILE BOTTOM NAV                                                         */
-/* -------------------------------------------------------------------------- */
-
-function MobileBottomNav() {
-  const [active, setActive] = useState(2);
-
-  return (
-    <nav className="fixed bottom-0 left-1/2 z-50 w-full -translate-x-1/2 bg-[#f0f1f3cf] backdrop-saturate-150 backdrop-blur-xl sm:bottom-4 sm:w-[450px] sm:rounded-[40px] pt-3 pb-4">
-      <ul className="flex h-[52px] items-center">
-        {MOBILE_NAV.map(({ label, icon: Icon, href }, i) => {
-          const isActive = active === i;
-
-          return (
-            <li key={label} className="min-w-0 flex-1">
-              <Link href={href} onClick={() => setActive(i)} className="flex w-full flex-col items-center justify-center gap-1">
-                <span className="flex h-8 w-14 items-center justify-center">
-                  <span
-                    className={`flex h-8 items-center justify-center rounded-2xl transition-all duration-200 ease-out ${isActive ? "w-14 bg-[#4281775e]" : "w-8 bg-transparent"}`}
-                  >
-                    <Icon className="h-6 w-6 shrink-0 text-[#002623]" strokeWidth={isActive ? 2.2 : 1.8} />
-                  </span>
-                </span>
-
-                <span className="font-display text-[12px] font-medium leading-none tracking-wide text-[#002623]">{label}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
   );
 }

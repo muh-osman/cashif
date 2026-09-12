@@ -1,0 +1,36 @@
+export const PARTNER_OFFERS = [
+  {
+    id: "speereeto",
+    name: "سبيرو",
+    nameEn: "Speereeto",
+    discount: "10%",
+    code: "C10",
+    image: "/images/partners/A.png",
+    file: "coupon_A.png",
+  },
+  {
+    id: "stily",
+    name: "STILY",
+    nameEn: "STILY",
+    discount: "35%",
+    code: "2031007",
+    image: "/images/partners/B.png",
+    file: "coupon_B.png",
+  },
+  {
+    id: "mizan",
+    name: "شركة ميزان عبدالحكيم العضيب",
+    nameEn: "Mizan",
+    discount: "25%",
+    image: "/images/partners/C.png",
+    file: "coupon_C.png",
+  },
+  {
+    id: "sharqah",
+    name: "الشارقة لتأجير السيارات",
+    nameEn: "Sharqah",
+    discount: "25%",
+    image: "/images/partners/D.png",
+    file: "coupon_D.png",
+  },
+];

@@ -171,6 +171,7 @@ html {
 }
 
 body {
+  position: relative;
   font-family: "thmanyah-sans-regular", ui-sans-serif, system-ui, sans-serif;
 
   @media (max-width: 639px) {

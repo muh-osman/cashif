@@ -1,7 +1,5 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-import Link from "next/link";
+import { SiteShell } from "@/components/site-shell";
 
 export const metadata = {
   title: "كاشف لفحص السيارات",
@@ -10,16 +8,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" data-scroll-behavior="smooth">
       <body className="font-sans antialiased">
-        {/* <nav style={{ display: "flex", gap: "12px" }}>
-          <Link href="/">Home</Link>
-          <Link href="/about">About</Link>
-          <Link href="/faq">FAQ</Link>
-          <Link href="/posts">Posts</Link>
-        </nav> */}
-
-        {children}
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   );

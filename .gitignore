@@ -30,8 +30,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Keep local-only env files private. .env is committed so Vercel can load the public API URL.
+.env*.local
 
 # vercel
 .vercel

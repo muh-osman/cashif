@@ -1,7 +1,11 @@
-import { getApiUrl } from "@/lib/api-url";
+import { forwardApiResponse, getApiUrl } from "@/lib/api-url";
 
 export async function POST(request) {
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+
+  if (!body?.phoneNumber || !body?.otp) {
+    return Response.json({ message: "رقم الجوال وكود التحقق مطلوبان" }, { status: 400 });
+  }
 
   try {
     const response = await fetch(getApiUrl("api/Account/login"), {
@@ -12,8 +16,7 @@ export async function POST(request) {
       body: JSON.stringify(body),
       cache: "no-store",
     });
-    const data = await response.json().catch(() => ({}));
-    return Response.json(data, { status: response.ok ? 200 : response.status });
+    return forwardApiResponse(response);
   } catch (error) {
     return Response.json({ message: error.message || "حدث خطأ" }, { status: 500 });
   }

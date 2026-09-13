@@ -7,17 +7,19 @@ import { Menu, LogIn, LogOut, ShoppingCart, MapPin, ExternalLink, Gift, ChevronL
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useAuth } from "@/components/auth-provider";
 import { clearAuthCookies } from "@/lib/auth";
+import { FALK_PARAGRAPHS, FALK_TITLE } from "@/data/falk";
 
 const MOBILE_NAV = [
   { label: "حسابي", icon: Menu, action: "account" },
   { label: "الأسعار", icon: SaudiRiyal, href: "/" },
   { label: "الرئيسية", icon: HomeIcon, href: "/" },
   { label: "تقاريري", icon: FileText, action: "reports", href: "/reports" },
-  { label: "فالك", icon: Handshake, href: "/" },
+  { label: "فالك", icon: Handshake, action: "falk", href: "/falk" },
 ];
 
 const ACCOUNT_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.action === "account");
 const REPORTS_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.action === "reports");
+const FALK_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.action === "falk");
 const HOME_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.label === "الرئيسية");
 
 const ACCOUNT_LINKS = [
@@ -37,6 +39,10 @@ function isAccountPath(pathname) {
 
 function isReportsPath(pathname) {
   return pathname === "/reports" || pathname.startsWith("/reports/");
+}
+
+function isFalkPath(pathname) {
+  return pathname === "/falk" || pathname.startsWith("/falk/");
 }
 
 function MobileNavItem({ icon: Icon, label, isActive, expandKey = 0 }) {
@@ -63,33 +69,36 @@ function MobileNavItem({ icon: Icon, label, isActive, expandKey = 0 }) {
   );
 }
 
-function LoginRequiredDrawer({ open, onOpenChange, title, description, from, onBeforeNavigate }) {
+function LoginRequiredDrawer({ open, onOpenChange, title, description, from, onBeforeNavigate, children }) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} showSwipeHandle>
       <DrawerContent className="sm:w-[450px] sm:[--drawer-content-width:450px] sm:data-[swipe-axis=y]:inset-x-0 sm:mx-auto">
         <DrawerHeader className="text-right md:text-right">
           <DrawerTitle className="font-display text-[#002623]">{title}</DrawerTitle>
-          <DrawerDescription className="text-[#757575]">{description}</DrawerDescription>
+          <DrawerDescription className={description ? "text-[#757575]" : "sr-only"}>{description || title}</DrawerDescription>
         </DrawerHeader>
 
-        <div className="flex flex-col gap-1 p-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-          <DrawerClose
-            nativeButton={false}
-            render={
-              <Link
-                href={`/login?from=${from}`}
-                className="mt-1 flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-[#002623] transition-colors hover:bg-[#428177]/10"
-                onClick={() => {
-                  onBeforeNavigate?.();
-                  onOpenChange(false);
-                }}
-              />
-            }
-          >
-            <LogIn className="h-5 w-5 shrink-0" />
-            <span className="flex-1 text-right text-base font-medium">تسجيل الدخول</span>
-            <ChevronLeft className="h-4 w-4 shrink-0 text-[#757575]" />
-          </DrawerClose>
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          {children}
+          <div className="flex flex-col gap-1 p-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+            <DrawerClose
+              nativeButton={false}
+              render={
+                <Link
+                  href={`/login?from=${from}`}
+                  className="mt-1 flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-[#002623] transition-colors hover:bg-[#428177]/10"
+                  onClick={() => {
+                    onBeforeNavigate?.();
+                    onOpenChange(false);
+                  }}
+                />
+              }
+            >
+              <LogIn className="h-5 w-5 shrink-0" />
+              <span className="flex-1 text-right text-base font-medium">تسجيل الدخول</span>
+              <ChevronLeft className="h-4 w-4 shrink-0 text-[#757575]" />
+            </DrawerClose>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>
@@ -103,11 +112,13 @@ export function MobileBottomNav({ initialActive = 2 }) {
   const [expanding, setExpanding] = useState({ index: null, key: 0 });
   const [accountOpen, setAccountOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
+  const [falkOpen, setFalkOpen] = useState(false);
   const [ordersOpen, setOrdersOpen] = useState(false);
   const keepAccountExpandRef = useRef(false);
   const { isLoggedIn, setIsLoggedIn } = useAuth();
   const isAccountPage = isAccountPath(pathname);
   const isReportsPage = isReportsPath(pathname);
+  const isFalkPage = isFalkPath(pathname);
 
   const keepAccountExpand = () => {
     keepAccountExpandRef.current = true;
@@ -126,9 +137,15 @@ export function MobileBottomNav({ initialActive = 2 }) {
     setExpanding((prev) => (prev.index === REPORTS_NAV_INDEX ? { ...prev, index: null } : prev));
   };
 
+  const clearFalkExpandIfNeeded = () => {
+    if (isFalkPath(pathname)) return;
+    setExpanding((prev) => (prev.index === FALK_NAV_INDEX ? { ...prev, index: null } : prev));
+  };
+
   useEffect(() => {
     setAccountOpen(false);
     setReportsOpen(false);
+    setFalkOpen(false);
     setOrdersOpen(false);
 
     setExpanding((prev) => {
@@ -138,7 +155,10 @@ export function MobileBottomNav({ initialActive = 2 }) {
       if (isReportsPath(pathname)) {
         return prev.index === REPORTS_NAV_INDEX ? prev : { index: REPORTS_NAV_INDEX, key: prev.key + 1 };
       }
-      if (prev.index === ACCOUNT_NAV_INDEX || prev.index === REPORTS_NAV_INDEX) {
+      if (isFalkPath(pathname)) {
+        return prev.index === FALK_NAV_INDEX ? prev : { index: FALK_NAV_INDEX, key: prev.key + 1 };
+      }
+      if (prev.index === ACCOUNT_NAV_INDEX || prev.index === REPORTS_NAV_INDEX || prev.index === FALK_NAV_INDEX) {
         return { index: HOME_NAV_INDEX, key: prev.key + 1 };
       }
       return prev;
@@ -151,7 +171,13 @@ export function MobileBottomNav({ initialActive = 2 }) {
         <ul className="flex h-[52px] items-center">
           {MOBILE_NAV.map(({ label, icon: Icon, href, action }, i) => {
             const isActive =
-              action === "account" ? isAccountPage : action === "reports" ? isReportsPage : !isAccountPage && !isReportsPage && active === i;
+              action === "account"
+                ? isAccountPage
+                : action === "reports"
+                  ? isReportsPage
+                  : action === "falk"
+                    ? isFalkPage
+                    : !isAccountPage && !isReportsPage && !isFalkPage && active === i;
             const itemClass = "group flex w-full cursor-pointer flex-col items-center justify-center gap-1";
             const expandKey = expanding.index === i ? expanding.key : 0;
             const isHighlighted = expanding.index === i || (isActive && expanding.index === null);
@@ -172,7 +198,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
                   >
                     <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
                   </button>
-                ) : action === "reports" ? (
+                ) : action === "reports" || action === "falk" ? (
                   <button
                     type="button"
                     onClick={() => {
@@ -182,7 +208,8 @@ export function MobileBottomNav({ initialActive = 2 }) {
                         router.push(href);
                         return;
                       }
-                      setReportsOpen(true);
+                      if (action === "reports") setReportsOpen(true);
+                      else setFalkOpen(true);
                     }}
                     className={`${itemClass} cursor-pointer`}
                   >
@@ -313,6 +340,22 @@ export function MobileBottomNav({ initialActive = 2 }) {
         description="سجّل دخولك لعرض تقارير الفحص الخاصة بك."
         from="/reports"
       />
+
+      <LoginRequiredDrawer
+        open={falkOpen}
+        onOpenChange={(open) => {
+          setFalkOpen(open);
+          if (!open) clearFalkExpandIfNeeded();
+        }}
+        title={FALK_TITLE}
+        from="/falk"
+      >
+        <div className="space-y-3 px-4 pt-3 text-right text-[15px] leading-relaxed text-[#757575]">
+          {FALK_PARAGRAPHS.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+      </LoginRequiredDrawer>
     </>
   );
 }

@@ -202,7 +202,6 @@ export default function LoginPage() {
                   type="tel"
                   inputMode="numeric"
                   autoComplete="tel-national"
-                  autoFocus
                   maxLength={16}
                   placeholder="5xxxxxxxx"
                   value={local}
@@ -230,8 +229,7 @@ export default function LoginPage() {
           </form>
         ) : (
           <form onSubmit={handleVerify}>
-            <CardContent className="space-y-4">
-              <label className="block text-base font-medium text-[#002623]">كود التحقق</label>
+            <CardContent>
               <div dir="ltr" className="flex justify-center">
                 <InputOTP
                   maxLength={OTP_LENGTH}

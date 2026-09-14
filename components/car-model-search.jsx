@@ -42,7 +42,7 @@ export function CarModelSearch({ className, isStuck }) {
   function handleSelect(model) {
     setSelected(model);
     setOpen(false);
-    router.push(`/dashboard/prices?modelId=${model.id}`);
+    router.push(`/prices?modelId=${model.id}`);
   }
 
   return (

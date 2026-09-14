@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { CalendarDays, Car, ClipboardList, Loader2, MapPin, SaudiRiyal, Tag, TriangleAlert } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const PAYMENT_LOGOS = {
   Moyasar: { src: "/images/moyasar.png", width: 96, height: 42 },
@@ -47,7 +50,7 @@ function OrderCard({ order }) {
       <CardContent className="flex flex-1 flex-col space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2 border-[#174545]/20 bg-[#174545]/10">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2 border-[#174545]/20">
               <Car className="h-5 w-5 text-[#174545]" />
             </span>
             <div className="min-w-0">
@@ -142,12 +145,23 @@ export default function OrdersPage() {
       ) : null}
 
       {!loading && !error && orders.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-16">
-          <span className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#002623]/5">
-            <Car className="h-8 w-8 text-[#c0cad8]" />
-          </span>
-          <p className="text-[#757575]">لا توجد طلبات حتى الآن</p>
-        </div>
+        <Card className="mx-auto max-w-lg rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
+          <CardContent className="flex flex-col items-center gap-5 py-6 text-center">
+            <ClipboardList className="h-10 w-10 text-[#174545]" />
+            <div className="space-y-2">
+              <p className="text-lg font-semibold text-[#002623]">لا توجد طلبات حتى الآن</p>
+              <p className="text-sm leading-relaxed text-[#757575]">
+                بعد حجز فحص سيارتك ستظهر هنا تفاصيل الطلب: الفرع، الخطة، والسعر.
+              </p>
+            </div>
+            <Link
+              href="/prices"
+              className={cn(buttonVariants({ variant: "default", size: "lg" }), "cursor-pointer rounded-full bg-[#002623] px-8 py-2 text-white hover:bg-[#1a292e]")}
+            >
+              احجز الآن
+            </Link>
+          </CardContent>
+        </Card>
       ) : null}
 
       {!loading && !error && orders.length > 0 ? (

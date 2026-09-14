@@ -11,7 +11,7 @@ import { WhatsAppButton } from "@/components/whatsapp-button";
 export function SiteShell({ children, isLoggedIn = false }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const hideSearch = isHome || pathname === "/login" || pathname.startsWith("/login/");
+  const hideSearch = isHome || pathname === "/login" || pathname.startsWith("/login/") || pathname === "/prices" || pathname.startsWith("/prices/");
 
   useEffect(() => {
     const toTop = () => window.scrollTo(0, 0);

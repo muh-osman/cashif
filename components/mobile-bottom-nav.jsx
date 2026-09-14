@@ -11,13 +11,14 @@ import { FALK_PARAGRAPHS, FALK_TITLE } from "@/data/falk";
 
 const MOBILE_NAV = [
   { label: "حسابي", icon: Menu, action: "account" },
-  { label: "الأسعار", icon: SaudiRiyal, href: "/" },
+  { label: "الأسعار", icon: SaudiRiyal, href: "/prices" },
   { label: "الرئيسية", icon: HomeIcon, href: "/" },
   { label: "تقاريري", icon: FileText, action: "reports", href: "/reports" },
   { label: "فالك", icon: Handshake, action: "falk", href: "/falk" },
 ];
 
 const ACCOUNT_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.action === "account");
+const PRICES_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.label === "الأسعار");
 const REPORTS_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.action === "reports");
 const FALK_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.action === "falk");
 const HOME_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.label === "الرئيسية");
@@ -43,6 +44,14 @@ function isReportsPath(pathname) {
 
 function isFalkPath(pathname) {
   return pathname === "/falk" || pathname.startsWith("/falk/");
+}
+
+function isPricesPath(pathname) {
+  return pathname === "/prices" || pathname.startsWith("/prices/");
+}
+
+function isHomePath(pathname) {
+  return pathname === "/";
 }
 
 function MobileNavItem({ icon: Icon, label, isActive, expandKey = 0 }) {
@@ -119,6 +128,8 @@ export function MobileBottomNav({ initialActive = 2 }) {
   const isAccountPage = isAccountPath(pathname);
   const isReportsPage = isReportsPath(pathname);
   const isFalkPage = isFalkPath(pathname);
+  const isPricesPage = isPricesPath(pathname);
+  const isHomePage = isHomePath(pathname);
 
   const keepAccountExpand = () => {
     keepAccountExpandRef.current = true;
@@ -158,7 +169,13 @@ export function MobileBottomNav({ initialActive = 2 }) {
       if (isFalkPath(pathname)) {
         return prev.index === FALK_NAV_INDEX ? prev : { index: FALK_NAV_INDEX, key: prev.key + 1 };
       }
-      if (prev.index === ACCOUNT_NAV_INDEX || prev.index === REPORTS_NAV_INDEX || prev.index === FALK_NAV_INDEX) {
+      if (isPricesPath(pathname)) {
+        return prev.index === PRICES_NAV_INDEX ? prev : { index: PRICES_NAV_INDEX, key: prev.key + 1 };
+      }
+      if (isHomePath(pathname)) {
+        return prev.index === HOME_NAV_INDEX ? prev : { index: HOME_NAV_INDEX, key: prev.key + 1 };
+      }
+      if (prev.index === ACCOUNT_NAV_INDEX || prev.index === REPORTS_NAV_INDEX || prev.index === FALK_NAV_INDEX || prev.index === PRICES_NAV_INDEX) {
         return { index: HOME_NAV_INDEX, key: prev.key + 1 };
       }
       return prev;
@@ -177,7 +194,11 @@ export function MobileBottomNav({ initialActive = 2 }) {
                   ? isReportsPage
                   : action === "falk"
                     ? isFalkPage
-                    : !isAccountPage && !isReportsPage && !isFalkPage && active === i;
+                    : label === "الأسعار"
+                      ? isPricesPage
+                      : label === "الرئيسية"
+                        ? isHomePage
+                        : !isAccountPage && !isReportsPage && !isFalkPage && !isPricesPage && active === i;
             const itemClass = "group flex w-full cursor-pointer flex-col items-center justify-center gap-1";
             const expandKey = expanding.index === i ? expanding.key : 0;
             const isHighlighted = expanding.index === i || (isActive && expanding.index === null);

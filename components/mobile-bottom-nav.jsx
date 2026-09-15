@@ -341,7 +341,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
             open={ordersOpen}
             onOpenChange={setOrdersOpen}
             title="طلباتي"
-            description="سجّل دخولك لعرض طلباتك."
+            description="سجّل دخولك لعرض طلباتك"
             from="/orders"
             onBeforeNavigate={() => {
               keepAccountExpand();
@@ -358,7 +358,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
           if (!open) clearReportsExpandIfNeeded();
         }}
         title="تقاريري"
-        description="سجّل دخولك لعرض تقارير الفحص الخاصة بك."
+        description="سجّل دخولك لعرض تقارير الفحص الخاصة بك"
         from="/reports"
       />
 

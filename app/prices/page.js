@@ -9,7 +9,7 @@ export default function PricesPage() {
           الأسعار
           <span className="absolute bottom-[1px] left-0 -z-10 h-[14px] w-full bg-[#e6d39c]" />
         </h1>
-        <p className="text-[#757575]">حدد الخدمة المناسبة، ثم أكمل الحجز.</p>
+        <p className="text-[#757575]">حدد الخدمة المناسبة، ثم أكمل الحجز</p>
       </div>
 
       <Suspense>

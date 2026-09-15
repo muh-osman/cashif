@@ -12,7 +12,6 @@ import {
   CreditCard,
   ChevronDown,
   Download,
-  FilePlus,
   Hash,
   Hourglass,
   Images,
@@ -28,6 +27,7 @@ import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const RANK_ROWS = [
@@ -96,6 +96,25 @@ function calculateProgressValue(pointsData) {
   return Math.min(Math.round((Math.max(currentPoints, 0) / nextLevelPoints) * 100), 100);
 }
 
+function PointsCardSkeleton() {
+  return (
+    <div aria-hidden>
+      <div className="flex items-center justify-between gap-4 sm:gap-16">
+        <div className="min-w-0 flex-1">
+          <Skeleton className="h-7 w-28 bg-[#174545]/15" />
+          <Skeleton className="mt-1 h-5 w-44 bg-[#174545]/15" />
+          <Skeleton className="mt-2 h-9 w-32 bg-[#174545]/15 sm:h-12 sm:w-40" />
+        </div>
+        <Skeleton className="size-[148px] shrink-0 rounded-full bg-[#174545]/15" />
+      </div>
+      <div className="mt-4 hidden space-y-2 md:block">
+        <Skeleton className="h-9 w-full rounded-lg bg-[#174545]/15" />
+        <Skeleton className="mx-auto h-[18px] w-48 bg-[#174545]/15" />
+      </div>
+    </div>
+  );
+}
+
 function RankRing({ value, color, children }) {
   const size = 148;
   const stroke = 7;
@@ -124,30 +143,56 @@ function RankRing({ value, color, children }) {
   );
 }
 
-function ServiceIconBtn({ icon: Icon, label, onClick, disabled, variant = "teal", iconClassName }) {
-  const isTeal = variant === "teal";
+const ICON_SHAPES = {
+  circle: {
+    viewBox: "0 0 63 63",
+    d: "M63 31.5C63 14.103 48.897 0 31.5 0C14.103 0 0 14.103 0 31.5C0 48.897 14.103 63 31.5 63C48.897 63 63 48.897 63 31.5Z",
+  },
+  clover: {
+    viewBox: "0 0 62 62",
+    d: "M7.78628 54.2125C-2.59542 43.8291 -2.59542 26.9941 7.78628 16.6107L16.6114 7.78754C26.9931 -2.59584 43.8287 -2.59584 54.2137 7.78754C64.5954 18.1709 64.5954 35.0059 54.2137 45.3893L45.3886 54.2125C35.0069 64.5958 18.1713 64.5958 7.78628 54.2125Z",
+  },
+  square: {
+    viewBox: "0 0 59 59",
+    d: "M1.3077 21.3393C-4.19593 8.66644 8.66702 -4.19605 21.3396 1.30784L23.4364 2.21791C27.3032 3.89848 31.6966 3.89848 35.5666 2.21791L37.6602 1.30784C50.3359 -4.19605 63.1957 8.66644 57.6921 21.3393L56.7817 23.4344C55.1036 27.3037 55.1036 31.6964 56.7817 35.5654L57.6921 37.6609C63.1957 50.3337 50.3359 63.1962 37.6602 57.692L35.5666 56.782C31.6966 55.1017 27.3032 55.1017 23.4364 56.782L21.3396 57.692C8.66702 63.1962 -4.19593 50.3337 1.3077 37.6609L2.21809 35.5654C3.89932 31.6964 3.89932 27.3037 2.21809 23.4344L1.3077 21.3393Z",
+  },
+  hex: {
+    viewBox: "0 0 40 40",
+    d: "M16.78 1.1c1.9-1.46 4.54-1.46 6.44 0l4.76 3.66c0.37 0.28 0.77 0.52 1.2 0.7l5.56 2.3c2.2 0.91 3.53 3.2 3.21 5.58l-0.78 5.97c-0.06 0.46-0.06 0.92 0 1.38l0.78 5.97c0.32 2.38-1 4.67-3.21 5.58l-5.56 2.3c-0.43 0.18-0.83 0.42-1.2 0.7l-4.76 3.67c-1.9 1.45-4.54 1.45-6.44 0l-4.76-3.67c-0.37-0.28-0.77-0.52-1.2-0.7l-5.56-2.3c-2.2-0.91-3.53-3.2-3.21-5.58l0.78-5.97c0.06-0.46 0.06-0.92 0-1.38l-0.78-5.97c-0.32-2.38 1-4.67 3.21-5.58l5.56-2.3c0.43-0.18 0.83-0.42 1.2-0.7l4.76-3.67Z",
+  },
+};
 
+function ServiceIconShape({ shape, className }) {
+  const iconShape = ICON_SHAPES[shape] ?? ICON_SHAPES.circle;
+
+  return (
+    <svg viewBox={iconShape.viewBox} className={cn("absolute inset-0 size-full", className)} aria-hidden>
+      <path d={iconShape.d} fill="currentColor" />
+    </svg>
+  );
+}
+
+function ServiceIconBtn({ icon: Icon, caption, label, description, onClick, disabled, iconClassName, iconColor, iconShape = "circle" }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={cn(
-        "flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border px-2 py-3.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-        isTeal
-          ? "border-[#002623]/10 border-r-[3px] border-r-[#174545] text-[#002623] hover:bg-[#174545]/5"
-          : "border-[#f8d0d0] border-r-[3px] border-r-[#be1e2d] text-[#be1e2d] hover:bg-[#be1e2d]/5"
-      )}
+      className="flex h-full min-h-[158px] w-full cursor-pointer flex-col items-start rounded-[22px] bg-[#F2F2F7] px-[18px] py-5 text-start transition-colors hover:bg-[#EAEAF0] disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <span
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-[10px]",
-          isTeal ? "bg-[#e1f5ee] text-[#174545]" : "border border-[#f8d0d0] bg-[#fce8e8] text-[#be1e2d]"
+      <span className="relative flex size-11 shrink-0 items-center justify-center">
+        <ServiceIconShape shape={iconShape} className={iconColor} />
+        {disabled ? (
+          <Loader2 className="relative z-10 size-[22px] animate-spin text-white" />
+        ) : (
+          <Icon className={cn("relative z-10 size-[22px] text-white", iconClassName)} strokeWidth={2.25} />
         )}
-      >
-        {disabled ? <Loader2 className="h-5 w-5 animate-spin" /> : <Icon className={cn("h-5 w-5", iconClassName)} />}
       </span>
-      <span className="text-center leading-snug">{label}</span>
+      {caption ? <span className="mt-3.5 text-[13px] leading-none text-[#8e8e93]">{caption}</span> : null}
+      <span className={cn("text-[17px] font-bold leading-tight tracking-tight text-[#1d1d1f]", caption ? "mt-1" : "mt-3.5")}>
+        {label}
+      </span>
+      {description ? <span className="mt-1 text-[13px] leading-snug text-[#8e8e93]">{description}</span> : null}
     </button>
   );
 }
@@ -357,16 +402,17 @@ export default function ReportsPage() {
           تقاريري
           <span className="absolute bottom-[1px] left-0 -z-10 h-[14px] w-full bg-[#e6d39c]" />
         </h1>
-        <p className="text-[#757575]">تقارير فحص السيارات الخاصة بك.</p>
+        <p className="text-[#757575]">تقارير فحص السيارات الخاصة بك</p>
       </div>
 
       <div className="mb-8 flex justify-center">
-        <div className="relative w-full max-w-[670px] overflow-hidden rounded-[40px] border-r-4 border-[#174545] bg-[linear-gradient(135deg,#cfe8e0_0%,#e8f0ee_50%,#f3ece2_100%)] shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
+        <div
+          className="relative w-full max-w-[670px] overflow-hidden rounded-[40px] border-r-4 border-[#174545] bg-[linear-gradient(135deg,#cfe8e0_0%,#e8f0ee_50%,#f3ece2_100%)] shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]"
+          aria-busy={loadingPoints}
+        >
           <div className="bg-white/40 p-5 backdrop-blur-xl sm:p-8">
             {loadingPoints ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-[#174545]" />
-              </div>
+              <PointsCardSkeleton />
             ) : (
               <>
                 <div className="flex items-center justify-between gap-4 sm:gap-16">
@@ -388,11 +434,25 @@ export default function ReportsPage() {
                   </RankRing>
                 </div>
 
-                <div className={cn("mt-4 space-y-2", pointsExpanded ? "block" : "hidden md:block")}>
-                  <p title="جميع النقاط التي تم استخدامها من حسابك" className="rounded-lg border border-[#17454517] bg-white/45 px-3 py-1.5 text-center text-sm font-semibold text-[#174545]">
-                    مجموع النقاط المستخدمة {points?.pointsConsumed ?? 0}
-                  </p>
-                  <p className="text-center text-[13px] text-[#00000099]">تستبدال النقاط في صفحة الدفع</p>
+                <div
+                  className={cn(
+                    "grid transition-[grid-template-rows] duration-300 ease-out md:grid-rows-[1fr]",
+                    pointsExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                  )}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <div
+                      className={cn(
+                        "mt-4 space-y-2 transition-opacity duration-300 ease-out md:opacity-100",
+                        pointsExpanded ? "opacity-100" : "opacity-0"
+                      )}
+                    >
+                      <p title="جميع النقاط التي تم استخدامها من حسابك" className="rounded-lg border border-[#17454517] bg-white/45 px-3 py-1.5 text-center text-sm font-semibold text-[#174545]">
+                        مجموع النقاط المستخدمة {points?.pointsConsumed ?? 0}
+                      </p>
+                      <p className="text-center text-[13px] text-[#00000099]">تستبدال النقاط في صفحة الدفع</p>
+                    </div>
+                  </div>
                 </div>
               </>
             )}
@@ -407,16 +467,19 @@ export default function ReportsPage() {
             <Info className="h-5 w-5" />
           </button>
 
-          {!pointsExpanded ? (
-            <button
-              type="button"
-              onClick={() => setPointsExpanded(true)}
-              className="absolute bottom-1 left-1/2 cursor-pointer -translate-x-1/2 rounded-full p-1 text-[#174545] md:hidden"
-              aria-label="عرض تفاصيل النقاط"
-            >
-              <ChevronDown className="h-6 w-6" />
-            </button>
-          ) : null}
+          <button
+            type="button"
+            onClick={() => setPointsExpanded(true)}
+            className={cn(
+              "absolute bottom-1 left-1/2 -translate-x-1/2 cursor-pointer rounded-full p-1 text-[#174545] transition-opacity duration-300 ease-out md:hidden",
+              loadingPoints || pointsExpanded ? "pointer-events-none opacity-0" : "opacity-100"
+            )}
+            aria-label="عرض تفاصيل النقاط"
+            aria-expanded={pointsExpanded}
+            tabIndex={loadingPoints || pointsExpanded ? -1 : undefined}
+          >
+            <ChevronDown className="h-6 w-6" />
+          </button>
         </div>
       </div>
 
@@ -424,7 +487,7 @@ export default function ReportsPage() {
         <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-3xl **:data-[slot=dialog-close]:left-4 **:data-[slot=dialog-close]:right-auto" dir="rtl">
           <DialogHeader className="text-right">
             <DialogTitle className="font-display text-xl text-[#002623]">فئات العملاء</DialogTitle>
-            <DialogDescription className="text-[#757575]">نسب النقاط حسب رتبة العميل.</DialogDescription>
+            <DialogDescription className="text-[#757575]">نسب النقاط حسب رتبة العميل</DialogDescription>
           </DialogHeader>
           <div className="overflow-x-auto rounded-[24px] ring-1 ring-[#002623]/10">
             <table className="w-full min-w-[520px] text-center text-sm">
@@ -503,6 +566,96 @@ export default function ReportsPage() {
   );
 }
 
+function PostInspectionServices({ hasVideo, canAskMojaz, cardId, cardNumber, defaultOpen = false, onNavigate, onInsurance }) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div>
+      <Button
+        type="button"
+        size="lg"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        className="w-full cursor-pointer rounded-full bg-[#f0f1f3] px-8 py-2 text-[#174545] hover:bg-[#e6e8eb]"
+      >
+        خدمات ما بعد الفحص
+        <ChevronDown className={cn("transition-transform duration-300 ease-out", open && "rotate-180")} />
+      </Button>
+      <div className={cn("grid transition-[grid-template-rows] duration-300 ease-out", open ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
+        <div className="min-h-0 overflow-hidden">
+          <div
+            className={cn(
+              "flex flex-wrap justify-center gap-2.5 pt-3.5 transition-opacity duration-300 ease-out",
+              open ? "opacity-100" : "opacity-0"
+            )}
+          >
+            {hasVideo ? (
+              <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
+                <ServiceIconBtn
+                  icon={Video}
+                  caption="تسجيل"
+                  label="فيديو"
+                  description="شاهد فيديو فحص سيارتك"
+                  iconColor="text-[#34C759]"
+                  iconShape="circle"
+                  onClick={() => onNavigate(`/videos/${cardNumber}`)}
+                />
+              </div>
+            ) : null}
+            <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
+              <ServiceIconBtn
+                icon={Shield}
+                caption="خدمة"
+                label="تأمين ونقل ملكية"
+                description="أتمم التأمين ونقل الملكية"
+                iconColor="text-[#174545]"
+                iconShape="square"
+                onClick={() => onInsurance(cardNumber)}
+              />
+            </div>
+            <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
+              <ServiceIconBtn
+                icon={Truck}
+                caption="توصيل"
+                label="شحن السيارة"
+                description="اشحن سيارتك لأي مدينة"
+                iconColor="text-[#E8C44A]"
+                iconShape="clover"
+                iconClassName="-scale-x-100"
+                onClick={() => onNavigate(`/shipping/${cardId}`)}
+              />
+            </div>
+            <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
+              <ServiceIconBtn
+                icon={Tag}
+                caption="شركاء"
+                label="عروض الشركات"
+                description="خصومات وعروض من شركائنا"
+                iconColor="text-[#00999d]"
+                iconShape="hex"
+                onClick={() => onNavigate("/partners")}
+              />
+            </div>
+            {canAskMojaz ? (
+              <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
+                <ServiceIconBtn
+                  icon={ClipboardList}
+                  caption="تقرير"
+                  label="طلب تقرير موجز"
+                  description="اطلب تقرير موجز للسيارة"
+                  iconColor="text-[#FF3B30]"
+                  iconShape="circle"
+                  onClick={() => onNavigate(`/ask-mojaz-report/${cardId}`)}
+                />
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazReport, loadingDownload, onDownload, onInsurance, onNavigate }) {
   if (loading) {
     return (
@@ -543,7 +696,7 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
 
   return (
     <div className="flex flex-wrap justify-center gap-6">
-      {cards.map((card) => {
+      {cards.map((card, index) => {
         const specs = [
           { icon: Car, label: "الشركة", value: card.carManufacturerNameAr, iconClassName: "-scale-x-100" },
           { icon: Tag, label: "الفئة", value: card.carModelNameAr },
@@ -598,30 +751,15 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
                 </div>
               </div>
 
-              <div>
-                <p className="mb-3.5 text-center text-[15px] font-bold">خدمات ما بعد الفحص</p>
-                <div className="flex flex-wrap justify-center gap-2.5">
-                  {hasVideo ? (
-                    <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
-                      <ServiceIconBtn icon={Video} label="فيديو" onClick={() => onNavigate(`/videos/${card.cardNumber}`)} />
-                    </div>
-                  ) : null}
-                  <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
-                    <ServiceIconBtn icon={Shield} label="تأمين ونقل ملكية" onClick={() => onInsurance(card.cardNumber)} />
-                  </div>
-                  <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
-                    <ServiceIconBtn icon={Truck} label="شحن السيارة" iconClassName="-scale-x-100" onClick={() => onNavigate(`/shipping/${card.id}`)} />
-                  </div>
-                  <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
-                    <ServiceIconBtn icon={Tag} label="عروض الشركات" onClick={() => onNavigate("/partners")} />
-                  </div>
-                  {canAskMojaz ? (
-                    <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
-                      <ServiceIconBtn icon={FilePlus} label="طلب تقرير موجز" variant="red" onClick={() => onNavigate(`/ask-mojaz-report/${card.id}`)} />
-                    </div>
-                  ) : null}
-                </div>
-              </div>
+              <PostInspectionServices
+                hasVideo={hasVideo}
+                canAskMojaz={canAskMojaz}
+                cardId={card.id}
+                cardNumber={card.cardNumber}
+                defaultOpen={index === 0}
+                onNavigate={onNavigate}
+                onInsurance={onInsurance}
+              />
             </CardContent>
           </Card>
         );
@@ -655,7 +793,7 @@ function MojazReports({ loading, error, reports }) {
           <ClipboardList className="h-10 w-10 text-[#174545]" />
           <div className="space-y-2">
             <p className="text-lg font-semibold text-[#002623]">لا يوجد تقارير</p>
-            <p className="text-sm leading-relaxed text-[#757575]">تقارير موجز ستظهر هنا عند جاهزيتها.</p>
+            <p className="text-sm leading-relaxed text-[#757575]">تقارير موجز ستظهر هنا عند جاهزيتها</p>
           </div>
         </CardContent>
       </Card>

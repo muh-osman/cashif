@@ -185,6 +185,7 @@ export default function LoginPage() {
               </label>
               <InputGroup
                 dir="ltr"
+                data-disabled={pending}
                 className={cn(
                   "h-14 rounded-full border-[#002623]/10 bg-white px-2 text-base shadow-none",
                   phoneInvalid && "border-destructive ring-3 ring-destructive/20"

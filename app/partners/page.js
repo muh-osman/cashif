@@ -43,7 +43,7 @@ export default function PartnersPage() {
         ))}
       </ul>
 
-      <p className="mt-8 text-center text-[#757575]">اعرض الكوبونات لدى شركائنا عند وصولك</p>
+      <p className="mt-[24px] text-center text-sm text-[#757575]">اعرض الكوبونات لدى شركائنا عند وصولك</p>
     </main>
   );
 }

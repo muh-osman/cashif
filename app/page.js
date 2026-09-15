@@ -383,82 +383,9 @@ export default function Home() {
 /* -------------------------------------------------------------------------- */
 
 function HeroSection() {
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
-  const [isMobile, setIsMobile] = useState(false);
-  const sectionRef = useRef(null);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|windows phone/.test(userAgent);
-      setIsMobile(isMobileDevice);
-    };
-    checkMobile();
-
-    const handleOrientation = (event) => {
-      if (event.beta !== null && event.gamma !== null) {
-        const x = Math.max(-30, Math.min(30, event.gamma * 0.6));
-        const y = Math.max(-20, Math.min(20, event.beta * 0.4));
-        setRotation({ x, y });
-      }
-    };
-
-    const handleMouseMove = (event) => {
-      const section = sectionRef.current;
-      if (!section) return;
-      const rect = section.getBoundingClientRect();
-      const px = (event.clientX - rect.left) / rect.width - 0.5;
-      const py = (event.clientY - rect.top) / rect.height - 0.5;
-
-      const x = Math.max(-15, Math.min(15, px * 20)); // was 60, now gentler
-      const y = Math.max(-10, Math.min(10, py * 15)); // was 40, now gentler
-      setRotation({ x, y });
-    };
-
-    const handleMouseLeave = () => {
-      setRotation({ x: 0, y: 0 });
-    };
-
-    let cleanupFallback = null;
-
-    if (isMobile && window.DeviceOrientationEvent) {
-      if (typeof DeviceOrientationEvent.requestPermission === "function") {
-        DeviceOrientationEvent.requestPermission()
-          .then((state) => {
-            if (state === "granted") {
-              window.addEventListener("deviceorientation", handleOrientation);
-            }
-          })
-          .catch(console.error);
-      } else {
-        window.addEventListener("deviceorientation", handleOrientation);
-      }
-    } else if (!isMobile) {
-      const section = sectionRef.current;
-      section?.addEventListener("mousemove", handleMouseMove);
-      section?.addEventListener("mouseleave", handleMouseLeave);
-      cleanupFallback = () => {
-        section?.removeEventListener("mousemove", handleMouseMove);
-        section?.removeEventListener("mouseleave", handleMouseLeave);
-      };
-    }
-
-    return () => {
-      window.removeEventListener("deviceorientation", handleOrientation);
-      if (cleanupFallback) cleanupFallback();
-    };
-  }, [isMobile]);
-
   return (
-    <section ref={sectionRef} className="relative overflow-hidden rounded-b-[40px] bg-[#002623] px-4 pb-32 pt-4 lg:rounded-[40px] lg:px-8 lg:pt-8">
-      <div
-        className="absolute inset-0 z-0 opacity-[0.03]"
-        style={{
-          transform: `perspective(800px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(1.12)`,
-          transition: "transform 0.1s ease-out",
-          transformOrigin: "center center",
-        }}
-      >
+    <section className="relative overflow-hidden rounded-b-[40px] bg-[#002623] px-4 pb-32 pt-4 lg:rounded-[40px] lg:px-8 lg:pt-8">
+      <div className="absolute inset-0 z-0 opacity-[0.03]">
         <Image src="/images/cars-brands-abstract-background.jpg" alt="Cars brands abstract background" fill className="object-cover" priority />
       </div>
 

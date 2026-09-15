@@ -3,12 +3,18 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { SERVICES, ServiceCard, ServicesGrid } from "@/components/services-grid";
+import { EqualHeightProvider, SERVICES, ServiceCard, ServicesGrid } from "@/components/services-grid";
 
 const SERVICE_PARAMS = SERVICES.map((service) => service.param);
 const DEFAULT_PARAM = "purchaseInspection";
 
 const CAROUSEL_SERVICES = [
+  SERVICES.find((service) => service.param === "passengerCheck"),
+  SERVICES.find((service) => service.param === "purchaseInspection"),
+  SERVICES.find((service) => service.param === "checkit"),
+];
+
+const PRICES_GRID_SERVICES = [
   SERVICES.find((service) => service.param === "checkit"),
   SERVICES.find((service) => service.param === "purchaseInspection"),
   SERVICES.find((service) => service.param === "passengerCheck"),
@@ -83,37 +89,45 @@ export function PricesServices() {
   return (
     <>
       <div className="lg:hidden">
-        <Carousel
-          className="-mx-4"
-          dir="rtl"
-          setApi={setApi}
-          opts={{
-            align: "center",
-            startIndex: DEFAULT_CAROUSEL_INDEX,
-            direction: "rtl",
-            containScroll: false,
-          }}
-        >
-          <CarouselContent className="ml-0 gap-3">
-            {CAROUSEL_SERVICES.map((service) => (
-              <CarouselItem key={service.id} className="flex basis-[calc(50%-12px)] pl-0">
-                <ServiceCard
-                  service={service}
-                  ctaLabel="اختيار الخدمة"
-                  selected={selectedParam === service.param}
-                  onSelect={handleSelect}
-                  compact
-                  preview
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+        <EqualHeightProvider>
+          <PricesCarousel setApi={setApi} selectedParam={selectedParam} onSelect={handleSelect} />
+        </EqualHeightProvider>
       </div>
 
       <div className="hidden lg:block">
-        <ServicesGrid ctaLabel="اختيار الخدمة" selectedParam={selectedParam} onSelect={handleSelect} preview />
+        <ServicesGrid services={PRICES_GRID_SERVICES} ctaLabel="اختيار الخدمة" selectedParam={selectedParam} onSelect={handleSelect} preview />
       </div>
     </>
+  );
+}
+
+function PricesCarousel({ setApi, selectedParam, onSelect }) {
+  return (
+    <Carousel
+      className="-mx-4"
+      dir="ltr"
+      setApi={setApi}
+      opts={{
+        align: "center",
+        startIndex: DEFAULT_CAROUSEL_INDEX,
+        direction: "ltr",
+        containScroll: false,
+      }}
+    >
+      <CarouselContent className="ml-0 items-start gap-3">
+        {CAROUSEL_SERVICES.map((service) => (
+          <CarouselItem key={service.id} className="flex basis-[calc(50%-12px)] items-start pl-0" dir="rtl">
+            <ServiceCard
+              service={service}
+              ctaLabel="اختيار الخدمة"
+              selected={selectedParam === service.param}
+              onSelect={onSelect}
+              compact
+              preview
+            />
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    </Carousel>
   );
 }

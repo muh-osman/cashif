@@ -13,7 +13,6 @@ import {
   ChevronDown,
   Download,
   FilePlus,
-  FileText,
   Hash,
   Hourglass,
   Images,
@@ -125,7 +124,7 @@ function RankRing({ value, color, children }) {
   );
 }
 
-function ServiceIconBtn({ icon: Icon, label, onClick, disabled, variant = "teal" }) {
+function ServiceIconBtn({ icon: Icon, label, onClick, disabled, variant = "teal", iconClassName }) {
   const isTeal = variant === "teal";
 
   return (
@@ -146,19 +145,19 @@ function ServiceIconBtn({ icon: Icon, label, onClick, disabled, variant = "teal"
           isTeal ? "bg-[#e1f5ee] text-[#174545]" : "border border-[#f8d0d0] bg-[#fce8e8] text-[#be1e2d]"
         )}
       >
-        {disabled ? <Loader2 className="h-5 w-5 animate-spin" /> : <Icon className="h-5 w-5" />}
+        {disabled ? <Loader2 className="h-5 w-5 animate-spin" /> : <Icon className={cn("h-5 w-5", iconClassName)} />}
       </span>
       <span className="text-center leading-snug">{label}</span>
     </button>
   );
 }
 
-function SpecRow({ icon: Icon, label, value, last }) {
+function SpecRow({ icon: Icon, label, value, last, iconClassName }) {
   return (
     <div className={cn("flex items-center justify-between gap-2 px-3.5 py-2.5", !last && "border-b border-[#002623]/8")}>
       <div className="flex min-w-0 items-center gap-2">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#002623]/5 text-[#757575]">
-          <Icon className="h-4 w-4" />
+          <Icon className={cn("h-4 w-4", iconClassName)} />
         </span>
         <span className="text-[13px] font-semibold text-[#002623]">{label}</span>
       </div>
@@ -184,7 +183,6 @@ function toList(data) {
 export default function ReportsPage() {
   const router = useRouter();
   const [tab, setTab] = useState("cashif");
-  const [animateTab, setAnimateTab] = useState(false);
   const [pointsExpanded, setPointsExpanded] = useState(false);
   const [ranksOpen, setRanksOpen] = useState(false);
 
@@ -315,7 +313,6 @@ export default function ReportsPage() {
 
   function handleTabChange(next) {
     if (next === tab) return;
-    setAnimateTab(true);
     setTab(next);
     router.replace(next === "mojaz" ? "/reports?tab=1" : "/reports", { scroll: false });
   }
@@ -487,29 +484,21 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div
-        key={tab}
-        className={cn(
-          animateTab && "animate-in fade-in-0 duration-300 ease-out",
-          animateTab && (tab === "mojaz" ? "slide-in-from-left-6" : "slide-in-from-right-6")
-        )}
-      >
-        {tab === "cashif" ? (
-          <CashifReports
-            loading={loadingCards}
-            error={cardsError}
-            cards={completedCards}
-            videoStatus={videoStatus}
-            cardIdsWithMojazReport={cardIdsWithMojazReport}
-            loadingDownload={loadingDownload}
-            onDownload={handleDownloadCard}
-            onInsurance={handleInsurance}
-            onNavigate={(href) => router.push(href)}
-          />
-        ) : (
-          <MojazReports loading={loadingMojaz} error={mojazError} reports={mojaz} />
-        )}
-      </div>
+      {tab === "cashif" ? (
+        <CashifReports
+          loading={loadingCards}
+          error={cardsError}
+          cards={completedCards}
+          videoStatus={videoStatus}
+          cardIdsWithMojazReport={cardIdsWithMojazReport}
+          loadingDownload={loadingDownload}
+          onDownload={handleDownloadCard}
+          onInsurance={handleInsurance}
+          onNavigate={(href) => router.push(href)}
+        />
+      ) : (
+        <MojazReports loading={loadingMojaz} error={mojazError} reports={mojaz} />
+      )}
     </main>
   );
 }
@@ -536,7 +525,7 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
     return (
       <Card className="mx-auto max-w-lg rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
         <CardContent className="flex flex-col items-center gap-5 py-6 text-center">
-          <FileText className="h-10 w-10 text-[#174545]" />
+          <ClipboardList className="h-10 w-10 text-[#174545]" />
           <div className="space-y-2">
             <p className="text-lg font-semibold text-[#002623]">لا يوجد تقارير</p>
             <p className="text-sm leading-relaxed text-[#757575]">بعد اكتمال فحص سيارتك سيظهر التقرير هنا لتحميله والاستفادة من خدمات ما بعد الفحص.</p>
@@ -556,7 +545,7 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
     <div className="flex flex-wrap justify-center gap-6">
       {cards.map((card) => {
         const specs = [
-          { icon: Car, label: "الشركة", value: card.carManufacturerNameAr },
+          { icon: Car, label: "الشركة", value: card.carManufacturerNameAr, iconClassName: "-scale-x-100" },
           { icon: Tag, label: "الفئة", value: card.carModelNameAr },
           { icon: ClipboardList, label: "نوع الفحص", value: card.servicesListNameAr?.join(", ") },
           { icon: CreditCard, label: "رقم الفحص", value: card.cardNumber },
@@ -592,18 +581,19 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
                   <p className="text-[22px] font-bold text-[#002623]">الفحص مكتمل</p>
                   <Button
                     size="lg"
+                    dir="ltr"
                     disabled={loadingDownload[card.id]}
                     onClick={() => onDownload(card.id, card.includeImage)}
-                    className="cursor-pointer rounded-full bg-[#174545] px-5 text-white hover:bg-[#123838]"
+                    className="cursor-pointer rounded-full bg-[#002623] px-8 py-2 text-white hover:bg-[#1a292e]"
                   >
-                    {loadingDownload[card.id] ? <Loader2 data-icon="inline-start" className="animate-spin" /> : <Download data-icon="inline-start" />}
+                    {loadingDownload[card.id] ? <Loader2 className="animate-spin" /> : <Download />}
                     تحميل تقرير الفحص
                   </Button>
                 </div>
 
                 <div dir="rtl" className="overflow-hidden rounded-xl border border-[#002623]/10">
                   {specs.map((row, index) => (
-                    <SpecRow key={row.label} icon={row.icon} label={row.label} value={row.value} last={index === specs.length - 1} />
+                    <SpecRow key={row.label} icon={row.icon} label={row.label} value={row.value} last={index === specs.length - 1} iconClassName={row.iconClassName} />
                   ))}
                 </div>
               </div>
@@ -620,7 +610,7 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
                     <ServiceIconBtn icon={Shield} label="تأمين ونقل ملكية" onClick={() => onInsurance(card.cardNumber)} />
                   </div>
                   <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
-                    <ServiceIconBtn icon={Truck} label="شحن السيارة" onClick={() => onNavigate(`/shipping/${card.id}`)} />
+                    <ServiceIconBtn icon={Truck} label="شحن السيارة" iconClassName="-scale-x-100" onClick={() => onNavigate(`/shipping/${card.id}`)} />
                   </div>
                   <div className="flex w-[calc(50%-5px)] sm:w-[calc(25%-8px)]">
                     <ServiceIconBtn icon={Tag} label="عروض الشركات" onClick={() => onNavigate("/partners")} />
@@ -662,10 +652,10 @@ function MojazReports({ loading, error, reports }) {
     return (
       <Card className="mx-auto max-w-lg rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
         <CardContent className="flex flex-col items-center gap-5 py-6 text-center">
-          <FileText className="h-10 w-10 text-[#174545]" />
+          <ClipboardList className="h-10 w-10 text-[#174545]" />
           <div className="space-y-2">
             <p className="text-lg font-semibold text-[#002623]">لا يوجد تقارير</p>
-            <p className="text-sm leading-relaxed text-[#757575]">تقارير موجز المطلوبة من صفحة تقارير كاشف ستظهر هنا عند جاهزيتها.</p>
+            <p className="text-sm leading-relaxed text-[#757575]">تقارير موجز ستظهر هنا عند جاهزيتها.</p>
           </div>
         </CardContent>
       </Card>

@@ -16,6 +16,7 @@ export async function GET() {
 
   try {
     const response = await fetch(`https://cashif.cc/payment-system/back-end/public/api/mojaz/orders/${encodeURIComponent(userId)}`, {
+    // const response = await fetch(`https://cashif.cc/payment-system/back-end/public/api/mojaz/orders/95332`, {
       cache: "no-store",
     });
     const data = await response.json().catch(() => ({}));

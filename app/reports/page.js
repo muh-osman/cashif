@@ -26,7 +26,7 @@ import {
 import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -96,6 +96,84 @@ function calculateProgressValue(pointsData) {
   return Math.min(Math.round((Math.max(currentPoints, 0) / nextLevelPoints) * 100), 100);
 }
 
+const DEFAULT_CARD_IMAGE = "/images/reports/card-image.jpg";
+const GITHUB_LOGO_BASE =
+  "https://raw.githubusercontent.com/filippofilip95/car-logos-dataset/master/logos/thumb";
+const GITHUB_LOCAL_LOGO_BASE =
+  "https://raw.githubusercontent.com/filippofilip95/car-logos-dataset/master/local-logos";
+const LOGO_SLUG_ALIASES = {
+  mercedes: "mercedes-benz",
+  vw: "volkswagen",
+  chevy: "chevrolet",
+  gwm: "great-wall",
+  "ssang-yong": "ssangyong",
+  amg: "mercedes-amg",
+  li: "li-auto",
+  "range-rover": "land-rover",
+};
+
+function makeLogoSlug(nameEn) {
+  const slug = nameEn
+    ?.trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if (!slug) return null;
+  return LOGO_SLUG_ALIASES[slug] || slug;
+}
+
+function makeLogoSrc(nameEn) {
+  const slug = makeLogoSlug(nameEn);
+  return slug ? `${GITHUB_LOGO_BASE}/${slug}.png` : null;
+}
+
+function makeLocalLogoSrc(nameEn) {
+  const slug = makeLogoSlug(nameEn);
+  return slug ? `${GITHUB_LOCAL_LOGO_BASE}/${slug}.png` : null;
+}
+
+function CardMakeImage({ nameEn, carImageUrl }) {
+  const logoSrc = makeLogoSrc(nameEn);
+  const localLogoSrc = makeLocalLogoSrc(nameEn);
+  const photoSrc = carImageUrl || DEFAULT_CARD_IMAGE;
+
+  return (
+    <img
+      src={logoSrc || photoSrc}
+      alt={logoSrc ? nameEn.trim() : ""}
+      data-step={logoSrc ? "logo" : "photo"}
+      className="w-full max-w-[220px] object-contain"
+      onError={(event) => {
+        const img = event.currentTarget;
+
+        if (img.dataset.step === "logo") {
+          img.dataset.step = localLogoSrc ? "local-logo" : "photo";
+          if (!localLogoSrc) img.alt = "";
+          img.src = localLogoSrc || photoSrc;
+          return;
+        }
+
+        if (img.dataset.step === "local-logo") {
+          img.dataset.step = "photo";
+          img.alt = "";
+          img.src = photoSrc;
+          return;
+        }
+
+        img.onerror = null;
+        if (img.dataset.step !== "default") {
+          img.dataset.step = "default";
+          img.src = DEFAULT_CARD_IMAGE;
+        }
+      }}
+    />
+  );
+}
+
 function PointsCardSkeleton() {
   return (
     <div aria-hidden>
@@ -117,7 +195,7 @@ function PointsCardSkeleton() {
 
 function RankRing({ value, color, children }) {
   const size = 148;
-  const stroke = 7;
+  const stroke = 15;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (Math.min(Math.max(value, 0), 100) / 100) * circumference;
@@ -172,13 +250,13 @@ function ServiceIconShape({ shape, className }) {
   );
 }
 
-function ServiceIconBtn({ icon: Icon, caption, label, description, onClick, disabled, iconClassName, iconColor, iconShape = "circle" }) {
+function ServiceIconBtn({ icon: Icon, caption, label, onClick, disabled, iconClassName, iconColor, iconShape = "circle" }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex h-full min-h-[158px] w-full cursor-pointer flex-col items-start rounded-[22px] bg-[#F2F2F7] px-[18px] py-5 text-start transition-colors hover:bg-[#EAEAF0] disabled:cursor-not-allowed disabled:opacity-50"
+      className="flex h-full min-h-[128px] w-full cursor-pointer flex-col items-start rounded-[22px] bg-[#F2F2F7] px-[18px] py-5 text-start transition-colors hover:bg-[#EAEAF0] disabled:cursor-not-allowed disabled:opacity-50"
     >
       <span className="relative flex size-11 shrink-0 items-center justify-center">
         <ServiceIconShape shape={iconShape} className={iconColor} />
@@ -189,10 +267,9 @@ function ServiceIconBtn({ icon: Icon, caption, label, description, onClick, disa
         )}
       </span>
       {caption ? <span className="mt-3.5 text-[13px] leading-none text-[#8e8e93]">{caption}</span> : null}
-      <span className={cn("text-[17px] font-bold leading-tight tracking-tight text-[#1d1d1f]", caption ? "mt-1" : "mt-3.5")}>
+      <span className={cn("text-[16px] font-bold leading-tight tracking-tight text-[#1d1d1f]", caption ? "mt-1" : "mt-3.5")}>
         {label}
       </span>
-      {description ? <span className="mt-1 text-[13px] leading-snug text-[#8e8e93]">{description}</span> : null}
     </button>
   );
 }
@@ -483,41 +560,46 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <Dialog open={ranksOpen} onOpenChange={setRanksOpen}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-3xl **:data-[slot=dialog-close]:left-4 **:data-[slot=dialog-close]:right-auto" dir="rtl">
-          <DialogHeader className="text-right">
-            <DialogTitle className="font-display text-xl text-[#002623]">فئات العملاء</DialogTitle>
-            <DialogDescription className="text-[#757575]">نسب النقاط حسب رتبة العميل</DialogDescription>
-          </DialogHeader>
-          <div className="overflow-x-auto rounded-[24px] ring-1 ring-[#002623]/10">
-            <table className="w-full min-w-[520px] text-center text-sm">
-              <thead className="bg-[#002623] text-white">
-                <tr>
-                  <th className="px-3 py-3 font-medium">الرتبة</th>
-                  <th className="px-3 py-3 font-medium">الحد الأدنى للنقاط</th>
-                  <th className="px-3 py-3 font-medium">الحد الأعلى للنقاط</th>
-                  <th className="px-3 py-3 font-medium">نسبة النقاط</th>
-                </tr>
-              </thead>
-              <tbody>
-                {RANK_ROWS.map((row, index) => (
-                  <tr key={row.name} className={index % 2 === 0 ? "bg-[#f7f8f8]" : "bg-white"}>
-                    <td className="px-3 py-3">
-                      <span className="inline-flex items-center gap-1.5 font-medium text-[#002623]">
-                        {row.name}
-                        <Award className="h-4 w-4" style={{ color: row.color }} />
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 text-[#757575]">{row.min}</td>
-                    <td className="px-3 py-3 text-[#757575]">{row.max}</td>
-                    <td className="px-3 py-3 text-[#757575]">{row.percent}</td>
+      <Drawer open={ranksOpen} onOpenChange={setRanksOpen} showSwipeHandle>
+        <DrawerContent
+          dir="rtl"
+          className="sm:max-w-3xl sm:[--drawer-content-width:48rem] sm:data-[swipe-axis=y]:inset-x-0 sm:mx-auto"
+        >
+          <DrawerHeader className="text-right md:text-right">
+            <DrawerTitle className="font-display text-xl text-[#002623]">فئات العملاء</DrawerTitle>
+            <DrawerDescription className="text-[#757575]">نسب النقاط حسب رتبة العميل</DrawerDescription>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            <div className="overflow-x-auto rounded-[24px] ring-1 ring-[#002623]/10">
+              <table className="w-full min-w-[520px] text-center text-sm">
+                <thead className="bg-[#002623] text-white">
+                  <tr>
+                    <th className="px-3 py-3 font-medium">الرتبة</th>
+                    <th className="px-3 py-3 font-medium">الحد الأدنى للنقاط</th>
+                    <th className="px-3 py-3 font-medium">الحد الأعلى للنقاط</th>
+                    <th className="px-3 py-3 font-medium">نسبة النقاط</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {RANK_ROWS.map((row, index) => (
+                    <tr key={row.name} className={index % 2 === 0 ? "bg-[#f7f8f8]" : "bg-white"}>
+                      <td className="px-3 py-3">
+                        <span className="inline-flex items-center gap-1.5 font-medium text-[#002623]">
+                          {row.name}
+                          <Award className="h-4 w-4" style={{ color: row.color }} />
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 text-[#757575]">{row.min}</td>
+                      <td className="px-3 py-3 text-[#757575]">{row.max}</td>
+                      <td className="px-3 py-3 text-[#757575]">{row.percent}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </DrawerContent>
+      </Drawer>
 
       <h2 className="mb-3 text-base font-semibold text-[#002623]">تقاريري</h2>
       <div className="mb-4 h-px bg-[#002623]/10" />
@@ -595,7 +677,6 @@ function PostInspectionServices({ hasVideo, canAskMojaz, cardId, cardNumber, def
                   icon={Video}
                   caption="تسجيل"
                   label="فيديو"
-                  description="شاهد فيديو فحص سيارتك"
                   iconColor="text-[#34C759]"
                   iconShape="circle"
                   onClick={() => onNavigate(`/videos/${cardNumber}`)}
@@ -607,7 +688,6 @@ function PostInspectionServices({ hasVideo, canAskMojaz, cardId, cardNumber, def
                 icon={Shield}
                 caption="خدمة"
                 label="تأمين ونقل ملكية"
-                description="أتمم التأمين ونقل الملكية"
                 iconColor="text-[#174545]"
                 iconShape="square"
                 onClick={() => onInsurance(cardNumber)}
@@ -618,7 +698,6 @@ function PostInspectionServices({ hasVideo, canAskMojaz, cardId, cardNumber, def
                 icon={Truck}
                 caption="توصيل"
                 label="شحن السيارة"
-                description="اشحن سيارتك لأي مدينة"
                 iconColor="text-[#E8C44A]"
                 iconShape="clover"
                 iconClassName="-scale-x-100"
@@ -630,7 +709,6 @@ function PostInspectionServices({ hasVideo, canAskMojaz, cardId, cardNumber, def
                 icon={Tag}
                 caption="شركاء"
                 label="عروض الشركات"
-                description="خصومات وعروض من شركائنا"
                 iconColor="text-[#00999d]"
                 iconShape="hex"
                 onClick={() => onNavigate("/partners")}
@@ -642,7 +720,6 @@ function PostInspectionServices({ hasVideo, canAskMojaz, cardId, cardNumber, def
                   icon={ClipboardList}
                   caption="تقرير"
                   label="طلب تقرير موجز"
-                  description="اطلب تقرير موجز للسيارة"
                   iconColor="text-[#FF3B30]"
                   iconShape="circle"
                   onClick={() => onNavigate(`/ask-mojaz-report/${cardId}`)}
@@ -722,16 +799,7 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
             <CardContent className="space-y-5 pt-5">
               <div dir="ltr" className="grid items-center gap-4 sm:grid-cols-2 sm:gap-0">
                 <div className="flex flex-col items-center justify-center gap-3">
-                  <img
-                    src={card.carImageUrl || "/images/reports/card-image.jpg"}
-                    alt=""
-                    className="w-full max-w-[220px] rounded-lg object-contain"
-                    onError={(event) => {
-                      event.currentTarget.onerror = null;
-                      event.currentTarget.src = "/images/reports/card-image.jpg";
-                    }}
-                  />
-                  <p className="text-[22px] font-bold text-[#002623]">الفحص مكتمل</p>
+                  <CardMakeImage nameEn={card.carManufacturerNameEn} carImageUrl={card.carImageUrl} />
                   <Button
                     size="lg"
                     dir="ltr"
@@ -740,7 +808,7 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
                     className="cursor-pointer rounded-full bg-[#002623] px-8 py-2 text-white hover:bg-[#1a292e]"
                   >
                     {loadingDownload[card.id] ? <Loader2 className="animate-spin" /> : <Download />}
-                    تحميل تقرير الفحص
+                    تحميل التقرير
                   </Button>
                 </div>
 
@@ -806,11 +874,11 @@ function MojazReports({ loading, error, reports }) {
         const status = getMojazStatus(report.status);
 
         return (
-          <Card key={report.id} size="sm" className="relative w-full max-w-[329px] rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
-            <div className="absolute top-4 left-4 h-8 w-8 overflow-hidden rounded-md">
-              <Image src="/images/reports/mojaz-logo.webp" alt="موجز" width={32} height={32} className="h-full w-full object-cover" />
+          <Card key={report.id} size="sm" className="relative w-full rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] sm:max-w-[329px]">
+            <div className="absolute top-4 left-4 h-12 w-12 overflow-hidden rounded-md">
+              <Image src="/images/reports/mojaz-logo.webp" alt="موجز" width={48} height={48} className="h-full w-full object-cover" />
             </div>
-            <CardContent className="space-y-3 pt-2">
+            <CardContent className="space-y-3">
               <div className="flex items-center gap-2">
                 <Hourglass className="h-4 w-4 text-[#002623]/80" />
                 <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", status.className)}>{status.label}</span>
@@ -833,7 +901,7 @@ function MojazReports({ loading, error, reports }) {
                 size="lg"
                 disabled={report.status !== "ready"}
                 onClick={() => window.open(report.pdf_url, "_blank", "noopener,noreferrer")}
-                className="w-full cursor-pointer rounded-full bg-[#174545] text-white hover:bg-[#123838]"
+                className="w-full cursor-pointer rounded-full bg-[#002623] text-white hover:bg-[#1a292e]"
               >
                 عرض التقرير
               </Button>

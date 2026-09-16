@@ -179,8 +179,8 @@ function PointsCardSkeleton() {
     <div aria-hidden>
       <div className="flex items-center justify-between gap-4 sm:gap-16">
         <div className="min-w-0 flex-1">
-          <Skeleton className="h-7 w-28 bg-[#174545]/15" />
-          <Skeleton className="mt-1 h-5 w-44 bg-[#174545]/15" />
+          <Skeleton className="h-7 w-20 bg-[#174545]/15 sm:w-28" />
+          <Skeleton className="mt-1 h-5 w-28 bg-[#174545]/15 sm:w-44" />
           <Skeleton className="mt-2 h-9 w-32 bg-[#174545]/15 sm:h-12 sm:w-40" />
         </div>
         <Skeleton className="size-[148px] shrink-0 rounded-full bg-[#174545]/15" />
@@ -571,27 +571,27 @@ export default function ReportsPage() {
           </DrawerHeader>
           <div className="min-h-0 flex-1 overflow-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <div className="overflow-x-auto rounded-[24px] ring-1 ring-[#002623]/10">
-              <table className="w-full min-w-[520px] text-center text-sm">
+              <table className="w-full text-center text-xs md:text-sm">
                 <thead className="bg-[#002623] text-white">
                   <tr>
-                    <th className="px-3 py-3 font-medium">الرتبة</th>
-                    <th className="px-3 py-3 font-medium">الحد الأدنى للنقاط</th>
-                    <th className="px-3 py-3 font-medium">الحد الأعلى للنقاط</th>
-                    <th className="px-3 py-3 font-medium">نسبة النقاط</th>
+                    <th className="px-2 py-2.5 font-medium leading-snug md:px-3 md:py-3">الرتبة</th>
+                    <th className="max-w-[4.75rem] px-2 py-2.5 font-medium leading-snug md:max-w-none md:px-3 md:py-3">الحد الأدنى للنقاط</th>
+                    <th className="max-w-[4.75rem] px-2 py-2.5 font-medium leading-snug md:max-w-none md:px-3 md:py-3">الحد الأعلى للنقاط</th>
+                    <th className="max-w-[4.25rem] px-2 py-2.5 font-medium leading-snug md:max-w-none md:px-3 md:py-3">نسبة النقاط</th>
                   </tr>
                 </thead>
                 <tbody>
                   {RANK_ROWS.map((row, index) => (
                     <tr key={row.name} className={index % 2 === 0 ? "bg-[#f7f8f8]" : "bg-white"}>
-                      <td className="px-3 py-3">
-                        <span className="inline-flex items-center gap-1.5 font-medium text-[#002623]">
+                      <td className="px-2 py-2.5 md:px-3 md:py-3">
+                        <span className="inline-flex items-center gap-1 font-medium text-[#002623] md:gap-1.5">
                           {row.name}
                           <Award className="h-4 w-4" style={{ color: row.color }} />
                         </span>
                       </td>
-                      <td className="px-3 py-3 text-[#757575]">{row.min}</td>
-                      <td className="px-3 py-3 text-[#757575]">{row.max}</td>
-                      <td className="px-3 py-3 text-[#757575]">{row.percent}</td>
+                      <td className="px-2 py-2.5 text-[#757575] md:px-3 md:py-3">{row.min}</td>
+                      <td className="px-2 py-2.5 text-[#757575] md:px-3 md:py-3">{row.max}</td>
+                      <td className="px-2 py-2.5 text-[#757575] md:px-3 md:py-3">{row.percent}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -8,17 +8,30 @@ import { EqualHeightProvider, SERVICES, ServiceCard, ServicesGrid } from "@/comp
 const SERVICE_PARAMS = SERVICES.map((service) => service.param);
 const DEFAULT_PARAM = "purchaseInspection";
 
+const PRICES_DESCRIPTIONS = {
+  purchaseInspection: "فحص جميع أنواع السيارات المستعملة مع تجربة ميدانية وتقرير مفصل يوضح الحالة والعيوب قبل اتخاذ قرار الشراء",
+  checkit: "نتولى فحص السيارة وتوثيق حالتها ونقل ملكيتها وشحنها دون الحاجة الى حضورك",
+  passengerCheck: "فحص مخصص قبل السفر للتأكد من سلامة السيارة وجاهزيتها لرحلة آمنة ومريحة",
+};
+
+function withPricesDescription(service) {
+  return {
+    ...service,
+    description: PRICES_DESCRIPTIONS[service.param],
+  };
+}
+
 const CAROUSEL_SERVICES = [
   SERVICES.find((service) => service.param === "passengerCheck"),
   SERVICES.find((service) => service.param === "purchaseInspection"),
   SERVICES.find((service) => service.param === "checkit"),
-];
+].map(withPricesDescription);
 
 const PRICES_GRID_SERVICES = [
   SERVICES.find((service) => service.param === "checkit"),
   SERVICES.find((service) => service.param === "purchaseInspection"),
   SERVICES.find((service) => service.param === "passengerCheck"),
-];
+].map(withPricesDescription);
 
 const DEFAULT_CAROUSEL_INDEX = CAROUSEL_SERVICES.findIndex((service) => service.param === DEFAULT_PARAM);
 

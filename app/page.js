@@ -372,6 +372,7 @@ export default function Home() {
       <StagesSection />
       <WhyUsSection />
       <FaqSection />
+      <BlogSection />
       <TestimonialsCarousel />
       <SiteFooter />
     </div>
@@ -634,6 +635,92 @@ function FaqSection() {
           ))}
         </Accordion>
       </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  BLOG                                                                       */
+/* -------------------------------------------------------------------------- */
+
+function BlogSection() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/blog")
+      .then((response) => (response.ok ? response.json() : { posts: [] }))
+      .then((data) => {
+        if (!cancelled) setPosts(Array.isArray(data.posts) ? data.posts : []);
+      })
+      .catch(() => {
+        if (!cancelled) setPosts([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!loading && posts.length === 0) return null;
+
+  return (
+    <section className="px-4 py-4">
+      <SectionTitle>المدونة</SectionTitle>
+
+      <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-3">
+        {loading
+          ? Array.from({ length: 3 }, (_, index) => (
+              <div key={index} className="h-[380px] animate-pulse rounded-[40px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]" />
+            ))
+          : posts.map((post) => (
+              <a
+                key={post.id}
+                href={post.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-full flex-col overflow-hidden rounded-[40px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]"
+              >
+                <div className="relative aspect-[16/9] bg-[#f0f1f3]">
+                  {post.image ? (
+                    <img src={post.image} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="flex h-full items-center justify-center text-[#174545]">
+                      <FileText className="h-10 w-10" />
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-1 flex-col p-5">
+                  <p className="text-sm text-[#757575]">
+                    {post.category ? <span className="font-medium text-[#174545]">{post.category}</span> : null}
+                    {post.category && post.date ? <span className="mx-1.5">·</span> : null}
+                    {post.date}
+                  </p>
+                  <h3 className="mt-2 line-clamp-2 text-lg font-semibold leading-snug text-[#002623]">{post.title}</h3>
+                  {post.excerpt ? <p className="mt-2 line-clamp-3 text-sm font-light leading-relaxed text-[#757575]">{post.excerpt}</p> : null}
+                </div>
+              </a>
+            ))}
+      </div>
+
+      {!loading ? (
+        <div className="mt-8 text-center">
+          <a
+            href="https://cashif.cc/blog/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center rounded-full bg-[#002623] px-8 py-2 text-white transition hover:bg-[#1a292e]"
+          >
+            جميع المقالات
+          </a>
+        </div>
+      ) : null}
     </section>
   );
 }

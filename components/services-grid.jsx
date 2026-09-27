@@ -78,11 +78,6 @@ export function useEqualHeight() {
   return useContext(EqualHeightContext);
 }
 
-const COLLAPSED_BODY_HEIGHT = {
-  compact: 128,
-  default: 160,
-};
-
 function ServicePoint({ point, compact }) {
   return (
     <li className={cn("flex items-start gap-2 font-medium text-[#757575]", compact ? "text-xs" : "items-center text-base")}>
@@ -96,23 +91,26 @@ export function ServiceCard({ service, ctaLabel: ctaLabelOverride, selected = fa
   const { id, number, title, description, points, cta, ctaLabel = "أطلب الأن", param } = service;
   const equalHeight = useEqualHeight();
   const expanded = Boolean(preview && equalHeight?.expandedId === id);
-  const collapsedBodyHeight = compact ? COLLAPSED_BODY_HEIGHT.compact : COLLAPSED_BODY_HEIGHT.default;
   const bodyInnerRef = useRef(null);
-  const [bodyHeight, setBodyHeight] = useState(collapsedBodyHeight);
+  const descriptionRef = useRef(null);
+  const [bodyHeight, setBodyHeight] = useState(0);
 
   useLayoutEffect(() => {
     if (!preview) return;
-    const node = bodyInnerRef.current;
-    if (!node) return;
+    const body = bodyInnerRef.current;
+    const description = descriptionRef.current;
+    if (!body || !description) return;
 
     function applyHeight() {
-      setBodyHeight(expanded ? node.scrollHeight + 20 : collapsedBodyHeight);
+      const collapsedHeight = description.offsetTop + description.offsetHeight;
+      setBodyHeight(expanded ? body.scrollHeight : collapsedHeight);
     }
 
     applyHeight();
-    const frame = requestAnimationFrame(applyHeight);
-    return () => cancelAnimationFrame(frame);
-  }, [collapsedBodyHeight, expanded, preview]);
+    const observer = new ResizeObserver(applyHeight);
+    observer.observe(description);
+    return () => observer.disconnect();
+  }, [expanded, preview]);
 
   function toggleExpanded(event) {
     event.preventDefault();
@@ -129,7 +127,7 @@ export function ServiceCard({ service, ctaLabel: ctaLabelOverride, selected = fa
         "flex w-full flex-col justify-between rounded-[40px] shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]",
         compact ? "p-4" : "p-6 sm:p-11",
         onSelect ? (selected ? "border-2 border-[#174545]" : "border-2 border-transparent") : "border-none",
-        preview && "cursor-grab active:cursor-grabbing",
+        preview && "cursor-grab gap-0! active:cursor-grabbing",
         expanded && "overflow-visible"
       )}
     >
@@ -149,9 +147,11 @@ export function ServiceCard({ service, ctaLabel: ctaLabelOverride, selected = fa
               : undefined
           }
         >
-          <div ref={bodyInnerRef} className={cn(preview && expanded && "pb-3")}>
+          <div ref={bodyInnerRef}>
             {description ? (
-              <p className={cn("mt-1.5 text-center text-[#757575] font-heading-bold", compact ? "mb-3 text-xs" : "mb-4 text-sm")}>{description}</p>
+              <p ref={descriptionRef} className={cn("mt-1.5 text-center text-[#757575] font-heading-bold", compact ? "mb-3 text-xs" : "mb-4 text-sm")}>
+                {description}
+              </p>
             ) : null}
             <ul className={cn(compact ? "space-y-2" : "space-y-4")}>
               {points.map((point, i) => (
@@ -159,22 +159,13 @@ export function ServiceCard({ service, ctaLabel: ctaLabelOverride, selected = fa
               ))}
             </ul>
           </div>
-          {preview ? (
-            <div
-              className={cn(
-                "pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-b from-transparent to-white",
-                expanded ? "opacity-0" : "opacity-100"
-              )}
-              style={{ transition: "opacity 650ms cubic-bezier(0.22, 1, 0.36, 1)" }}
-            />
-          ) : null}
         </div>
         {preview ? (
           <button
             type="button"
             onClick={toggleExpanded}
             onPointerDown={(event) => event.stopPropagation()}
-            className="relative z-10 mx-auto mt-3 flex cursor-pointer items-center gap-1 text-sm font-medium text-[#174545] hover:text-[#002623]"
+            className="relative z-10 mx-auto mt-4 flex cursor-pointer items-center gap-1 text-sm font-medium text-[#174545] hover:text-[#002623]"
           >
             {expanded ? "أقل" : "المزيد"}
             <ChevronDown

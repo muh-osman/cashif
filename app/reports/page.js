@@ -28,6 +28,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { makeLocalLogoSrc, makeLogoSrc } from "@/lib/car-logo";
 import { cn } from "@/lib/utils";
 
 const RANK_ROWS = [
@@ -97,44 +98,6 @@ function calculateProgressValue(pointsData) {
 }
 
 const DEFAULT_CARD_IMAGE = "/images/reports/card-image.jpg";
-const GITHUB_LOGO_BASE =
-  "https://raw.githubusercontent.com/filippofilip95/car-logos-dataset/master/logos/thumb";
-const GITHUB_LOCAL_LOGO_BASE =
-  "https://raw.githubusercontent.com/filippofilip95/car-logos-dataset/master/local-logos";
-const LOGO_SLUG_ALIASES = {
-  mercedes: "mercedes-benz",
-  vw: "volkswagen",
-  chevy: "chevrolet",
-  gwm: "great-wall",
-  "ssang-yong": "ssangyong",
-  amg: "mercedes-amg",
-  li: "li-auto",
-  "range-rover": "land-rover",
-};
-
-function makeLogoSlug(nameEn) {
-  const slug = nameEn
-    ?.trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  if (!slug) return null;
-  return LOGO_SLUG_ALIASES[slug] || slug;
-}
-
-function makeLogoSrc(nameEn) {
-  const slug = makeLogoSlug(nameEn);
-  return slug ? `${GITHUB_LOGO_BASE}/${slug}.png` : null;
-}
-
-function makeLocalLogoSrc(nameEn) {
-  const slug = makeLogoSlug(nameEn);
-  return slug ? `${GITHUB_LOCAL_LOGO_BASE}/${slug}.png` : null;
-}
 
 function CardMakeImage({ nameEn, carImageUrl }) {
   const logoSrc = makeLogoSrc(nameEn);

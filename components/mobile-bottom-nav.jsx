@@ -39,7 +39,14 @@ function isAccountPath(pathname) {
 }
 
 function isReportsPath(pathname) {
-  return pathname === "/reports" || pathname.startsWith("/reports/") || pathname === "/videos" || pathname.startsWith("/videos/");
+  return (
+    pathname === "/reports" ||
+    pathname.startsWith("/reports/") ||
+    pathname === "/videos" ||
+    pathname.startsWith("/videos/") ||
+    pathname === "/shipping" ||
+    pathname.startsWith("/shipping/")
+  );
 }
 
 function isFalkPath(pathname) {

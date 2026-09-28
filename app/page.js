@@ -47,14 +47,11 @@ const BRANCHES = [
   { name: "خميس مشيط", href: "https://maps.app.goo.gl/6dMQqyhHiKgmrP6b7" },
 ];
 
-const CAROUSEL_SLIDES = Array.from({ length: 10 }, (_, i) => {
-  const n = i + 50;
-  return {
-    desktop: `/images/desktop/${n}.jpg`,
-    mobile: `/images/mobile/${n}.jpg`,
-    alt: `Cashif Carousel ${n}`,
-  };
-});
+const CAROUSEL_SLIDES = [50, 51, 53, 54, 55, 56, 57, 58, 59].map((n) => ({
+  desktop: `/images/desktop/${n}.jpg`,
+  mobile: `/images/mobile/${n}.jpg`,
+  alt: `Cashif Carousel ${n}`,
+}));
 
 const STAGES = [
   { img: "/images/x1.png", label: "تسجيل بيانات المركبة" },
@@ -223,8 +220,9 @@ const FOOTER_SERVICES = [
 ];
 
 const FOOTER_LINKS = [
-  { label: "الأحكام والخصوصية", href: "https://cashif.cc/terms-and-privacy-policy/" },
-  { label: "الاسترجاع والاستبدال", href: "https://cashif.cc/return-policy/" },
+  { label: "الأحكام والشروط", href: "/terms" },
+  { label: "سياسة الخصوصية", href: "/privacy" },
+  { label: "الاسترجاع والاستبدال", href: "/return-policy" },
   { label: "المدونة", href: "https://cashif.cc/blog/" },
 ];
 
@@ -671,7 +669,7 @@ function BlogSection() {
 
   return (
     <section className="px-4 py-4">
-      <SectionTitle>المدونة</SectionTitle>
+      <SectionTitle>أحدث مقالات مدونة كاشف</SectionTitle>
 
       <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-3">
         {loading

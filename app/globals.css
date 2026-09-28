@@ -203,3 +203,33 @@ body {
   transform-origin: center;
   animation: nav-bg-expand 200ms ease-out forwards;
 }
+
+/* Moyasar caps the card form at 20rem from the md breakpoint. */
+@media (min-width: 768px) {
+  #shipping-moyasar-form div#mysr .md\:max-w-80 {
+    max-width: 100% !important;
+  }
+}
+
+/* Tailwind preflight clears input backgrounds, so Moyasar's ring looks soft. */
+#shipping-moyasar-form div#mysr input {
+  background-color: #fff;
+  border-radius: var(--radius-3xl) !important;
+}
+
+#shipping-moyasar-form div#mysr button {
+  border-radius: var(--radius-4xl) !important;
+}
+
+/* Split the joined card fields so each radius matches a normal input. */
+#shipping-moyasar-form div#mysr .grid {
+  gap: 0.5rem !important;
+}
+
+/* Site utilities set `translate`; Moyasar also sets `transform` on the same class. */
+#shipping-moyasar-form div#mysr .top-1\/4 {
+  top: 0 !important;
+  height: 2.25rem !important;
+  --tw-translate-x: 0 !important;
+  --tw-translate-y: 0 !important;
+}

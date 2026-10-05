@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Loader2, MapPin, SaudiRiyal, TriangleAlert } from "lucide-react";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
+
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 import {
   CITIES,
   DELIVERY_FLATBED,
@@ -78,6 +80,16 @@ export function ShippingForm({ cardId }) {
   const [selectedCity, setSelectedCity] = useState("");
   const [shippingType, setShippingType] = useState("");
   const [termsOpen, setTermsOpen] = useState(false);
+
+  useIsomorphicLayoutEffect(() => {
+    const html = document.documentElement;
+    const previous = html.style.scrollBehavior;
+    html.style.scrollBehavior = "auto";
+    void html.offsetHeight;
+    html.scrollTop = 0;
+    document.body.scrollTop = 0;
+    html.style.scrollBehavior = previous;
+  }, [deliveryMethod]);
 
   useEffect(() => {
     if (!cardId) return;

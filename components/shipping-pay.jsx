@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Tooltip } from "@base-ui/react/tooltip";
 import Link from "next/link";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
@@ -9,6 +8,7 @@ import { CreditCard, Info, Landmark, Loader2, SaudiRiyal, TriangleAlert } from "
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   DELIVERY_FLATBED,
@@ -35,24 +35,25 @@ const FLATBED_FEE_TOOLTIP = "رسوم استلام السيارة في مركز 
 
 function FlatbedFeeInfo() {
   return (
-    <Tooltip.Root>
-      <Tooltip.Trigger
+    <Popover>
+      <PopoverTrigger
         type="button"
+        openOnHover
         delay={0}
-        closeOnClick={false}
-        aria-label={FLATBED_FEE_TOOLTIP}
-        className="inline-flex cursor-pointer border-0 bg-transparent p-0 text-[#757575]"
+        closeDelay={80}
+        className="inline-flex min-h-8 cursor-pointer touch-manipulation items-center gap-1 border-0 bg-transparent px-1 text-[11px] font-medium text-[#757575] [font-family:inherit]"
       >
         <Info className="h-3.5 w-3.5" />
-      </Tooltip.Trigger>
-      <Tooltip.Portal>
-        <Tooltip.Positioner side="top" sideOffset={6} className="isolate z-50">
-          <Tooltip.Popup className="max-w-56 rounded-2xl bg-[#002623] px-3 py-2 text-center text-xs leading-5 text-white shadow-lg outline-none">
-            {FLATBED_FEE_TOOLTIP}
-          </Tooltip.Popup>
-        </Tooltip.Positioner>
-      </Tooltip.Portal>
-    </Tooltip.Root>
+        شامل الضريبة
+      </PopoverTrigger>
+      <PopoverContent
+        side="top"
+        sideOffset={6}
+        className="w-auto max-w-56 gap-0 rounded-2xl bg-[#002623] px-3 py-2 text-center text-xs leading-5 text-white shadow-lg ring-0"
+      >
+        {FLATBED_FEE_TOOLTIP}
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -278,10 +279,7 @@ export function ShippingPay({ cardId, to, shippingType, deliveryMethod }) {
                 <DetailRow label="سطحة الى شركة الشحن" hint="تدفع الآن">
                   <span className="flex flex-col items-end gap-1">
                     <Money amount={RECEIVE_AND_SEND_FEE} />
-                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#757575]">
-                      <FlatbedFeeInfo />
-                      شامل الضريبة
-                    </span>
+                    <FlatbedFeeInfo />
                   </span>
                 </DetailRow>
               ) : null}

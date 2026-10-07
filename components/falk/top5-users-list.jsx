@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, Info } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { ChevronDown, Info, Trophy } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const FIXED_REWARDS = ["100%", "60%", "40%", "20%", "10%", "0%", "0%", "0%", "0%", "0%"];
+
+const RANK_STYLES = [
+  "bg-[#e6d39c] text-[#174545]",
+  "bg-[#d7e4e1] text-[#174545]",
+  "bg-[#f3ece2] text-[#8a6a3b]",
+];
 
 function formatName(fullName) {
   const parts = String(fullName || "")
@@ -59,58 +65,93 @@ export function FalkTop5UsersList() {
       <button
         type="button"
         onClick={() => setExpanded((value) => !value)}
-        className="flex flex-row-reverse w-full items-center justify-between bg-[#164547] px-5 py-4 text-left text-white"
+        aria-expanded={expanded}
+        className="flex w-full cursor-pointer items-center gap-3 px-5 py-5 text-right"
       >
-        <div>
-          <p className="text-2xl font-bold">Top {users.length}</p>
-          <p className="text-sm text-[#c7dff7]">{monthYear}</p>
-        </div>
-        <ChevronDown className={cn("h-6 w-6 transition-transform", expanded ? "rotate-0" : "rotate-180")} />
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#174545]/10">
+          <Trophy className="h-6 w-6 text-[#174545]" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-lg font-semibold text-[#002623]">Top {users.length}</span>
+          <span className="mt-0.5 block text-sm text-[#757575]">{monthYear}</span>
+        </span>
+        <ChevronDown
+          className={cn(
+            "h-5 w-5 shrink-0 text-[#174545] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            expanded && "rotate-180"
+          )}
+        />
       </button>
 
-      {expanded ? (
-        <CardContent className="overflow-x-auto p-0">
-          <table className="w-full min-w-[420px] text-center text-sm">
-            <thead className="bg-[#164547] text-white">
-              <tr>
-                <th className="px-3 py-3 font-semibold">الترتيب</th>
-                <th className="px-3 py-3 font-semibold">الاسم</th>
-                <th className="px-3 py-3 font-semibold">الكود</th>
-                <th className="relative px-3 py-3 font-semibold">
-                  <button
-                    type="button"
-                    className="absolute top-2 right-2"
-                    onClick={() => setTipOpen((value) => !value)}
-                    aria-label="النسبة من قيمة العمولة"
-                  >
-                    <Info className="h-4 w-4 text-white" />
-                  </button>
-                  {tipOpen ? (
-                    <span className="absolute top-8 right-2 z-10 whitespace-nowrap rounded-lg bg-black px-2 py-1 text-xs font-normal text-white">
-                      النسبة من قيمة العمولة
-                    </span>
-                  ) : null}
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+          expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        )}
+      >
+        <div className="min-h-0 overflow-hidden" inert={expanded ? undefined : true}>
+          <div
+            className={cn(
+              "px-4 pb-5 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              expanded ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
+            )}
+          >
+            <div className="mb-3 border-t border-[#002623]/10 pt-4">
+              <div className="grid grid-cols-4 items-center px-2 text-center text-xs font-medium text-[#757575]">
+                <span>الترتيب</span>
+                <span>الاسم</span>
+                <span>الكود</span>
+                <button
+                  type="button"
+                  onClick={() => setTipOpen((value) => !value)}
+                  aria-expanded={tipOpen}
+                  className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-full px-2 py-1 hover:bg-[#174545]/8 hover:text-[#174545]"
+                >
                   المكافأة
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <div
+                className={cn(
+                  "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+                  tipOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                )}
+              >
+                <p className="min-h-0 overflow-hidden text-xs leading-5 text-[#174545]">
+                  <span className="mt-2 block rounded-2xl bg-[#174545]/8 px-3 py-2 text-center">النسبة من قيمة العمولة</span>
+                </p>
+              </div>
+            </div>
+
+            <ul className="space-y-2">
               {users.map((user, index) => (
-                <tr key={`${user.clientId}-${user.code}`} className={index % 2 === 0 ? "bg-[#f0f4f9]" : "bg-white"}>
-                  <td className="px-3 py-3">{index + 1}</td>
-                  <td className="px-3 py-3">{formatName(user.clientName)}</td>
-                  <td className="px-3 py-3">
-                    <span className="inline-block min-w-[70px] rounded-full border border-[#174545]/30 px-3 py-1 font-semibold text-[#174545]">
+                <li
+                  key={`${user.clientId}-${user.code}`}
+                  className="grid grid-cols-4 items-center rounded-2xl bg-[#002623]/[0.04] px-2 py-3 text-center"
+                >
+                  <span
+                    className={cn(
+                      "mx-auto flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold",
+                      RANK_STYLES[index] || "bg-[#174545]/10 text-[#174545]"
+                    )}
+                  >
+                    {index + 1}
+                  </span>
+                  <span className="truncate px-1 text-sm font-semibold text-[#002623]">
+                    {formatName(user.clientName)}
+                  </span>
+                  <span>
+                    <span className="inline-block rounded-full border border-[#174545]/20 bg-white px-3 py-1 text-xs font-semibold text-[#174545]">
                       {user.code}
                     </span>
-                  </td>
-                  <td className="px-3 py-3">{FIXED_REWARDS[index] || "0%"}</td>
-                </tr>
+                  </span>
+                  <span className="text-sm font-semibold text-[#174545]">{FIXED_REWARDS[index] || "0%"}</span>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </CardContent>
-      ) : null}
+            </ul>
+          </div>
+        </div>
+      </div>
     </Card>
   );
 }

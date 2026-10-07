@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export function FalkInstructions() {
   return (
-    <Card className="rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
+    <Card className="rounded-[40px] border-none py-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
       <CardContent className="space-y-5 p-6 text-right">
         <h2 className="text-xl font-semibold text-[#002623]">تعليمات هامه قبل نشر المحتوى:</h2>
 

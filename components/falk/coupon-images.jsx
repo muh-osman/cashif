@@ -146,17 +146,17 @@ export function FalkCouponImages({ code, percent }) {
                   overlayRefs.current[globalIndex] = el;
                 }}
                 dir="rtl"
-                className="relative flex justify-center overflow-hidden rounded-3xl text-center font-black"
+                className="@container relative flex justify-center overflow-hidden rounded-3xl text-center font-black"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={post.image_data} alt={post.title || `cashif ${globalIndex + 1}`} className="h-auto w-full max-w-full" />
-                <div className="absolute right-4 bottom-4 flex items-center gap-1 rounded-[9px] border-2 border-dashed border-white p-[3px] text-black max-[550px]:right-[7px] max-[550px]:bottom-[6px] max-[550px]:border-none">
-                  <p className="bg-white px-4 text-[32px] leading-[1.5] font-bold [border-bottom-right-radius:6px] [border-top-right-radius:6px] max-[550px]:px-1.5 max-[550px]:text-[24px]">
+                <div className="absolute right-[2cqw] bottom-[2cqw] flex items-center gap-[0.6cqw] text-black">
+                  <p className="bg-white px-[1.6cqw] text-[5.5cqw] leading-[1.5] font-bold [border-bottom-right-radius:1cqw] [border-top-right-radius:1cqw]">
                     {code}
                   </p>
-                  <div className="bg-white [border-bottom-left-radius:6px] [border-top-left-radius:6px]">
-                    <p className="px-2 text-[16px] leading-[1.5] font-semibold max-[550px]:px-1.5 max-[550px]:text-[12px]">خصم</p>
-                    <p className="px-2 text-[16px] leading-[1.5] font-semibold max-[550px]:px-1.5 max-[550px]:text-[12px]">%{percent}</p>
+                  <div className="bg-white [border-bottom-left-radius:1cqw] [border-top-left-radius:1cqw]">
+                    <p className="px-[1.2cqw] text-[2.75cqw] leading-[1.5] font-semibold">خصم</p>
+                    <p className="px-[1.2cqw] text-[2.75cqw] leading-[1.5] font-semibold">%{percent}</p>
                   </div>
                 </div>
               </div>

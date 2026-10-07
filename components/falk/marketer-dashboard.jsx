@@ -180,7 +180,7 @@ export function FalkMarketerDashboard() {
       </div>
 
       <div className="mx-auto max-w-3xl space-y-5">
-        <Card className="relative rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
+        <Card className="relative rounded-[40px] border-none py-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
           <CardContent className="space-y-5 p-6">
             <div className="absolute top-4 left-4">
               <button

@@ -7,7 +7,6 @@ import { Menu, LogIn, LogOut, ShoppingCart, MapPin, ExternalLink, Gift, ChevronL
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useAuth } from "@/components/auth-provider";
 import { clearAuthCookies } from "@/lib/auth";
-import { FALK_PARAGRAPHS, FALK_TITLE } from "@/data/falk";
 
 const MOBILE_NAV = [
   { label: "حسابي", icon: Menu, action: "account" },
@@ -375,13 +374,17 @@ export function MobileBottomNav({ initialActive = 2 }) {
           setFalkOpen(open);
           if (!open) clearFalkExpandIfNeeded();
         }}
-        title={FALK_TITLE}
+        title="'فالك' للتسويق بالعمولة"
         from="/falk"
       >
         <div className="space-y-3 px-4 pt-3 text-right text-[15px] leading-relaxed text-[#757575]">
-          {FALK_PARAGRAPHS.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
+          <p>
+            برنامج &apos;فالك&apos; للتسويق بالعمولة هو منصة تتيح لك كمسوق فرصة ربح المال بسهولة من خلال الترويج لخدمات مركز كاشف لفحص السيارات عبر الإنترنت او من خلال التوصية المباشرة لدوائر المعارف والأصدقاء والمقربين.
+          </p>
+          <p>
+            من خلال الانضمام إلى البرنامج، تحصل على &apos;كود&apos; تسويقي خاص بك للترويج لمنتجات الفحص، وعندما يقوم الأشخاص بزيارة مراكز كاشف لفحص السيارت والحصول على احد منتجات الفحص عبر &apos;الكود&apos;، تكسب عمولة على كل عملية فحص.
+          </p>
+          <p>انضم إلى &apos;فالك&apos; اليوم وابدأ رحلتك في عالم التسويق بالعمولة. وفالك التوفيق!</p>
         </div>
       </LoginRequiredDrawer>
     </>

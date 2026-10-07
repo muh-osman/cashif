@@ -28,7 +28,7 @@ export default function BranchesPage() {
           <Button
             key={item}
             type="button"
-            size="sm"
+            size="lg"
             variant={city === item ? "default" : "outline"}
             onClick={() => setCity(item)}
             className={cn(

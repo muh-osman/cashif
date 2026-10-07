@@ -41,15 +41,17 @@ function FlatbedFeeInfo() {
         openOnHover
         delay={0}
         closeDelay={80}
-        className="inline-flex min-h-8 cursor-pointer touch-manipulation items-center gap-1 border-0 bg-transparent px-1 text-[11px] font-medium text-[#757575] [font-family:inherit]"
+        aria-label={FLATBED_FEE_TOOLTIP}
+        className="inline-flex size-6 shrink-0 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-[#757575]"
       >
         <Info className="h-3.5 w-3.5" />
-        شامل الضريبة
       </PopoverTrigger>
       <PopoverContent
         side="top"
         sideOffset={6}
-        className="w-auto max-w-56 gap-0 rounded-2xl bg-[#002623] px-3 py-2 text-center text-xs leading-5 text-white shadow-lg ring-0"
+        positionMethod="fixed"
+        collisionPadding={8}
+        className="w-auto max-w-[min(14rem,calc(100vw-1.5rem))] gap-0 rounded-2xl bg-[#002623] px-3 py-2 text-center text-xs leading-5 text-white shadow-lg ring-0 duration-0 data-open:animate-none data-closed:animate-none data-[side=top]:slide-in-from-bottom-0"
       >
         {FLATBED_FEE_TOOLTIP}
       </PopoverContent>
@@ -279,7 +281,10 @@ export function ShippingPay({ cardId, to, shippingType, deliveryMethod }) {
                 <DetailRow label="سطحة الى شركة الشحن" hint="تدفع الآن">
                   <span className="flex flex-col items-end gap-1">
                     <Money amount={RECEIVE_AND_SEND_FEE} />
-                    <FlatbedFeeInfo />
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#757575]">
+                      <FlatbedFeeInfo />
+                      شامل الضريبة
+                    </span>
                   </span>
                 </DetailRow>
               ) : null}

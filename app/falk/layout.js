@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { FalkAccessGate } from "@/components/falk/falk-access-gate";
 import { hasAuthCookieFromStore } from "@/lib/auth";
 
 export const metadata = {
@@ -14,5 +15,5 @@ export default async function FalkLayout({ children }) {
     redirect("/login?from=/falk");
   }
 
-  return children;
+  return <FalkAccessGate>{children}</FalkAccessGate>;
 }

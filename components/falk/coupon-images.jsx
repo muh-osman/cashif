@@ -145,15 +145,18 @@ export function FalkCouponImages({ code, percent }) {
                 ref={(el) => {
                   overlayRefs.current[globalIndex] = el;
                 }}
-                className="relative overflow-hidden rounded-3xl"
+                dir="rtl"
+                className="relative flex justify-center overflow-hidden rounded-3xl text-center font-black"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={post.image_data} alt={post.title || `cashif ${globalIndex + 1}`} className="w-full object-cover" />
-                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-10 text-white">
-                  <h3 className="text-2xl font-bold tracking-wide">{code}</h3>
-                  <div className="rounded-xl bg-[#174545] px-3 py-2 text-center">
-                    <p className="text-xs">خصم</p>
-                    <p className="text-lg font-bold">%{percent}</p>
+                <img src={post.image_data} alt={post.title || `cashif ${globalIndex + 1}`} className="h-auto w-full max-w-full" />
+                <div className="absolute right-4 bottom-4 flex items-center gap-1 rounded-[9px] border-2 border-dashed border-white p-[3px] text-black max-[550px]:right-[7px] max-[550px]:bottom-[6px] max-[550px]:border-none">
+                  <p className="rounded-r-md bg-white px-4 text-[32px] leading-normal max-[550px]:px-1.5 max-[550px]:text-2xl">
+                    {code}
+                  </p>
+                  <div className="rounded-l-md bg-white">
+                    <p className="px-2 text-base font-semibold max-[550px]:px-1.5 max-[550px]:text-xs">خصم</p>
+                    <p className="px-2 text-base font-semibold max-[550px]:px-1.5 max-[550px]:text-xs">%{percent}</p>
                   </div>
                 </div>
               </div>

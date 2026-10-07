@@ -28,9 +28,9 @@ const MIN_WITHDRAWAL = 200;
 
 const TABS = [
   { id: "info", label: "معلومات عن كاشف" },
-  { id: "content", label: "المحتوى التسويقي" },
   { id: "how", label: "طريقة العمل" },
   { id: "instructions", label: "تعليمات قبل نشر المحتوى" },
+  { id: "content", label: "المحتوى التسويقي" },
 ];
 
 function ProgressRing({ value }) {
@@ -284,9 +284,9 @@ export function FalkMarketerDashboard() {
             <span
               className={cn(
                 "pointer-events-none absolute inset-y-0 right-0 w-1/4 rounded-[24px] border-4 border-white bg-[#f0f1f3] transition-transform duration-300 ease-out",
-                tab === "content" && "-translate-x-full",
-                tab === "how" && "-translate-x-[200%]",
-                tab === "instructions" && "-translate-x-[300%]"
+                tab === "how" && "-translate-x-full",
+                tab === "instructions" && "-translate-x-[200%]",
+                tab === "content" && "-translate-x-[300%]"
               )}
             />
             <div className="relative z-10 grid grid-cols-4">
@@ -304,14 +304,14 @@ export function FalkMarketerDashboard() {
           </div>
 
           {tab === "info" ? <FalkInfoAboutCashif /> : null}
+          {tab === "how" ? <FalkHowWorks /> : null}
+          {tab === "instructions" ? <FalkInstructions /> : null}
           {tab === "content" ? (
             <FalkCouponImages
               code={marketer?.code || "-"}
               percent={settings?.codeDiscountPercentage || 0}
             />
           ) : null}
-          {tab === "how" ? <FalkHowWorks /> : null}
-          {tab === "instructions" ? <FalkInstructions /> : null}
         </div>
       </div>
 

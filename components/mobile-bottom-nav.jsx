@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, LogIn, LogOut, ShoppingCart, MapPin, ExternalLink, Gift, ChevronLeft, Home as HomeIcon, FileText, SaudiRiyal, Handshake } from "lucide-react";
+import { Menu, LogIn, LogOut, ShoppingCart, MapPin, ExternalLink, Gift, ChevronLeft, Home as HomeIcon, FileText, SaudiRiyal, Handshake, Loader2 } from "lucide-react";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { FalkAcceptTermsDrawer } from "@/components/falk/accept-terms";
+import { FalkSoonDrawer } from "@/components/falk/soon";
 import { useAuth } from "@/components/auth-provider";
 import { clearAuthCookies } from "@/lib/auth";
 
@@ -60,7 +62,7 @@ function isHomePath(pathname) {
   return pathname === "/";
 }
 
-function MobileNavItem({ icon: Icon, label, isActive, expandKey = 0 }) {
+function MobileNavItem({ icon: Icon, label, isActive, expandKey = 0, spinning = false }) {
   return (
     <>
       <span className="flex h-8 w-14 items-center justify-center">
@@ -76,7 +78,10 @@ function MobileNavItem({ icon: Icon, label, isActive, expandKey = 0 }) {
               className="nav-bg-expand pointer-events-none absolute inset-0 rounded-2xl bg-[#428177]/25"
             />
           )}
-          <Icon className="relative z-10 h-6 w-6 shrink-0 text-[#002623] transition-colors duration-200 group-hover:text-[#174545]" strokeWidth={isActive ? 2.2 : 1.8} />
+          <Icon
+            className={`relative z-10 h-6 w-6 shrink-0 text-[#002623] transition-colors duration-200 group-hover:text-[#174545] ${spinning ? "animate-spin" : ""}`}
+            strokeWidth={isActive ? 2.2 : 1.8}
+          />
         </span>
       </span>
       <span className="font-display text-[12px] font-medium leading-none tracking-wide text-[#002623] transition-colors duration-200 group-hover:text-[#174545]">{label}</span>
@@ -127,15 +132,115 @@ export function MobileBottomNav({ initialActive = 2 }) {
   const [expanding, setExpanding] = useState({ index: null, key: 0 });
   const [accountOpen, setAccountOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
-  const [falkOpen, setFalkOpen] = useState(false);
+  const [falkLoginOpen, setFalkLoginOpen] = useState(false);
+  const [falkSoonOpen, setFalkSoonOpen] = useState(false);
+  const [falkTermsOpen, setFalkTermsOpen] = useState(false);
+  const [falkAccess, setFalkAccess] = useState(null);
+  const [falkChecking, setFalkChecking] = useState(false);
   const [ordersOpen, setOrdersOpen] = useState(false);
   const keepAccountExpandRef = useRef(false);
+  const falkAccessPromiseRef = useRef(null);
   const { isLoggedIn, setIsLoggedIn } = useAuth();
   const isAccountPage = isAccountPath(pathname);
   const isReportsPage = isReportsPath(pathname);
   const isFalkPage = isFalkPath(pathname);
   const isPricesPage = isPricesPath(pathname);
   const isHomePage = isHomePath(pathname);
+
+  const applyFalkAccess = (data) => {
+    const access = {
+      exists: Boolean(data.exists),
+      isAcceptTerms: Boolean(data.isAcceptTerms),
+    };
+    setFalkAccess(access);
+    if (access.exists && access.isAcceptTerms) router.prefetch("/falk");
+    return access;
+  };
+
+  const loadFalkAccess = () => {
+    if (!isLoggedIn) {
+      falkAccessPromiseRef.current = null;
+      setFalkAccess(null);
+      return Promise.resolve(null);
+    }
+
+    if (falkAccessPromiseRef.current) return falkAccessPromiseRef.current;
+
+    falkAccessPromiseRef.current = fetch("/api/falk/access", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          setFalkAccess(null);
+          falkAccessPromiseRef.current = null;
+          return { ok: false };
+        }
+        return { ok: true, ...applyFalkAccess(data) };
+      })
+      .catch(() => {
+        setFalkAccess(null);
+        falkAccessPromiseRef.current = null;
+        return null;
+      });
+
+    return falkAccessPromiseRef.current;
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      falkAccessPromiseRef.current = null;
+      setFalkAccess(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const promise = fetch("/api/falk/access", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          if (!cancelled) {
+            setFalkAccess(null);
+            falkAccessPromiseRef.current = null;
+          }
+          return { ok: false };
+        }
+        if (cancelled) return { ok: true, exists: Boolean(data.exists), isAcceptTerms: Boolean(data.isAcceptTerms) };
+        return { ok: true, ...applyFalkAccess(data) };
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setFalkAccess(null);
+          falkAccessPromiseRef.current = null;
+        }
+        return null;
+      });
+
+    falkAccessPromiseRef.current = promise;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, router]);
+
+  const openFalkFromAccess = (access) => {
+    if (!access?.ok) {
+      setFalkLoginOpen(true);
+      return;
+    }
+
+    if (!access.exists) {
+      setFalkSoonOpen(true);
+      return;
+    }
+
+    if (!access.isAcceptTerms) {
+      setFalkTermsOpen(true);
+      return;
+    }
+
+    setActive(FALK_NAV_INDEX);
+    router.push("/falk");
+  };
 
   const keepAccountExpand = () => {
     keepAccountExpandRef.current = true;
@@ -162,7 +267,9 @@ export function MobileBottomNav({ initialActive = 2 }) {
   useEffect(() => {
     setAccountOpen(false);
     setReportsOpen(false);
-    setFalkOpen(false);
+    setFalkLoginOpen(false);
+    setFalkSoonOpen(false);
+    setFalkTermsOpen(false);
     setOrdersOpen(false);
 
     setExpanding((prev) => {
@@ -225,7 +332,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
                   >
                     <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
                   </button>
-                ) : action === "reports" || action === "falk" ? (
+                ) : action === "reports" ? (
                   <button
                     type="button"
                     onClick={() => {
@@ -235,12 +342,42 @@ export function MobileBottomNav({ initialActive = 2 }) {
                         router.push(href);
                         return;
                       }
-                      if (action === "reports") setReportsOpen(true);
-                      else setFalkOpen(true);
+                      setReportsOpen(true);
                     }}
                     className={`${itemClass} cursor-pointer`}
                   >
                     <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
+                  </button>
+                ) : action === "falk" ? (
+                  <button
+                    type="button"
+                    disabled={falkChecking}
+                    onClick={async () => {
+                      playExpand();
+                      if (!isLoggedIn) {
+                        setFalkLoginOpen(true);
+                        return;
+                      }
+
+                      if (falkAccess) {
+                        openFalkFromAccess({ ok: true, ...falkAccess });
+                        return;
+                      }
+
+                      setFalkChecking(true);
+                      const access = await loadFalkAccess();
+                      setFalkChecking(false);
+                      openFalkFromAccess(access);
+                    }}
+                    className={`${itemClass} cursor-pointer disabled:opacity-70`}
+                  >
+                    <MobileNavItem
+                      icon={falkChecking ? Loader2 : Icon}
+                      label={label}
+                      isActive={isHighlighted}
+                      expandKey={expandKey}
+                      spinning={falkChecking}
+                    />
                   </button>
                 ) : (
                   <Link
@@ -369,15 +506,18 @@ export function MobileBottomNav({ initialActive = 2 }) {
       />
 
       <LoginRequiredDrawer
-        open={falkOpen}
+        open={falkLoginOpen}
         onOpenChange={(open) => {
-          setFalkOpen(open);
+          setFalkLoginOpen(open);
           if (!open) clearFalkExpandIfNeeded();
         }}
         title="'فالك' للتسويق بالعمولة"
         from="/falk"
       >
         <div className="space-y-3 px-4 pt-3 text-right text-[15px] leading-relaxed text-[#757575]">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-[#174545]/10">
+            <Handshake className="h-7 w-7 text-[#174545]" />
+          </span>
           <p>
             برنامج &apos;فالك&apos; للتسويق بالعمولة هو منصة تتيح لك كمسوق فرصة ربح المال بسهولة من خلال الترويج لخدمات مركز كاشف لفحص السيارات عبر الإنترنت او من خلال التوصية المباشرة لدوائر المعارف والأصدقاء والمقربين.
           </p>
@@ -387,6 +527,29 @@ export function MobileBottomNav({ initialActive = 2 }) {
           <p>انضم إلى &apos;فالك&apos; اليوم وابدأ رحلتك في عالم التسويق بالعمولة. وفالك التوفيق!</p>
         </div>
       </LoginRequiredDrawer>
+
+      <FalkSoonDrawer
+        open={falkSoonOpen}
+        onOpenChange={(open) => {
+          setFalkSoonOpen(open);
+          if (!open) clearFalkExpandIfNeeded();
+        }}
+      />
+
+      <FalkAcceptTermsDrawer
+        open={falkTermsOpen}
+        onOpenChange={(open) => {
+          setFalkTermsOpen(open);
+          if (!open) clearFalkExpandIfNeeded();
+        }}
+        onAccepted={() => {
+          const next = { exists: true, isAcceptTerms: true };
+          setFalkAccess(next);
+          falkAccessPromiseRef.current = Promise.resolve({ ok: true, ...next });
+          setActive(FALK_NAV_INDEX);
+          router.push("/falk");
+        }}
+      />
     </>
   );
 }

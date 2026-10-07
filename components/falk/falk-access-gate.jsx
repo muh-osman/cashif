@@ -1,9 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { FalkAcceptTerms } from "@/components/falk/accept-terms";
-import { FalkSoon } from "@/components/falk/soon";
 
 const FalkAccessContext = createContext({ specialCode: null, reloadAccess: async () => {} });
 
@@ -23,6 +22,7 @@ async function fetchAccess() {
 }
 
 export function FalkAccessGate({ children }) {
+  const router = useRouter();
   const [status, setStatus] = useState("loading");
   const [specialCode, setSpecialCode] = useState(null);
   const [error, setError] = useState("");
@@ -38,13 +38,8 @@ export function FalkAccessGate({ children }) {
         setSpecialCode(data.specialCode ?? null);
         setError("");
 
-        if (!data.exists) {
-          setStatus("soon");
-          return;
-        }
-
-        if (!data.isAcceptTerms) {
-          setStatus("terms");
+        if (!data.exists || !data.isAcceptTerms) {
+          router.replace("/");
           return;
         }
 
@@ -59,7 +54,7 @@ export function FalkAccessGate({ children }) {
     return () => {
       cancelled = true;
     };
-  }, [reloadKey]);
+  }, [reloadKey, router]);
 
   const reloadAccess = () => {
     setStatus("loading");
@@ -87,14 +82,6 @@ export function FalkAccessGate({ children }) {
         </button>
       </main>
     );
-  }
-
-  if (status === "soon") {
-    return <FalkSoon />;
-  }
-
-  if (status === "terms") {
-    return <FalkAcceptTerms onAccepted={reloadAccess} />;
   }
 
   return (

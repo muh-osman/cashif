@@ -150,13 +150,13 @@ export function FalkCouponImages({ code, percent }) {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={post.image_data} alt={post.title || `cashif ${globalIndex + 1}`} className="h-auto w-full max-w-full" />
-                <div className="absolute right-[2cqw] bottom-[2cqw] flex items-center gap-[0.6cqw] text-black">
-                  <p className="bg-white px-[1.6cqw] text-[5.5cqw] leading-[1.5] font-bold [border-bottom-right-radius:1cqw] [border-top-right-radius:1cqw]">
+                <div className="absolute right-[2.2cqw] bottom-[2.2cqw] flex items-center gap-[0.8cqw] text-black">
+                  <p className="bg-white px-[2cqw] text-[7cqw] leading-[1.5] font-bold [border-bottom-right-radius:1.4cqw] [border-top-right-radius:1.4cqw]">
                     {code}
                   </p>
-                  <div className="bg-white [border-bottom-left-radius:1cqw] [border-top-left-radius:1cqw]">
-                    <p className="px-[1.2cqw] text-[2.75cqw] leading-[1.5] font-semibold">خصم</p>
-                    <p className="px-[1.2cqw] text-[2.75cqw] leading-[1.5] font-semibold">%{percent}</p>
+                  <div className="bg-white [border-bottom-left-radius:1.4cqw] [border-top-left-radius:1.4cqw]">
+                    <p className="px-[1.6cqw] text-[3.5cqw] leading-[1.5] font-semibold">خصم</p>
+                    <p className="px-[1.6cqw] text-[3.5cqw] leading-[1.5] font-semibold">%{percent}</p>
                   </div>
                 </div>
               </div>

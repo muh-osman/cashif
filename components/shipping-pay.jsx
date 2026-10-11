@@ -311,7 +311,7 @@ export function ShippingPay({ cardId, to, shippingType, deliveryMethod }) {
                     size="lg"
                     disabled={confirming}
                     onClick={confirmOrder}
-                    className="h-12 w-full cursor-pointer rounded-full bg-[#174545] text-base font-bold text-white hover:bg-[#002623]"
+                    className="w-full cursor-pointer rounded-full bg-[#174545] text-base font-bold text-white hover:bg-[#002623]"
                   >
                     {confirming ? <Loader2 className="animate-spin" /> : "تأكيد الطلب"}
                   </Button>

@@ -271,7 +271,7 @@ export function ShippingForm({ cardId }) {
                     required
                     value={selectedCity}
                     onChange={handleCityChange}
-                    className="h-12 w-full appearance-none rounded-2xl border border-[#002623]/10 bg-white px-4 pe-10 text-sm font-medium outline-none focus:border-[#174545]"
+                    className="h-13 w-full appearance-none rounded-full border border-[#002623]/10 bg-white px-4 pe-10 text-sm font-medium outline-none focus:border-[#174545]"
                   >
                     <option value="">اختر المدينة</option>
                     {CITIES.map((city) => (
@@ -322,7 +322,7 @@ export function ShippingForm({ cardId }) {
                 type="button"
                 size="lg"
                 onClick={submitForm}
-                className="h-12 w-full cursor-pointer rounded-full bg-[#002623] text-base text-white hover:bg-[#1a292e]"
+                className="w-full cursor-pointer rounded-full bg-[#002623] text-base text-white hover:bg-[#1a292e]"
               >
                 {selectedCity && shippingType && isAvailablePrice(price) ? (
                   <span className="inline-flex items-center gap-1 font-bold">

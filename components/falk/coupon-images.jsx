@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import { Copy, Loader2 } from "lucide-react";
+import { Copy } from "lucide-react";
 import { toast } from "sonner";
 import { FalkVideos } from "@/components/falk/falak-videos";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { WhatsAppIcon } from "@/components/whatsapp-icon";
 
 const ITEMS_PER_PAGE = 5;
@@ -126,11 +127,26 @@ export function FalkCouponImages({ code, percent }) {
 
   if (loading) {
     return (
-      <Card className="rounded-[40px] border-none shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
-        <CardContent className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-[#174545]" />
-        </CardContent>
-      </Card>
+      <div className="space-y-5">
+        {Array.from({ length: 2 }, (_, index) => (
+          <Card key={index} className="rounded-[40px] border-none py-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
+            <CardContent className="space-y-4 p-5">
+              <Skeleton className="aspect-[4/5] w-full rounded-3xl bg-[#174545]/10" />
+              <div className="space-y-2 rounded-2xl bg-[#002623]/5 p-3">
+                <Skeleton className="h-4 w-full rounded-full bg-[#174545]/10" />
+                <Skeleton className="h-4 w-5/6 rounded-full bg-[#174545]/10" />
+                <Skeleton className="h-4 w-2/3 rounded-full bg-[#174545]/10" />
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                {Array.from({ length: 6 }, (_, iconIndex) => (
+                  <Skeleton key={iconIndex} className="size-10 rounded-full bg-[#174545]/10" />
+                ))}
+              </div>
+              <Skeleton className="h-13 w-full rounded-full bg-[#174545]/10" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     );
   }
 
@@ -262,7 +278,7 @@ export function FalkCouponImages({ code, percent }) {
               key={value}
               type="button"
               onClick={() => setPage(value)}
-              className={`h-9 w-9 rounded-full text-sm font-semibold ${
+              className={`h-9 w-9 cursor-pointer rounded-full text-sm font-semibold ${
                 page === value ? "bg-[#174545] text-white" : "bg-[#002623]/5 text-[#174545]"
               }`}
             >

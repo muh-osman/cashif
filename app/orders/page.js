@@ -224,11 +224,11 @@ export default function OrdersPage() {
             tab === "shipping" && "-translate-x-full"
           )}
         />
-        <div className="relative z-10 grid grid-cols-2">
-          <button type="button" onClick={() => setTab("inspection")} className="cursor-pointer py-3 text-sm font-medium text-[#174545]">
+        <div className="relative z-10 grid h-13 grid-cols-2">
+          <button type="button" onClick={() => setTab("inspection")} className="flex h-full cursor-pointer items-center justify-center text-sm font-medium text-[#174545]">
             طلبات الفحص
           </button>
-          <button type="button" onClick={() => setTab("shipping")} className="cursor-pointer py-3 text-sm font-medium text-[#174545]">
+          <button type="button" onClick={() => setTab("shipping")} className="flex h-full cursor-pointer items-center justify-center text-sm font-medium text-[#174545]">
             طلبات الشحن
           </button>
         </div>

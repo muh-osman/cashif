@@ -158,7 +158,7 @@ export function FalkTransferForm() {
                 value={selectedPaymentType}
                 onChange={(event) => setSelectedPaymentType(event.target.value)}
                 disabled={disabled}
-                className="h-11 w-full cursor-pointer appearance-none rounded-2xl border border-[#002623]/10 bg-white bg-[length:1rem] bg-[left_0.875rem_center] bg-no-repeat py-0 pl-10 pr-3 text-sm text-[#002623] outline-none focus:border-[#174545] disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-13 w-full cursor-pointer appearance-none rounded-full border border-[#002623]/10 bg-white bg-[length:1rem] bg-[left_0.875rem_center] bg-no-repeat py-0 pl-10 pr-3 text-sm text-[#002623] outline-none focus:border-[#174545] disabled:cursor-not-allowed disabled:opacity-50"
                 style={{
                   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23757575' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
                 }}
@@ -182,7 +182,7 @@ export function FalkTransferForm() {
                 value={accountNumber}
                 onChange={(event) => setAccountNumber(event.target.value)}
                 disabled={disabled}
-                className="h-11 rounded-2xl border border-[#002623]/10 bg-white"
+                className="border border-[#002623]/10 bg-white"
               />
             </div>
 
@@ -197,7 +197,7 @@ export function FalkTransferForm() {
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
                 disabled={disabled}
-                className="h-11 rounded-2xl border border-[#002623]/10 bg-white"
+                className="border border-[#002623]/10 bg-white"
               />
               <p className="inline-flex flex-wrap items-center gap-1 text-sm text-[#757575]">
                 الرصيد المتاح للسحب {Math.floor(marketer?.points || 0)}

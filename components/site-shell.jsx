@@ -21,6 +21,15 @@ function scrollPageToTop() {
   html.style.scrollBehavior = previous;
 }
 
+function isRecaptchaPage(pathname) {
+  return (
+    pathname === "/login" ||
+    pathname.startsWith("/login/") ||
+    pathname === "/signup" ||
+    pathname.startsWith("/signup/")
+  );
+}
+
 export function SiteShell({ children, isLoggedIn = false }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
@@ -29,6 +38,13 @@ export function SiteShell({ children, isLoggedIn = false }) {
   useEffect(() => {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("recaptcha-badge-visible", isRecaptchaPage(pathname));
+    return () => {
+      document.documentElement.classList.remove("recaptcha-badge-visible");
+    };
+  }, [pathname]);
 
   useIsomorphicLayoutEffect(() => {
     scrollPageToTop();

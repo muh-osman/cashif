@@ -77,14 +77,14 @@ export default function BranchesPage() {
                 </a>
                 <a
                   href={`tel:${CONTACT_PHONE}`}
-                  className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }), "border-[#002623]/15 text-[#002623] hover:bg-[#002623]/5")}
+                  className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }), "rounded-full border-[#002623]/15 text-[#002623] hover:bg-[#002623]/5")}
                   aria-label="اتصال"
                 >
                   <Phone />
                 </a>
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
-                  className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }), "border-[#002623]/15 text-[#002623] hover:bg-[#002623]/5")}
+                  className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }), "rounded-full border-[#002623]/15 text-[#002623] hover:bg-[#002623]/5")}
                   aria-label="بريد"
                 >
                   <Mail />

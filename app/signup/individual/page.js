@@ -175,7 +175,7 @@ export default function IndividualSignupPage() {
                 aria-invalid={nameInvalid}
                 onChange={(event) => handleNameChange(event.target.value)}
                 className={cn(
-                  "h-14 rounded-full border-[#002623]/10 bg-white px-4 text-base shadow-none md:text-base",
+                  "h-13 rounded-full border-[#002623]/10 bg-white px-4 text-base shadow-none md:text-base",
                   nameInvalid && "border-destructive ring-3 ring-destructive/20"
                 )}
               />
@@ -189,7 +189,7 @@ export default function IndividualSignupPage() {
                 dir="ltr"
                 data-disabled={pending}
                 className={cn(
-                  "h-14 rounded-full border-[#002623]/10 bg-white px-2 text-base shadow-none",
+                  "h-13 rounded-full border-[#002623]/10 bg-white px-2 text-base shadow-none",
                   phoneInvalid && "border-destructive ring-3 ring-destructive/20"
                 )}
               >
@@ -212,7 +212,7 @@ export default function IndividualSignupPage() {
                   aria-invalid={phoneInvalid}
                   onChange={(event) => handlePhoneChange(event.target.value)}
                   onPaste={handlePhonePaste}
-                  className="h-14 text-base text-[#002623] md:text-base"
+                  className="h-13 text-base text-[#002623] md:text-base"
                 />
               </InputGroup>
             </div>

@@ -289,13 +289,13 @@ export function FalkMarketerDashboard() {
                 tab === "content" && "-translate-x-[300%]"
               )}
             />
-            <div className="relative z-10 grid grid-cols-4">
+            <div className="relative z-10 grid h-13 grid-cols-4">
               {TABS.map((item) => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => setTab(item.id)}
-                  className="cursor-pointer px-1 py-3 text-center text-[11px] font-medium leading-4 text-[#174545] sm:text-sm sm:leading-5"
+                  className="flex h-full cursor-pointer items-center justify-center px-1 text-center text-[11px] font-medium leading-4 text-[#174545] sm:text-sm sm:leading-5"
                 >
                   {item.label}
                 </button>

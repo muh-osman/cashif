@@ -574,18 +574,18 @@ export default function ReportsPage() {
             tab === "mojaz" && "-translate-x-full"
           )}
         />
-        <div className="relative z-10 grid grid-cols-2">
+        <div className="relative z-10 grid h-13 grid-cols-2">
           <button
             type="button"
             onClick={() => handleTabChange("cashif")}
-            className="cursor-pointer py-3 text-sm font-medium text-[#174545]"
+            className="flex h-full cursor-pointer items-center justify-center text-sm font-medium text-[#174545]"
           >
             كاشف
           </button>
           <button
             type="button"
             onClick={() => handleTabChange("mojaz")}
-            className="cursor-pointer py-3 text-sm font-medium text-[#174545]"
+            className="flex h-full cursor-pointer items-center justify-center text-sm font-medium text-[#174545]"
           >
             موجز
           </button>

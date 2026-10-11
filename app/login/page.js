@@ -193,7 +193,7 @@ export default function LoginPage() {
                 dir="ltr"
                 data-disabled={pending}
                 className={cn(
-                  "h-14 rounded-full border-[#002623]/10 bg-white px-2 text-base shadow-none",
+                  "h-13 rounded-full border-[#002623]/10 bg-white px-2 text-base shadow-none",
                   phoneInvalid && "border-destructive ring-3 ring-destructive/20"
                 )}
               >
@@ -216,7 +216,7 @@ export default function LoginPage() {
                   aria-invalid={phoneInvalid}
                   onChange={(event) => handlePhoneChange(event.target.value)}
                   onPaste={handlePhonePaste}
-                  className="h-14 text-base text-[#002623] md:text-base"
+                  className="h-13 text-base text-[#002623] md:text-base"
                 />
               </InputGroup>
             </CardContent>

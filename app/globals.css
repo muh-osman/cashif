@@ -204,9 +204,18 @@ body {
   animation: nav-bg-expand 200ms ease-out forwards;
 }
 
-/* Keep reCAPTCHA badge visible above the fixed bottom nav (repositioning is allowed). */
+/* Show reCAPTCHA badge only on login/signup; hide elsewhere. */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
+
+html.recaptcha-badge-visible .grecaptcha-badge {
+  visibility: visible !important;
+}
+
+/* Keep badge above the fixed bottom nav on small screens (repositioning is allowed). */
 @media (max-width: 639px) {
-  .grecaptcha-badge {
+  html.recaptcha-badge-visible .grecaptcha-badge {
     bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px)) !important;
     z-index: 40 !important;
   }
@@ -214,30 +223,36 @@ body {
 
 /* Moyasar caps the card form at 20rem from the md breakpoint. */
 @media (min-width: 768px) {
-  #shipping-moyasar-form div#mysr .md\:max-w-80 {
+  #shipping-moyasar-form div#mysr .md\:max-w-80,
+  #mojaz-moyasar-form div#mysr .md\:max-w-80 {
     max-width: 100% !important;
   }
 }
 
 /* Tailwind preflight clears input backgrounds, so Moyasar's ring looks soft. */
-#shipping-moyasar-form div#mysr input {
+#shipping-moyasar-form div#mysr input,
+#mojaz-moyasar-form div#mysr input {
+  height: 3.25rem !important;
   background-color: #fff;
-  border-radius: var(--radius-3xl) !important;
+  border-radius: 9999px !important;
 }
 
-#shipping-moyasar-form div#mysr button {
+#shipping-moyasar-form div#mysr button,
+#mojaz-moyasar-form div#mysr button {
   border-radius: var(--radius-4xl) !important;
 }
 
 /* Split the joined card fields so each radius matches a normal input. */
-#shipping-moyasar-form div#mysr .grid {
+#shipping-moyasar-form div#mysr .grid,
+#mojaz-moyasar-form div#mysr .grid {
   gap: 0.5rem !important;
 }
 
 /* Site utilities set `translate`; Moyasar also sets `transform` on the same class. */
-#shipping-moyasar-form div#mysr .top-1\/4 {
+#shipping-moyasar-form div#mysr .top-1\/4,
+#mojaz-moyasar-form div#mysr .top-1\/4 {
   top: 0 !important;
-  height: 2.25rem !important;
+  height: 3.25rem !important;
   --tw-translate-x: 0 !important;
   --tw-translate-y: 0 !important;
 }

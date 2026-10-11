@@ -843,9 +843,7 @@ function SiteFooter() {
             <FooterColumn title="خدمات كاشف">
               {FOOTER_SERVICES.map((s) => (
                 <li key={s.label}>
-                  <a href={s.href} className="inline-block rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10">
-                    {s.label}
-                  </a>
+                  <FooterLink href={s.href}>{s.label}</FooterLink>
                 </li>
               ))}
             </FooterColumn>
@@ -856,9 +854,7 @@ function SiteFooter() {
             <FooterColumn title="روابط مهمة">
               {FOOTER_LINKS.map((l) => (
                 <li key={l.label}>
-                  <a href={l.href} className="inline-block rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10">
-                    {l.label}
-                  </a>
+                  <FooterLink href={l.href}>{l.label}</FooterLink>
                 </li>
               ))}
             </FooterColumn>
@@ -906,5 +902,23 @@ function FooterColumn({ title, children }) {
       </h4>
       <ul className="space-y-1 text-right">{children}</ul>
     </div>
+  );
+}
+
+function FooterLink({ href, children }) {
+  const className = "inline-block rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10";
+
+  if (/^https?:\/\//.test(href)) {
+    return (
+      <a href={href} className={className}>
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
   );
 }

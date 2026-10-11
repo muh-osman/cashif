@@ -139,6 +139,8 @@ export function MobileBottomNav({ initialActive = 2 }) {
   const [falkAccess, setFalkAccess] = useState(null);
   const [falkChecking, setFalkChecking] = useState(false);
   const [ordersOpen, setOrdersOpen] = useState(false);
+  const [pendingIndex, setPendingIndex] = useState(null);
+  const [lastPathname, setLastPathname] = useState(pathname);
   const keepAccountExpandRef = useRef(false);
   const falkAccessPromiseRef = useRef(null);
   const { isLoggedIn, setIsLoggedIn } = useAuth();
@@ -147,6 +149,11 @@ export function MobileBottomNav({ initialActive = 2 }) {
   const isFalkPage = isFalkPath(pathname);
   const isPricesPage = isPricesPath(pathname);
   const isHomePage = isHomePath(pathname);
+
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname);
+    setPendingIndex(null);
+  }
 
   const applyFalkAccess = (data) => {
     const access = {
@@ -240,7 +247,12 @@ export function MobileBottomNav({ initialActive = 2 }) {
     }
 
     setActive(FALK_NAV_INDEX);
+    markPending(FALK_NAV_INDEX, "/falk");
     router.push("/falk");
+  };
+
+  const markPending = (index, href) => {
+    if (href !== pathname) setPendingIndex(index);
   };
 
   const keepAccountExpand = () => {
@@ -289,10 +301,8 @@ export function MobileBottomNav({ initialActive = 2 }) {
       if (isHomePath(pathname)) {
         return prev.index === HOME_NAV_INDEX ? prev : { index: HOME_NAV_INDEX, key: prev.key + 1 };
       }
-      if (prev.index === ACCOUNT_NAV_INDEX || prev.index === REPORTS_NAV_INDEX || prev.index === FALK_NAV_INDEX || prev.index === PRICES_NAV_INDEX) {
-        return { index: HOME_NAV_INDEX, key: prev.key + 1 };
-      }
-      return prev;
+      // Routes like /terms, /privacy, /return-policy, /makdom don't own a nav tab
+      return prev.index === null ? prev : { index: null, key: prev.key };
     });
   }, [pathname]);
 
@@ -316,6 +326,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
             const itemClass = "group flex w-full cursor-pointer flex-col items-center justify-center gap-1";
             const expandKey = expanding.index === i ? expanding.key : 0;
             const isHighlighted = expanding.index === i || (isActive && expanding.index === null);
+            const isPending = pendingIndex === i;
             const playExpand = () => {
               setExpanding((prev) => ({ index: i, key: prev.key + 1 }));
             };
@@ -340,6 +351,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
                       playExpand();
                       if (isLoggedIn) {
                         setActive(i);
+                        markPending(i, href);
                         router.push(href);
                         return;
                       }
@@ -347,7 +359,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
                     }}
                     className={`${itemClass} cursor-pointer`}
                   >
-                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
+                    <MobileNavItem icon={isPending ? Loader2 : Icon} label={label} isActive={isHighlighted} expandKey={expandKey} spinning={isPending} />
                   </button>
                 ) : action === "falk" ? (
                   <button
@@ -373,23 +385,24 @@ export function MobileBottomNav({ initialActive = 2 }) {
                     className={`${itemClass} cursor-pointer disabled:opacity-70`}
                   >
                     <MobileNavItem
-                      icon={falkChecking ? Loader2 : Icon}
+                      icon={falkChecking || isPending ? Loader2 : Icon}
                       label={label}
                       isActive={isHighlighted}
                       expandKey={expandKey}
-                      spinning={falkChecking}
+                      spinning={falkChecking || isPending}
                     />
                   </button>
                 ) : (
                   <Link
                     href={href}
-                    onClick={() => {
+                    onClick={(e) => {
                       playExpand();
                       setActive(i);
+                      if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) markPending(i, href);
                     }}
                     className={itemClass}
                   >
-                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
+                    <MobileNavItem icon={isPending ? Loader2 : Icon} label={label} isActive={isHighlighted} expandKey={expandKey} spinning={isPending} />
                   </Link>
                 )}
               </li>
@@ -548,6 +561,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
           setFalkAccess(next);
           falkAccessPromiseRef.current = Promise.resolve({ ok: true, ...next });
           setActive(FALK_NAV_INDEX);
+          markPending(FALK_NAV_INDEX, "/falk");
           router.push("/falk");
         }}
       />

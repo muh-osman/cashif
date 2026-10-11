@@ -9,7 +9,9 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "sonner";
 import { useAuth } from "@/components/auth-provider";
+import { SignupAccountTypeDrawer } from "@/components/signup-account-type-drawer";
 import { applyLoginSession, getApiErrorText, loginWithOtp, sendOtp } from "@/lib/auth";
+import { getRecaptchaToken, preloadRecaptcha } from "@/lib/recaptcha";
 import { cn } from "@/lib/utils";
 
 const OTP_LENGTH = 4;
@@ -52,6 +54,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [fromPath, setFromPath] = useState("/");
+  const [signupOpen, setSignupOpen] = useState(false);
 
   const phoneInvalid = Boolean(error) && step === "phone";
   const displayPhone = formatSaudiPhone(local);
@@ -63,6 +66,8 @@ export default function LoginPage() {
 
     if (from) setFromPath(redirectAfterLogin(from));
     if (phone) setLocal(normalizeLocal(phone).local);
+
+    preloadRecaptcha();
   }, []);
 
   function handlePhoneChange(value) {
@@ -93,7 +98,8 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const { ok, data } = await sendOtp(toApiPhone(local));
+      const recaptchaToken = await getRecaptchaToken("send_otp");
+      const { ok, data } = await sendOtp(toApiPhone(local), recaptchaToken);
 
       if (!ok || data?.status === false) {
         const message = getApiErrorText(data) || "تعذر إرسال الرمز";
@@ -224,7 +230,14 @@ export default function LoginPage() {
                 {pending ? "جاري الإرسال..." : "إرسال الرمز"}
               </Button>
               <p className="text-sm text-[#757575]">
-                ليس لديك حساب؟ <span className="font-medium text-[#174545]">إنشاء حساب</span>
+                ليس لديك حساب؟{" "}
+                <button
+                  type="button"
+                  onClick={() => setSignupOpen(true)}
+                  className="cursor-pointer font-medium text-[#174545] hover:text-[#002623]"
+                >
+                  إنشاء حساب
+                </button>
               </p>
             </CardFooter>
           </form>
@@ -276,6 +289,8 @@ export default function LoginPage() {
           </form>
         )}
       </Card>
+
+      <SignupAccountTypeDrawer open={signupOpen} onOpenChange={setSignupOpen} from={fromPath} />
     </main>
   );
 }

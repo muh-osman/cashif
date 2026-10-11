@@ -33,6 +33,7 @@ const ACCOUNT_LINKS = [
 
 function isAccountPath(pathname) {
   if (pathname === "/login" || pathname.startsWith("/login/")) return true;
+  if (pathname === "/signup" || pathname.startsWith("/signup/")) return true;
   return ACCOUNT_LINKS.some(({ href, activatesAccount }) => {
     if (!activatesAccount) return false;
     return pathname === href || pathname.startsWith(`${href}/`);

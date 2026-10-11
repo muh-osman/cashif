@@ -204,6 +204,14 @@ body {
   animation: nav-bg-expand 200ms ease-out forwards;
 }
 
+/* Keep reCAPTCHA badge visible above the fixed bottom nav (repositioning is allowed). */
+@media (max-width: 639px) {
+  .grecaptcha-badge {
+    bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 40 !important;
+  }
+}
+
 /* Moyasar caps the card form at 20rem from the md breakpoint. */
 @media (min-width: 768px) {
   #shipping-moyasar-form div#mysr .md\:max-w-80 {

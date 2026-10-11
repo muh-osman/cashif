@@ -95,21 +95,31 @@ export function FalkCouponImages({ code, percent }) {
   );
 
   const downloadImg = useCallback(
-    (index) => {
+    async (index) => {
       const globalIndex = (page - 1) * ITEMS_PER_PAGE + index;
       const node = overlayRefs.current[globalIndex];
       if (!node) return;
 
-      toPng(node, { quality: 1, pixelRatio: 2 })
-        .then((dataUrl) => {
-          const link = document.createElement("a");
-          link.download = `coupon-image-${globalIndex + 1}.png`;
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch(() => {
-          toast.error("فشل تحميل الصورة");
-        });
+      try {
+        const images = Array.from(node.querySelectorAll("img"));
+        await Promise.all(
+          images.map((img) => {
+            if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+            return new Promise((resolve, reject) => {
+              img.onload = () => resolve();
+              img.onerror = () => reject(new Error("image failed"));
+            });
+          })
+        );
+
+        const dataUrl = await toPng(node, { quality: 1, pixelRatio: 2, cacheBust: true });
+        const link = document.createElement("a");
+        link.download = `coupon-image-${globalIndex + 1}.png`;
+        link.href = dataUrl;
+        link.click();
+      } catch {
+        toast.error("فشل تحميل الصورة");
+      }
     },
     [page]
   );
@@ -149,7 +159,13 @@ export function FalkCouponImages({ code, percent }) {
                 className="@container relative flex justify-center overflow-hidden rounded-3xl text-center font-black"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={post.image_data} alt={post.title || `cashif ${globalIndex + 1}`} className="h-auto w-full max-w-full" />
+                <img
+                  src={post.image_url}
+                  alt={post.title || `cashif ${globalIndex + 1}`}
+                  className="h-auto w-full max-w-full"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                />
                 <div className="absolute right-[2.2cqw] bottom-[2.2cqw] flex items-center gap-[0.8cqw] text-black">
                   <p className="bg-white px-[2cqw] text-[7cqw] leading-[1.5] font-bold [border-bottom-right-radius:1.4cqw] [border-top-right-radius:1.4cqw]">
                     {code}
@@ -229,7 +245,7 @@ export function FalkCouponImages({ code, percent }) {
               </div>
 
               <Button
-                className="w-full rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
+                className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
                 onClick={() => downloadImg(index)}
               >
                 تحميل

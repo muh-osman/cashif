@@ -906,18 +906,22 @@ function FooterColumn({ title, children }) {
 }
 
 function FooterLink({ href, children }) {
-  const className = "inline-block rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10";
-
   if (/^https?:\/\//.test(href)) {
     return (
-      <a href={href} className={className}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10"
+      >
         {children}
+        <ExternalLink size={12} />
       </a>
     );
   }
 
   return (
-    <Link href={href} className={className}>
+    <Link href={href} className="inline-block rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10">
       {children}
     </Link>
   );

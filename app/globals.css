@@ -170,6 +170,17 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Prevent browser scroll-anchoring from leaving new routes mid-page
+   when loading UI is replaced by taller content. */
+html,
+body {
+  overflow-anchor: none;
+}
+
+html.routing-scroll-lock {
+  scroll-behavior: auto !important;
+}
+
 body {
   position: relative;
   font-family: "thmanyah-sans-regular", ui-sans-serif, system-ui, sans-serif;

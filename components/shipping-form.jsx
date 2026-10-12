@@ -305,8 +305,7 @@ export function ShippingForm({ cardId }) {
                           <span className="block min-w-0 overflow-hidden rounded-2xl bg-[#f4f6f5]">
                             <Image src={option.image} alt="" width={280} height={180} className="h-auto w-full object-contain" />
                           </span>
-                          <span className="mt-2 flex items-center justify-center gap-1.5 text-xs font-semibold sm:mt-3 sm:gap-2 sm:text-sm">
-                            <span className={cn("h-3.5 w-3.5 rounded-full border-2", selected ? "border-[#174545] bg-[#174545]" : "border-[#c5c5c5]")} />
+                          <span className="mt-2 block text-xs font-semibold sm:mt-3 sm:text-sm">
                             {option.label}
                           </span>
                         </button>

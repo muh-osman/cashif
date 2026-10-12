@@ -2,15 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import { Copy } from "lucide-react";
+import { Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { FalkVideos } from "@/components/falk/falak-videos";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WhatsAppIcon } from "@/components/whatsapp-icon";
+import { cn } from "@/lib/utils";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 4;
 
 function BrandIcon({ path }) {
   return (
@@ -37,7 +37,10 @@ function ShareIcon({ children, label, onClick, className = "" }) {
       type="button"
       aria-label={label}
       onClick={onClick}
-      className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white transition-opacity hover:opacity-85 ${className}`}
+      className={cn(
+        "flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white transition-opacity hover:opacity-85",
+        className
+      )}
     >
       {children}
     </button>
@@ -49,6 +52,7 @@ export function FalkCouponImages({ code, percent }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [pending, setPending] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -101,6 +105,8 @@ export function FalkCouponImages({ code, percent }) {
       const node = overlayRefs.current[globalIndex];
       if (!node) return;
 
+      setPending((prev) => ({ ...prev, [globalIndex]: true }));
+
       try {
         const images = Array.from(node.querySelectorAll("img"));
         await Promise.all(
@@ -120,6 +126,8 @@ export function FalkCouponImages({ code, percent }) {
         link.click();
       } catch {
         toast.error("فشل تحميل الصورة");
+      } finally {
+        setPending((prev) => ({ ...prev, [globalIndex]: false }));
       }
     },
     [page]
@@ -127,7 +135,7 @@ export function FalkCouponImages({ code, percent }) {
 
   if (loading) {
     return (
-      <div className="space-y-5">
+      <div className="grid gap-5 sm:grid-cols-2">
         {Array.from({ length: 2 }, (_, index) => (
           <Card key={index} className="rounded-[40px] border-none py-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
             <CardContent className="space-y-4 p-5">
@@ -160,116 +168,128 @@ export function FalkCouponImages({ code, percent }) {
 
   return (
     <div className="space-y-5">
-      {currentPosts.map((post, index) => {
-        const globalIndex = (page - 1) * ITEMS_PER_PAGE + index;
-        const postText = createPostText(index);
+      <div className="grid gap-5 sm:grid-cols-2">
+        {currentPosts.map((post, index) => {
+          const globalIndex = (page - 1) * ITEMS_PER_PAGE + index;
+          const postText = createPostText(index);
+          const isLastOdd = index === currentPosts.length - 1 && currentPosts.length % 2 === 1;
 
-        return (
-          <Card key={globalIndex} className="rounded-[40px] border-none py-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
-            <CardContent className="space-y-4 p-5">
-              <div
-                ref={(el) => {
-                  overlayRefs.current[globalIndex] = el;
-                }}
-                dir="rtl"
-                className="@container relative flex justify-center overflow-hidden rounded-3xl text-center font-black"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={post.image_url}
-                  alt={post.title || `cashif ${globalIndex + 1}`}
-                  className="h-auto w-full max-w-full"
-                  loading={index === 0 ? "eager" : "lazy"}
-                  decoding="async"
-                />
-                <div className="absolute right-[2.2cqw] bottom-[2.2cqw] flex items-center gap-[0.8cqw] text-black">
-                  <p className="bg-white px-[2cqw] text-[7cqw] leading-[1.5] font-bold [border-bottom-right-radius:1.4cqw] [border-top-right-radius:1.4cqw]">
-                    {code}
-                  </p>
-                  <div className="bg-white [border-bottom-left-radius:1.4cqw] [border-top-left-radius:1.4cqw]">
-                    <p className="px-[1.6cqw] text-[3.5cqw] leading-[1.5] font-semibold">خصم</p>
-                    <p className="px-[1.6cqw] text-[3.5cqw] leading-[1.5] font-semibold">%{percent}</p>
+          return (
+            <Card
+              key={globalIndex}
+              className={cn(
+                "h-full rounded-[40px] border-none py-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]",
+                isLastOdd && "sm:col-span-2 sm:w-full sm:max-w-[calc((100%-1.25rem)/2)] sm:justify-self-center"
+              )}
+            >
+              <CardContent className="flex h-full flex-col gap-4 space-y-0 p-5">
+                <div
+                  ref={(el) => {
+                    overlayRefs.current[globalIndex] = el;
+                  }}
+                  dir="rtl"
+                  className="@container relative flex justify-center overflow-hidden rounded-3xl text-center font-black"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={post.image_url}
+                    alt={post.title || `cashif ${globalIndex + 1}`}
+                    className="h-auto w-full max-w-full"
+                    loading={index === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                  />
+                  <div className="absolute right-[2.2cqw] bottom-[2.2cqw] flex items-center gap-[0.8cqw] text-black">
+                    <p className="bg-white px-[2cqw] text-[7cqw] leading-[1.5] font-bold [border-bottom-right-radius:1.4cqw] [border-top-right-radius:1.4cqw]">
+                      {code}
+                    </p>
+                    <div className="bg-white [border-bottom-left-radius:1.4cqw] [border-top-left-radius:1.4cqw]">
+                      <p className="px-[1.6cqw] text-[3.5cqw] leading-[1.5] font-semibold">خصم</p>
+                      <p className="px-[1.6cqw] text-[3.5cqw] leading-[1.5] font-semibold">%{percent}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-start gap-3 rounded-2xl bg-[#002623]/5 p-3">
-                <p className="flex-1 whitespace-pre-line text-sm leading-relaxed text-[#757575]">{postText}</p>
-                <button
-                  type="button"
-                  aria-label="تم النسخ"
-                  onClick={() => {
-                    navigator.clipboard.writeText(postText);
-                    toast.success("تم النسخ");
-                  }}
-                  className="shrink-0 rounded-xl p-2 text-[#174545] hover:bg-white"
-                >
-                  <Copy className="h-4 w-4" />
-                </button>
-              </div>
+                <div className="flex flex-1 items-start gap-3 rounded-2xl bg-[#002623]/5 p-3">
+                  <p className="flex-1 whitespace-pre-line text-sm leading-relaxed text-[#757575]">{postText}</p>
+                  <button
+                    type="button"
+                    aria-label="تم النسخ"
+                    onClick={() => {
+                      navigator.clipboard.writeText(postText);
+                      toast.success("تم النسخ");
+                    }}
+                    className="shrink-0 rounded-xl p-2 text-[#174545] hover:bg-white"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </button>
+                </div>
 
-              <div className="flex flex-wrap justify-center gap-3">
-                <ShareIcon
-                  label="X"
-                  className="bg-black"
-                  onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(postText)}`, "_blank")}
-                >
-                  <BrandIcon path={X_PATH} />
-                </ShareIcon>
-                <ShareIcon
-                  label="WhatsApp"
-                  className="bg-[#25D366]"
-                  onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(postText)}`, "_blank")}
-                >
-                  <WhatsAppIcon className="h-5 w-5" />
-                </ShareIcon>
-                <ShareIcon
-                  label="Snapchat"
-                  className="bg-[#FFFC00] !text-black"
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({ text: postText }).catch(() => {});
-                    } else {
-                      window.open("https://www.snapchat.com/", "_blank");
-                    }
-                  }}
-                >
-                  <BrandIcon path={SNAPCHAT_PATH} />
-                </ShareIcon>
-                <ShareIcon label="TikTok" className="bg-black" onClick={() => window.open("https://www.tiktok.com/", "_blank")}>
-                  <BrandIcon path={TIKTOK_PATH} />
-                </ShareIcon>
-                <ShareIcon
-                  label="Instagram"
-                  className="bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285AEB_90%)]"
-                  onClick={() => window.open("https://www.instagram.com/", "_blank")}
-                >
-                  <BrandIcon path={INSTAGRAM_PATH} />
-                </ShareIcon>
-                <ShareIcon
-                  label="Telegram"
-                  className="bg-[#229ED9]"
-                  onClick={() =>
-                    window.open(
-                      `https://telegram.me/share/url?url=https://cashif.cc/&text=${encodeURIComponent(postText)}`,
-                      "_blank"
-                    )
-                  }
-                >
-                  <BrandIcon path={TELEGRAM_PATH} />
-                </ShareIcon>
-              </div>
+                <div className="mt-auto space-y-4">
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <ShareIcon
+                      label="X"
+                      className="bg-black"
+                      onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(postText)}`, "_blank")}
+                    >
+                      <BrandIcon path={X_PATH} />
+                    </ShareIcon>
+                    <ShareIcon
+                      label="WhatsApp"
+                      className="bg-[#25D366]"
+                      onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(postText)}`, "_blank")}
+                    >
+                      <WhatsAppIcon className="h-5 w-5" />
+                    </ShareIcon>
+                    <ShareIcon
+                      label="Snapchat"
+                      className="bg-[#FFFC00] text-black"
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({ text: postText }).catch(() => {});
+                        } else {
+                          window.open("https://www.snapchat.com/", "_blank");
+                        }
+                      }}
+                    >
+                      <BrandIcon path={SNAPCHAT_PATH} />
+                    </ShareIcon>
+                    <ShareIcon label="TikTok" className="bg-black" onClick={() => window.open("https://www.tiktok.com/", "_blank")}>
+                      <BrandIcon path={TIKTOK_PATH} />
+                    </ShareIcon>
+                    <ShareIcon
+                      label="Instagram"
+                      className="bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285AEB_90%)]"
+                      onClick={() => window.open("https://www.instagram.com/", "_blank")}
+                    >
+                      <BrandIcon path={INSTAGRAM_PATH} />
+                    </ShareIcon>
+                    <ShareIcon
+                      label="Telegram"
+                      className="bg-[#229ED9]"
+                      onClick={() =>
+                        window.open(
+                          `https://telegram.me/share/url?url=https://cashif.cc/&text=${encodeURIComponent(postText)}`,
+                          "_blank"
+                        )
+                      }
+                    >
+                      <BrandIcon path={TELEGRAM_PATH} />
+                    </ShareIcon>
+                  </div>
 
-              <Button
-                className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
-                onClick={() => downloadImg(index)}
-              >
-                تحميل
-              </Button>
-            </CardContent>
-          </Card>
-        );
-      })}
+                  <Button
+                    className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
+                    disabled={pending[globalIndex]}
+                    onClick={() => downloadImg(index)}
+                  >
+                    {pending[globalIndex] ? <Loader2 className="h-4 w-4 animate-spin" /> : "تحميل"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
       {pageCount > 1 ? (
         <div className="flex items-center justify-center gap-2">
@@ -287,8 +307,6 @@ export function FalkCouponImages({ code, percent }) {
           ))}
         </div>
       ) : null}
-
-      <FalkVideos />
     </div>
   );
 }

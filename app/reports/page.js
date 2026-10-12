@@ -639,7 +639,7 @@ function PostInspectionServices({ hasVideo, canAskMojaz, cardId, cardNumber, def
                 <ServiceIconBtn
                   icon={Video}
                   caption="تسجيل"
-                  label="فيديو"
+                  label="عرض الفيديو"
                   iconColor="text-[#34C759]"
                   iconShape="circle"
                   onClick={() => onNavigate(`/videos/${cardNumber}`)}
@@ -753,9 +753,18 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
             size="sm"
             className="relative w-full max-w-[670px] rounded-[40px] border-none pt-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]"
           >
-            {card.includeImage ? (
-              <span title="تقرير مصور" className="absolute top-4 left-4 z-10 text-[#174545]">
-                <Images className="h-5 w-5" />
+            {card.includeImage || hasVideo ? (
+              <span className="absolute top-4 left-4 z-10 flex flex-col items-center gap-2 text-[#174545]">
+                {card.includeImage ? (
+                  <span title="تقرير مصور">
+                    <Images className="h-5 w-5" />
+                  </span>
+                ) : null}
+                {hasVideo ? (
+                  <span title="فيديو">
+                    <Video className="h-5 w-5" />
+                  </span>
+                ) : null}
               </span>
             ) : null}
 

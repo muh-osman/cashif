@@ -7,6 +7,7 @@ import { Info, Loader2, SaudiRiyal, TrendingUp, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { useFalkAccess } from "@/components/falk/falk-access-gate";
 import { FalkCouponImages } from "@/components/falk/coupon-images";
+import { FalkVideos } from "@/components/falk/falak-videos";
 import { FalkHowWorks } from "@/components/falk/how-works";
 import { FalkInfoAboutCashif } from "@/components/falk/info-about-cashif";
 import { FalkInstructions } from "@/components/falk/instructions";
@@ -31,6 +32,11 @@ const TABS = [
   { id: "how", label: "طريقة العمل" },
   { id: "instructions", label: "تعليمات قبل نشر المحتوى" },
   { id: "content", label: "المحتوى التسويقي" },
+];
+
+const CONTENT_SUB_TABS = [
+  { id: "images", label: "صور" },
+  { id: "videos", label: "فيديو" },
 ];
 
 function ProgressRing({ value }) {
@@ -66,6 +72,7 @@ export function FalkMarketerDashboard() {
   const router = useRouter();
   const { specialCode } = useFalkAccess();
   const [tab, setTab] = useState("info");
+  const [contentSubTab, setContentSubTab] = useState("images");
   const [marketer, setMarketer] = useState(null);
   const [settings, setSettings] = useState(null);
   const [monthlyBalance, setMonthlyBalance] = useState(0);
@@ -303,14 +310,55 @@ export function FalkMarketerDashboard() {
             </div>
           </div>
 
+          <div
+            className={cn(
+              "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+              tab === "content" ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+            )}
+          >
+            <div className="min-h-0 overflow-hidden" inert={tab === "content" ? undefined : true}>
+              <div
+                className={cn(
+                  "mb-4 transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+                  tab === "content" ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
+                )}
+              >
+                <div className="relative overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
+                  <span
+                    className={cn(
+                      "pointer-events-none absolute inset-y-0 right-0 w-1/2 rounded-[24px] border-4 border-white bg-[#f0f1f3] transition-transform duration-300 ease-out",
+                      contentSubTab === "videos" && "-translate-x-full"
+                    )}
+                  />
+                  <div className="relative z-10 grid h-13 grid-cols-2">
+                    {CONTENT_SUB_TABS.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setContentSubTab(item.id)}
+                        className="flex h-full cursor-pointer items-center justify-center text-sm font-medium text-[#174545]"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {tab === "info" ? <FalkInfoAboutCashif /> : null}
           {tab === "how" ? <FalkHowWorks /> : null}
           {tab === "instructions" ? <FalkInstructions /> : null}
           {tab === "content" ? (
-            <FalkCouponImages
-              code={marketer?.code || "-"}
-              percent={settings?.codeDiscountPercentage || 0}
-            />
+            contentSubTab === "images" ? (
+              <FalkCouponImages
+                code={marketer?.code || "-"}
+                percent={settings?.codeDiscountPercentage || 0}
+              />
+            ) : (
+              <FalkVideos />
+            )
           ) : null}
         </div>
       </div>

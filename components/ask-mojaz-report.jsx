@@ -177,11 +177,10 @@ export function AskMojazReport({ cardId, user }) {
                     disabled={loading}
                     onClick={() => setLookupType(option.value)}
                     className={cn(
-                      "flex min-w-[133px] cursor-pointer items-center gap-2 rounded-full border-2 px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                      "flex min-w-[133px] cursor-pointer items-center justify-center rounded-full border-2 px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                       selected ? "border-[#174545] bg-[#174545]/5 text-[#174545]" : "border-[#e5e7eb] text-[#002623]"
                     )}
                   >
-                    <span className={cn("size-3.5 rounded-full border-2", selected ? "border-[#174545] bg-[#174545]" : "border-[#c5c5c5]")} />
                     {option.label}
                   </button>
                 );

@@ -12,13 +12,16 @@ const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : us
 
 function scrollPageToTop() {
   const html = document.documentElement;
-  const previous = html.style.scrollBehavior;
-  html.style.scrollBehavior = "auto";
+  html.classList.add("routing-scroll-lock");
   // Chrome ignores a scroll-behavior change until the next layout.
   void html.offsetHeight;
+  window.scrollTo(0, 0);
   html.scrollTop = 0;
   document.body.scrollTop = 0;
-  html.style.scrollBehavior = previous;
+}
+
+function unlockRoutingScroll() {
+  document.documentElement.classList.remove("routing-scroll-lock");
 }
 
 function isRecaptchaPage(pathname) {
@@ -48,8 +51,25 @@ export function SiteShell({ children, isLoggedIn = false }) {
 
   useIsomorphicLayoutEffect(() => {
     scrollPageToTop();
-    const frame = requestAnimationFrame(scrollPageToTop);
-    return () => cancelAnimationFrame(frame);
+
+    let frame2 = 0;
+    const frame1 = requestAnimationFrame(() => {
+      scrollPageToTop();
+      // Second frame catches post-paint layout (sticky search / loading swap).
+      frame2 = requestAnimationFrame(scrollPageToTop);
+    });
+
+    // Retries cover async route content replacing app/loading.js after pathname updates.
+    const timers = [0, 50, 120, 250].map((ms) => setTimeout(scrollPageToTop, ms));
+    const unlockTimer = setTimeout(unlockRoutingScroll, 300);
+
+    return () => {
+      cancelAnimationFrame(frame1);
+      cancelAnimationFrame(frame2);
+      timers.forEach(clearTimeout);
+      clearTimeout(unlockTimer);
+      unlockRoutingScroll();
+    };
   }, [pathname]);
 
   return (

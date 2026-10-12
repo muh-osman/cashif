@@ -4,7 +4,7 @@ import { MOJAZ_STEPS } from "@/lib/mojaz";
 
 export function MojazStepper({ activeStep = 0 }) {
   return (
-    <ol className="flex w-full items-start justify-between gap-2">
+    <ol className="flex w-full items-start">
       {MOJAZ_STEPS.map((label, index) => {
         const done = index < activeStep;
         const current = index === activeStep;
@@ -15,7 +15,7 @@ export function MojazStepper({ activeStep = 0 }) {
               <span
                 aria-hidden
                 className={cn(
-                  "absolute top-4 start-[calc(50%+1.1rem)] h-0.5 w-[calc(100%-2.2rem)]",
+                  "absolute top-4 start-[calc(50%+1.25rem)] end-[calc(-50%+1.25rem)] h-0.5",
                   index < activeStep ? "bg-[#174545]" : "bg-[#d7dddd]"
                 )}
               />

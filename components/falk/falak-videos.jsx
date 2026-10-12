@@ -8,9 +8,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
+const ITEMS_PER_PAGE = 4;
+
 export function FalkVideos() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [pending, setPending] = useState({});
 
   useEffect(() => {
@@ -93,32 +96,54 @@ export function FalkVideos() {
     );
   }
 
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {videos.map((video, index) => {
-        const isLastOdd = index === videos.length - 1 && videos.length % 2 === 1;
+  const pageCount = Math.max(1, Math.ceil(videos.length / ITEMS_PER_PAGE));
+  const currentVideos = videos.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
-        return (
-          <Card
-            key={video.id}
-            className={cn(
-              "overflow-hidden rounded-[32px] border-none py-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]",
-              isLastOdd && "sm:col-span-2 sm:w-full sm:max-w-[calc((100%-1rem)/2)] sm:justify-self-center"
-            )}
-          >
-            <CardContent className="space-y-3 p-4">
-              <video src={video.video_url} controls crossOrigin="anonymous" className="h-48 w-full rounded-2xl bg-black object-cover" />
-              <Button
-                className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
-                disabled={pending[video.id]}
-                onClick={() => handleDownload(video.id)}
-              >
-                {pending[video.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : "تحميل"}
-              </Button>
-            </CardContent>
-          </Card>
-        );
-      })}
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2">
+        {currentVideos.map((video, index) => {
+          const isLastOdd = index === currentVideos.length - 1 && currentVideos.length % 2 === 1;
+
+          return (
+            <Card
+              key={video.id}
+              className={cn(
+                "overflow-hidden rounded-[32px] border-none py-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]",
+                isLastOdd && "sm:col-span-2 sm:w-full sm:max-w-[calc((100%-1rem)/2)] sm:justify-self-center"
+              )}
+            >
+              <CardContent className="space-y-3 p-4">
+                <video src={video.video_url} controls crossOrigin="anonymous" className="h-48 w-full rounded-2xl bg-black object-cover" />
+                <Button
+                  className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
+                  disabled={pending[video.id]}
+                  onClick={() => handleDownload(video.id)}
+                >
+                  {pending[video.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : "تحميل"}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {pageCount > 1 ? (
+        <div className="flex items-center justify-center gap-2">
+          {Array.from({ length: pageCount }, (_, i) => i + 1).map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setPage(value)}
+              className={`h-9 w-9 cursor-pointer rounded-full text-sm font-semibold ${
+                page === value ? "bg-[#174545] text-white" : "bg-[#002623]/5 text-[#174545]"
+              }`}
+            >
+              {value}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

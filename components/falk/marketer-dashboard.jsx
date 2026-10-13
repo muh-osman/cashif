@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import NumberFlow from "@number-flow/react";
 import { Info, Loader2, SaudiRiyal, TrendingUp, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { useFalkAccess } from "@/components/falk/falk-access-gate";
@@ -79,6 +80,8 @@ export function FalkMarketerDashboard() {
   const [loading, setLoading] = useState(true);
   const [termsOpen, setTermsOpen] = useState(false);
   const [error, setError] = useState("");
+  const [displayPoints, setDisplayPoints] = useState(0);
+  const [displayCardCount, setDisplayCardCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -150,7 +153,31 @@ export function FalkMarketerDashboard() {
   }, [specialCode]);
 
   const points = Math.trunc(marketer?.points || 0);
+  const cardCount = Math.trunc(marketer?.cardCount || 0);
   const progress = (points / MIN_WITHDRAWAL) * 100;
+
+  useEffect(() => {
+    if (loading) {
+      setDisplayPoints(0);
+      setDisplayCardCount(0);
+      return;
+    }
+
+    setDisplayPoints(0);
+    setDisplayCardCount(0);
+    let frame2 = 0;
+    const frame1 = requestAnimationFrame(() => {
+      frame2 = requestAnimationFrame(() => {
+        setDisplayPoints(points);
+        setDisplayCardCount(cardCount);
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(frame1);
+      cancelAnimationFrame(frame2);
+    };
+  }, [loading, points, cardCount]);
 
   const handleWithdraw = () => {
     if (points >= MIN_WITHDRAWAL) {
@@ -217,7 +244,14 @@ export function FalkMarketerDashboard() {
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-2xl bg-[#002623]/5 px-3 py-3 text-center">
                 <p className="text-xs text-[#757575]">استخدام الكود</p>
-                <p className="mt-1 text-lg font-semibold">{marketer?.cardCount || 0}</p>
+                <p className="mt-1 text-lg font-semibold">
+                  <NumberFlow
+                    value={displayCardCount}
+                    locales="en-US"
+                    format={{ maximumFractionDigits: 0 }}
+                    style={{ fontVariantNumeric: "tabular-nums", lineHeight: 0.85 }}
+                  />
+                </p>
               </div>
               <div className="rounded-2xl bg-[#002623]/5 px-3 py-3 text-center">
                 <p className="text-xs text-[#757575]">الحالة</p>
@@ -254,7 +288,12 @@ export function FalkMarketerDashboard() {
               <div className="min-w-0">
                 <h2 className="text-lg font-semibold text-[#174545]">الرصيد الحالي</h2>
                 <div className="mt-2 flex items-center gap-1.5 font-display text-4xl text-[#174545] sm:text-5xl">
-                  <span>{points.toLocaleString("en-US")}</span>
+                  <NumberFlow
+                    value={displayPoints}
+                    locales="en-US"
+                    format={{ maximumFractionDigits: 0 }}
+                    style={{ fontVariantNumeric: "tabular-nums", lineHeight: 0.85 }}
+                  />
                   <SaudiRiyal className="h-7 w-7 shrink-0" />
                 </div>
                 <p className="mt-2 flex items-center gap-1 text-sm text-[#00000099]">

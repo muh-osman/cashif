@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import NumberFlow from "@number-flow/react";
 import {
   Award,
   CalendarDays,
@@ -282,11 +283,32 @@ export default function ReportsPage() {
   const [cardsError, setCardsError] = useState("");
   const [mojazError, setMojazError] = useState("");
   const [loadingDownload, setLoadingDownload] = useState({});
+  const [displayPoints, setDisplayPoints] = useState(0);
+
+  const pointsValue = points?.points || 0;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("tab") === "1") setTab("mojaz");
   }, []);
+
+  useEffect(() => {
+    if (loadingPoints) {
+      setDisplayPoints(0);
+      return;
+    }
+
+    setDisplayPoints(0);
+    let frame2 = 0;
+    const frame1 = requestAnimationFrame(() => {
+      frame2 = requestAnimationFrame(() => setDisplayPoints(pointsValue));
+    });
+
+    return () => {
+      cancelAnimationFrame(frame1);
+      cancelAnimationFrame(frame2);
+    };
+  }, [loadingPoints, pointsValue]);
 
   useEffect(() => {
     let cancelled = false;
@@ -459,8 +481,13 @@ export default function ReportsPage() {
                   <div>
                     <h2 className="text-lg font-semibold text-[#174545]">رصيد النقاط</h2>
                     <p className="text-sm text-[#00000099]">كل نقطة تساوي ريال واحد</p>
-                    <p className="mt-2 font-display text-4xl text-[#174545] sm:text-5xl">
-                      {(points?.points || 0).toLocaleString("en-US")}
+                    <p className="mt-2 inline-flex items-baseline font-display text-4xl text-[#174545] sm:text-5xl">
+                      <NumberFlow
+                        value={displayPoints}
+                        locales="en-US"
+                        format={{ maximumFractionDigits: 0 }}
+                        style={{ fontVariantNumeric: "tabular-nums", lineHeight: 0.85 }}
+                      />
                       <span className="mr-1.5 font-sans text-sm text-[#00000099]">نقطة</span>
                     </p>
                   </div>

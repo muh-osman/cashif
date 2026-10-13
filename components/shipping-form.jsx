@@ -271,7 +271,7 @@ export function ShippingForm({ cardId }) {
                     required
                     value={selectedCity}
                     onChange={handleCityChange}
-                    className="h-13 w-full appearance-none rounded-full border border-[#002623]/10 bg-white px-4 pe-10 text-sm font-medium outline-none focus:border-[#174545]"
+                    className="h-13 w-full cursor-pointer appearance-none rounded-full border border-[#002623]/10 bg-white px-4 pe-10 text-sm font-medium outline-none focus:border-[#174545]"
                   >
                     <option value="">اختر المدينة</option>
                     {CITIES.map((city) => (

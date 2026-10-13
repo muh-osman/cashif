@@ -223,6 +223,7 @@ const FOOTER_LINKS = [
   { label: "الأحكام والشروط", href: "/terms" },
   { label: "سياسة الخصوصية", href: "/privacy" },
   { label: "الاسترجاع والاستبدال", href: "/return-policy" },
+  { label: "تابعنا", href: "/social-media" },
   { label: "المدونة", href: "https://cashif.cc/blog/" },
 ];
 

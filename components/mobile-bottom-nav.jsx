@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, LogIn, LogOut, ShoppingCart, MapPin, ExternalLink, Gift, ChevronLeft, Home as HomeIcon, FileText, SaudiRiyal, Handshake, Loader2 } from "lucide-react";
+import { Menu, LogIn, LogOut, ShoppingCart, MapPin, ExternalLink, Gift, ChevronLeft, Home as HomeIcon, FileText, SaudiRiyal, Handshake, Loader2, Share2, Truck } from "lucide-react";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { FalkAcceptTermsDrawer } from "@/components/falk/accept-terms";
 import { FalkSoonDrawer } from "@/components/falk/soon";
@@ -29,6 +29,8 @@ const ACCOUNT_LINKS = [
   { label: "المدونة", href: "https://cashif.cc/blog/", icon: FileText, external: true },
   { label: "طلباتي", href: "/orders", icon: ShoppingCart, action: "orders", activatesAccount: true },
   { label: "عروض شركائنا", href: "/partners", icon: Gift, activatesAccount: true },
+  { label: "أسعار الشحن", href: "/shipping-prices", icon: Truck, activatesAccount: true },
+  { label: "تابعنا", href: "/social-media", icon: Share2, activatesAccount: true },
 ];
 
 function isAccountPath(pathname) {

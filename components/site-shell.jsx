@@ -33,10 +33,21 @@ function isRecaptchaPage(pathname) {
   );
 }
 
+function isKioskPage(pathname) {
+  return pathname === "/new-branch" || pathname.startsWith("/new-branch/");
+}
+
 export function SiteShell({ children, isLoggedIn = false }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const hideSearch = isHome || pathname === "/login" || pathname.startsWith("/login/") || pathname === "/prices" || pathname.startsWith("/prices/");
+  const isKiosk = isKioskPage(pathname);
+  const hideSearch =
+    isHome ||
+    isKiosk ||
+    pathname === "/login" ||
+    pathname.startsWith("/login/") ||
+    pathname === "/prices" ||
+    pathname.startsWith("/prices/");
 
   useEffect(() => {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
@@ -76,8 +87,8 @@ export function SiteShell({ children, isLoggedIn = false }) {
     <AuthProvider initialLoggedIn={isLoggedIn}>
       {!hideSearch && <StickySearch />}
       <div className={hideSearch ? undefined : "pt-24"}>{children}</div>
-      <WhatsAppButton />
-      <MobileBottomNav />
+      {!isKiosk && <WhatsAppButton />}
+      {!isKiosk && <MobileBottomNav />}
       <Toaster position="top-center" richColors />
     </AuthProvider>
   );

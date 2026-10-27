@@ -58,10 +58,6 @@ function PlanCard({ plan }) {
         plan.featured && "ring-2 ring-[#174545]"
       )}
     >
-      <div className="pointer-events-none absolute -left-10 top-3 z-10 w-36 rotate-[-45deg] bg-[#d32f2f] py-1 text-center text-[10px] font-bold text-white shadow sm:text-xs">
-        خصم {DISCOUNT_PERCENT}%
-      </div>
-
       <div
         className={cn(
           "flex h-14 shrink-0 items-center justify-center border-b border-[#002623]/8 px-2 text-center sm:px-3",
@@ -73,22 +69,27 @@ function PlanCard({ plan }) {
 
       <CardContent className="flex flex-col gap-3 px-2 py-4 sm:px-3">
         <div className="text-center">
+          <div className="mb-2 flex justify-end" dir="rtl">
+            <span className="inline-flex items-center rounded-full bg-[#e5484d] px-2.5 py-[6px] text-[10px] font-bold leading-none text-white sm:text-xs">
+              خصم {DISCOUNT_PERCENT}%
+            </span>
+          </div>
           <p className="flex items-center justify-center gap-1 text-2xl font-bold text-[#174545] sm:text-3xl">
             <span>{plan.price}</span>
             <SaudiRiyal className="h-5 w-5 sm:h-6 sm:w-6" />
           </p>
 
           {plan.youSave > 0 && (
-            <p className="mt-2 flex flex-wrap items-center justify-center gap-1.5 text-[11px] sm:text-xs">
-              <span className="flex items-center gap-0.5 text-[#d32f2f] line-through">
+            <div className="mt-2 inline-flex max-w-full overflow-hidden rounded-full text-[11px] font-bold sm:text-xs">
+              <span className="inline-flex shrink-0 items-center justify-center gap-0.5 whitespace-nowrap bg-[#fce8e8] px-2 py-1 text-[#d32f2f] line-through sm:px-2.5">
                 {plan.originalPrice}
-                <SaudiRiyal className="h-3 w-3" />
+                <SaudiRiyal className="h-3 w-3 shrink-0" />
               </span>
-              <span className="inline-flex items-center gap-0.5 rounded bg-[#dff1d9] px-1.5 py-0.5 font-medium text-[#25d366]">
+              <span className="inline-flex shrink-0 items-center justify-center gap-0.5 whitespace-nowrap bg-[#dff1d9] px-2 py-1 text-[#25d366] sm:px-2.5">
                 وفر {plan.youSave}
-                <SaudiRiyal className="h-3 w-3" />
+                <SaudiRiyal className="h-3 w-3 shrink-0" />
               </span>
-            </p>
+            </div>
           )}
         </div>
 

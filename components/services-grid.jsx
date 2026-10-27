@@ -3,7 +3,8 @@
 import { createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, ShieldCheck } from "lucide-react";
+import { ChevronDown, PanelBottomOpen, ShieldCheck } from "lucide-react";
+import { MakdomDrawer } from "@/components/makdom-drawer";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -87,7 +88,15 @@ function ServicePoint({ point, compact }) {
   );
 }
 
-export function ServiceCard({ service, ctaLabel: ctaLabelOverride, selected = false, onSelect, compact = false, preview = false }) {
+export function ServiceCard({
+  service,
+  ctaLabel: ctaLabelOverride,
+  selected = false,
+  onSelect,
+  onCtaClick,
+  compact = false,
+  preview = false,
+}) {
   const { id, number, title, description, points, cta, ctaLabel = "أطلب الأن", param } = service;
   const equalHeight = useEqualHeight();
   const expanded = Boolean(preview && equalHeight?.expandedId === id);
@@ -184,6 +193,11 @@ export function ServiceCard({ service, ctaLabel: ctaLabelOverride, selected = fa
           >
             {ctaLabelOverride ?? ctaLabel}
           </button>
+        ) : onCtaClick ? (
+          <button type="button" onClick={onCtaClick} className={buttonClassName}>
+            {ctaLabelOverride ?? ctaLabel}
+            <PanelBottomOpen className="size-4" aria-hidden />
+          </button>
         ) : (
           <Link href={cta} className={buttonClassName}>
             {ctaLabelOverride ?? ctaLabel}
@@ -195,19 +209,36 @@ export function ServiceCard({ service, ctaLabel: ctaLabelOverride, selected = fa
 }
 
 export function ServicesGrid({ services = SERVICES, ctaLabel: ctaLabelOverride, selectedParam, onSelect, preview = false }) {
+  const [makdomOpen, setMakdomOpen] = useState(false);
+
   return (
     <EqualHeightProvider>
-      <ServicesGridRow services={services} ctaLabel={ctaLabelOverride} selectedParam={selectedParam} onSelect={onSelect} preview={preview} />
+      <ServicesGridRow
+        services={services}
+        ctaLabel={ctaLabelOverride}
+        selectedParam={selectedParam}
+        onSelect={onSelect}
+        onMakdomOpen={() => setMakdomOpen(true)}
+        preview={preview}
+      />
+      <MakdomDrawer open={makdomOpen} onOpenChange={setMakdomOpen} />
     </EqualHeightProvider>
   );
 }
 
-function ServicesGridRow({ services, ctaLabel, selectedParam, onSelect, preview }) {
+function ServicesGridRow({ services, ctaLabel, selectedParam, onSelect, onMakdomOpen, preview }) {
   return (
     <div className="mx-auto flex max-w-6xl flex-wrap items-start justify-center gap-6">
       {services.map((service) => (
         <div key={service.id} className="flex w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
-          <ServiceCard service={service} ctaLabel={ctaLabel} selected={selectedParam === service.param} onSelect={onSelect} preview={preview} />
+          <ServiceCard
+            service={service}
+            ctaLabel={ctaLabel}
+            selected={selectedParam === service.param}
+            onSelect={onSelect}
+            onCtaClick={service.cta === "/makdom" ? onMakdomOpen : undefined}
+            preview={preview}
+          />
         </div>
       ))}
     </div>

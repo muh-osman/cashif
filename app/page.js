@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth-provider";
 import { Bubble, BubbleContent, BubbleReactions } from "@/components/ui/bubble";
 import { Message, MessageContent, MessageGroup } from "@/components/ui/message";
+import { MakdomDrawer } from "@/components/makdom-drawer";
 import { ServicesGrid } from "@/components/services-grid";
 
 /* -------------------------------------------------------------------------- */
@@ -41,9 +42,9 @@ import { ServicesGrid } from "@/components/services-grid";
 const BRANCHES = [
   { name: "الرياض - القادسية", href: "https://maps.app.goo.gl/MiFGsgakfo62on7u8" },
   { name: "الرياض - الشفا", href: "https://maps.app.goo.gl/pXCnG7RPXJ2CDLqe7?g_st=aw" },
-  { name: "القصيم", href: "https://maps.app.goo.gl/Gd7g3VScomNQP8DR7" },
   { name: "الدمام", href: "https://maps.app.goo.gl/9UiHq4kW7Mjh1Aik8" },
   { name: "جدة", href: "https://maps.app.goo.gl/697yXkaS4o6kYsos8" },
+  { name: "القصيم", href: "https://maps.app.goo.gl/Gd7g3VScomNQP8DR7" },
   { name: "خميس مشيط", href: "https://maps.app.goo.gl/6dMQqyhHiKgmrP6b7" },
 ];
 
@@ -220,11 +221,10 @@ const FOOTER_SERVICES = [
 ];
 
 const FOOTER_LINKS = [
+  { label: "المدونة", href: "https://cashif.cc/blog/" },
   { label: "الأحكام والشروط", href: "/terms" },
   { label: "سياسة الخصوصية", href: "/privacy" },
   { label: "الاسترجاع والاستبدال", href: "/return-policy" },
-  { label: "تابعنا", href: "/social-media" },
-  { label: "المدونة", href: "https://cashif.cc/blog/" },
 ];
 
 const PAYMENT_LOGOS = [
@@ -790,7 +790,10 @@ function TestimonialsCarousel() {
 /* -------------------------------------------------------------------------- */
 
 function SiteFooter() {
+  const [makdomOpen, setMakdomOpen] = useState(false);
+
   return (
+    <>
     <footer className="relative rounded-t-[40px] bg-[#174545] pb-6 pt-40 text-white sm:pb-28 sm:pt-[210px]">
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
@@ -844,7 +847,17 @@ function SiteFooter() {
             <FooterColumn title="خدمات كاشف">
               {FOOTER_SERVICES.map((s) => (
                 <li key={s.label}>
-                  <FooterLink href={s.href}>{s.label}</FooterLink>
+                  {s.href === "/makdom" ? (
+                    <button
+                      type="button"
+                      onClick={() => setMakdomOpen(true)}
+                      className="inline-block cursor-pointer rounded-md px-2 py-1.5 text-sm text-white transition-colors hover:bg-white/10"
+                    >
+                      {s.label}
+                    </button>
+                  ) : (
+                    <FooterLink href={s.href}>{s.label}</FooterLink>
+                  )}
                 </li>
               ))}
             </FooterColumn>
@@ -892,6 +905,8 @@ function SiteFooter() {
         </div>
       </div>
     </footer>
+    <MakdomDrawer open={makdomOpen} onOpenChange={setMakdomOpen} />
+    </>
   );
 }
 

@@ -34,7 +34,12 @@ function isRecaptchaPage(pathname) {
 }
 
 function isKioskPage(pathname) {
-  return pathname === "/new-branch" || pathname.startsWith("/new-branch/");
+  return (
+    pathname === "/new-branch" ||
+    pathname.startsWith("/new-branch/") ||
+    pathname === "/plans-gallery" ||
+    pathname.startsWith("/plans-gallery/")
+  );
 }
 
 export function SiteShell({ children, isLoggedIn = false }) {

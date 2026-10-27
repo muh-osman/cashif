@@ -28,12 +28,12 @@ import {
 const SHIPPING_OPTIONS = [
   {
     type: SHIPPING_TYPE_PUBLIC,
-    image: "/images/shipping/public.png",
+    image: "/images/shipping/public.webp",
     label: "نقل عام",
   },
   {
     type: SHIPPING_TYPE_PRIVATE,
-    image: "/images/shipping/private.png",
+    image: "/images/shipping/private.webp",
     label: "سطحة خاصة",
   },
 ];

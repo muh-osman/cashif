@@ -5,7 +5,7 @@ export const PARTNER_OFFERS = [
     nameEn: "Speereeto",
     discount: "10%",
     code: "C10",
-    image: "/images/partners/A.png",
+    image: "/images/partners/A.webp",
     file: "coupon_A.png",
   },
   {
@@ -14,7 +14,7 @@ export const PARTNER_OFFERS = [
     nameEn: "STILY",
     discount: "35%",
     code: "2031007",
-    image: "/images/partners/B.png",
+    image: "/images/partners/B.webp",
     file: "coupon_B.png",
   },
   {
@@ -22,7 +22,7 @@ export const PARTNER_OFFERS = [
     name: "شركة ميزان عبدالحكيم العضيب",
     nameEn: "Mizan",
     discount: "25%",
-    image: "/images/partners/C.png",
+    image: "/images/partners/C.webp",
     file: "coupon_C.png",
   },
   {
@@ -30,7 +30,7 @@ export const PARTNER_OFFERS = [
     name: "الشارقة لتأجير السيارات",
     nameEn: "Sharqah",
     discount: "25%",
-    image: "/images/partners/D.png",
+    image: "/images/partners/D.webp",
     file: "coupon_D.png",
   },
 ];

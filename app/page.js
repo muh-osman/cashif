@@ -55,18 +55,18 @@ const CAROUSEL_SLIDES = [50, 51, 53, 54, 55, 56, 57, 58, 59].map((n) => ({
 }));
 
 const STAGES = [
-  { img: "/images/x1.png", label: "تسجيل بيانات المركبة" },
-  { img: "/images/x2.png", label: "فحص ميكانيكا المحرك والقير" },
-  { img: "/images/x3.png", label: "فحص الحساسات بالكمبيوتر" },
-  { img: "/images/x4.png", label: "فحص سلامة الوسائد الهوائية" },
-  { img: "/images/x5.png", label: "فحص ميكانيكا أسفل السيارة" },
-  { img: "/images/x6.png", label: "فحص الزيوت والتسريبات" },
-  { img: "/images/x7.png", label: "فحص أنظمة الفرامل والتعليق" },
-  { img: "/images/x8.png", label: "فحص الهيكل والسمكرة" },
-  { img: "/images/x9.png", label: "فحص الديكور والداخلية" },
-  { img: "/images/x10.png", label: "فحص سلامة الإطارات" },
-  { img: "/images/x11.png", label: "تجربة المركبة على الطريق" },
-  { img: "/images/x12.png", label: "طباعة التقرير وشرحه" },
+  { img: "/images/x1.webp", label: "تسجيل بيانات المركبة" },
+  { img: "/images/x2.webp", label: "فحص ميكانيكا المحرك والقير" },
+  { img: "/images/x3.webp", label: "فحص الحساسات بالكمبيوتر" },
+  { img: "/images/x4.webp", label: "فحص سلامة الوسائد الهوائية" },
+  { img: "/images/x5.webp", label: "فحص ميكانيكا أسفل السيارة" },
+  { img: "/images/x6.webp", label: "فحص الزيوت والتسريبات" },
+  { img: "/images/x7.webp", label: "فحص أنظمة الفرامل والتعليق" },
+  { img: "/images/x8.webp", label: "فحص الهيكل والسمكرة" },
+  { img: "/images/x9.webp", label: "فحص الديكور والداخلية" },
+  { img: "/images/x10.webp", label: "فحص سلامة الإطارات" },
+  { img: "/images/x11.webp", label: "تجربة المركبة على الطريق" },
+  { img: "/images/x12.webp", label: "طباعة التقرير وشرحه" },
 ];
 
 const WHY_US = [
@@ -230,11 +230,11 @@ const FOOTER_LINKS = [
 const PAYMENT_LOGOS = [
   { src: "/images/mada.svg", alt: "mada" },
   { src: "/images/pay.svg", alt: "pay" },
-  { src: "/images/samsung.png", alt: "samsung pay" },
+  { src: "/images/samsung.webp", alt: "samsung pay" },
   { src: "/images/visa.svg", alt: "visa" },
   { src: "/images/mastercard.svg", alt: "mastercard" },
   { src: "/images/tamara-logo.svg", alt: "tamara", light: true },
-  { src: "/images/tabby.png", alt: "tabby", light: true },
+  { src: "/images/tabby.webp", alt: "tabby", light: true },
 ];
 
 /* -------------------------------------------------------------------------- */

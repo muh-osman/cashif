@@ -259,7 +259,7 @@ export function AskMojazReport({ cardId, user }) {
 
             <div className="overflow-hidden rounded-2xl">
               <Image
-                src="/images/reports/mojaz-info-modal.png"
+                src="/images/reports/mojaz-info-modal.webp"
                 alt="أماكن الرقم التسلسلي"
                 width={720}
                 height={480}

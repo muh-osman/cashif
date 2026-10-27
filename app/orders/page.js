@@ -10,8 +10,8 @@ import { makeLocalLogoSrc, makeLogoSrc } from "@/lib/car-logo";
 import { cn } from "@/lib/utils";
 
 const PAYMENT_LOGOS = {
-  Moyasar: { src: "/images/moyasar.png", width: 96, height: 42 },
-  Tabby: { src: "/images/tabby.png", width: 96, height: 42 },
+  Moyasar: { src: "/images/moyasar.webp", width: 96, height: 42 },
+  Tabby: { src: "/images/tabby.webp", width: 96, height: 42 },
   Tamara: { src: "/images/tamara-logo.svg", width: 96, height: 32 },
 };
 

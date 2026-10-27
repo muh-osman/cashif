@@ -37,14 +37,14 @@ export const CONTACT_BRANCHES = [
     id: "qassim",
     city: "القصيم",
     name: "القصيم - شارع قرطبة",
-    image: "/images/branches/qassim.png",
+    image: "/images/branches/qassim.jpg",
     maps: "https://maps.app.goo.gl/Gd7g3VScomNQP8DR7",
   },
   {
     id: "khamis",
     city: "خميس مشيط",
     name: "خميس مشيط",
-    image: "/images/branches/khamis-mushait.png",
+    image: "/images/branches/khamis-mushait.jpg",
     maps: "https://maps.app.goo.gl/6dMQqyhHiKgmrP6b7",
   },
 ];

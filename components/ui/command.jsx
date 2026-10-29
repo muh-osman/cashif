@@ -61,7 +61,7 @@ function CommandInput({
 }) {
   return (
     <div data-slot="command-input-wrapper" className="p-1 pb-0">
-      <InputGroup className="h-9 bg-input/50">
+      <InputGroup className="h-9 bg-input/50 px-3">
         <CommandPrimitive.Input
           data-slot="command-input"
           className={cn(

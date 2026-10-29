@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { CarSearchDrawer } from "@/components/car-search-drawer";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -21,7 +21,9 @@ export function CarModelSearch({ className, isStuck }) {
   const [catalogLoading, setCatalogLoading] = useState(() => !cachedCatalog);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const pathname = usePathname();
   const router = useRouter();
+  const isPricesPage = pathname === "/prices" || pathname.startsWith("/prices/");
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +55,13 @@ export function CarModelSearch({ className, isStuck }) {
       cancelled = true;
     };
   }, [cachedCatalog]);
+
+  useEffect(() => {
+    if (!isPricesPage || drawerOpen) return;
+
+    const timer = setTimeout(() => setOpen(true), 0);
+    return () => clearTimeout(timer);
+  }, [isPricesPage, drawerOpen]);
 
   useEffect(() => {
     if (selected) return;

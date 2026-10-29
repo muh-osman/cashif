@@ -41,9 +41,10 @@ export function CarSearchDrawer({ open, onOpenChange, model, onSearch }) {
   const modelLabel = model
     ? `${model.nameAr}${model.nameEn ? ` - ${model.nameEn}` : ""}`
     : "";
+  const canSearch = Boolean(model?.id && selectedYear && selectedService);
 
   function handleSearch() {
-    if (!selectedYear || !selectedService) {
+    if (!canSearch) {
       toast.warning("الرجاء ادخال جميع البيانات");
       return;
     }
@@ -138,7 +139,8 @@ export function CarSearchDrawer({ open, onOpenChange, model, onSearch }) {
             type="button"
             size="lg"
             onClick={handleSearch}
-            className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
+            disabled={!canSearch}
+            className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90 disabled:cursor-not-allowed"
           >
             <Search className="size-5" />
             بحث

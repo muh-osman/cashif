@@ -57,11 +57,18 @@ export function CarModelSearch({ className, isStuck }) {
   }, [cachedCatalog]);
 
   useEffect(() => {
-    if (!isPricesPage || drawerOpen) return;
+    if (!isPricesPage) {
+      setDrawerOpen(false);
+      setOpen(false);
+      return;
+    }
 
-    const timer = setTimeout(() => setOpen(true), 0);
+    const timer = setTimeout(() => {
+      setDrawerOpen(true);
+      setOpen(true);
+    }, 0);
     return () => clearTimeout(timer);
-  }, [isPricesPage, drawerOpen]);
+  }, [isPricesPage]);
 
   useEffect(() => {
     if (selected) return;

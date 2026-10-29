@@ -36,7 +36,7 @@ export function CarSearchDrawer({ open, onOpenChange, model, onSearch }) {
     if (!open) return;
     setSelectedYear("");
     setSelectedService(null);
-  }, [open, model?.id]);
+  }, [open]);
 
   const modelLabel = model
     ? `${model.nameAr}${model.nameEn ? ` - ${model.nameEn}` : ""}`
@@ -74,8 +74,8 @@ export function CarSearchDrawer({ open, onOpenChange, model, onSearch }) {
       <DrawerContent className="sm:mx-auto sm:w-[450px] sm:[--drawer-content-width:450px] sm:data-[swipe-axis=y]:inset-x-0">
         <DrawerHeader className="text-right md:text-right">
           <DrawerTitle className="font-display text-[#002623]">اختر التفاصيل</DrawerTitle>
-          <DrawerDescription className={cn("text-[#757575]", !modelLabel && "sr-only")}>
-            {modelLabel || "حدد سنة الصنع والخدمة"}
+          <DrawerDescription className="text-[#757575]">
+            {modelLabel || "اختر الموديل من شريط البحث أعلاه"}
           </DrawerDescription>
         </DrawerHeader>
 

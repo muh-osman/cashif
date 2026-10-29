@@ -50,9 +50,7 @@ export function SiteShell({ children, isLoggedIn = false }) {
     isHome ||
     isKiosk ||
     pathname === "/login" ||
-    pathname.startsWith("/login/") ||
-    pathname === "/prices" ||
-    pathname.startsWith("/prices/");
+    pathname.startsWith("/login/");
 
   useEffect(() => {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
@@ -90,7 +88,9 @@ export function SiteShell({ children, isLoggedIn = false }) {
 
   return (
     <AuthProvider initialLoggedIn={isLoggedIn}>
-      {!hideSearch && <StickySearch />}
+      <div className={hideSearch ? "hidden" : undefined} aria-hidden={hideSearch || undefined}>
+        <StickySearch />
+      </div>
       <div className={hideSearch ? undefined : "pt-24"}>{children}</div>
       {!isKiosk && <WhatsAppButton />}
       {!isKiosk && <MobileBottomNav />}

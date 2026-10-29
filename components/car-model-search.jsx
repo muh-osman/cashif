@@ -3,26 +3,56 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { CarSearchDrawer } from "@/components/car-search-drawer";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { getCachedCarCatalog, loadCarCatalog } from "@/lib/car-catalog";
 import { cn } from "@/lib/utils";
-
-// TODO: replace with real data
-const CAR_MODELS = [
-  { id: 1, nameAr: "كامري", nameEn: "Camry", manufacturerAr: "تويوتا", manufacturerEn: "Toyota" },
-  { id: 2, nameAr: "سوناتا", nameEn: "Sonata", manufacturerAr: "هيونداي", manufacturerEn: "Hyundai" },
-  { id: 3, nameAr: "التيما", nameEn: "Altima", manufacturerAr: "نيسان", manufacturerEn: "Nissan" },
-  { id: 4, nameAr: "أكورد", nameEn: "Accord", manufacturerAr: "هوندا", manufacturerEn: "Honda" },
-];
 
 const PLACEHOLDERS = ["أسعار الفحص...", "كامري | تويوتا", "أكورد | هوندا", "التيما | نيسان"];
 
 export function CarModelSearch({ className, isStuck }) {
+  const cachedCatalog = getCachedCarCatalog();
   const [open, setOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [models, setModels] = useState(() => cachedCatalog?.models ?? []);
+  const [manufacturersById, setManufacturersById] = useState(() => cachedCatalog?.manufacturersById ?? new Map());
+  const [catalogLoading, setCatalogLoading] = useState(() => !cachedCatalog);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (cachedCatalog) {
+      setModels(cachedCatalog.models);
+      setManufacturersById(cachedCatalog.manufacturersById);
+      setCatalogLoading(false);
+      return;
+    }
+
+    setCatalogLoading(true);
+    loadCarCatalog()
+      .then((catalog) => {
+        if (cancelled) return;
+        setModels(catalog.models);
+        setManufacturersById(catalog.manufacturersById);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setModels([]);
+        setManufacturersById(new Map());
+      })
+      .finally(() => {
+        if (!cancelled) setCatalogLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cachedCatalog]);
 
   useEffect(() => {
     if (selected) return;
@@ -42,11 +72,26 @@ export function CarModelSearch({ className, isStuck }) {
   function handleSelect(model) {
     setSelected(model);
     setOpen(false);
-    router.push(`/prices?modelId=${model.id}`);
+    setDrawerOpen(true);
+  }
+
+  function handleSearch({ model, year, service }) {
+    if (!model?.id || !year || !service) return;
+
+    const params = new URLSearchParams({
+      modelId: String(model.id),
+      year: String(year),
+      [service]: "true",
+    });
+
+    router.push(`/prices?${params}`);
   }
 
   return (
-    <div className="flex w-full justify-center">
+    <div
+      className="flex w-full justify-center"
+      data-car-search-drawer={drawerOpen ? "open" : undefined}
+    >
       {/* Keyframes for the placeholder slide animation */}
       <style>{`
         @keyframes placeholderSlideOutDown {
@@ -98,40 +143,60 @@ export function CarModelSearch({ className, isStuck }) {
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </PopoverTrigger>
 
-        <PopoverContent dir="rtl" align="center" className="w-[--radix-popover-trigger-width] p-0">
+        <PopoverContent
+          dir="rtl"
+          align="center"
+          positionerClassName="z-[80]"
+          className="w-[var(--anchor-width)] p-0"
+        >
           <Command>
             <CommandInput placeholder="ابحث بالاسم أو الشركة المصنعة..." />
             <CommandList>
               <CommandEmpty>
-                <a
-                  href="https://wa.me/966920019948?text=استعلام عن موديل غير موجود"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block px-4 py-3 text-center text-sm text-[#0b6bcb] underline"
-                >
-                  لم تجد موديلك؟ تواصل معنا
-                </a>
+                {catalogLoading ? (
+                  <span className="block px-4 py-3 text-center text-sm text-[#757575]">جاري التحميل..</span>
+                ) : (
+                  <a
+                    href="https://wa.me/966920019948?text=استعلام عن موديل غير موجود"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block px-4 py-3 text-center text-sm text-[#0b6bcb] underline"
+                  >
+                    لم تجد موديلك؟ تواصل معنا
+                  </a>
+                )}
               </CommandEmpty>
               <CommandGroup>
-                {CAR_MODELS.map((model) => (
-                  <CommandItem
-                    key={model.id}
-                    value={`${model.nameAr} ${model.nameEn} ${model.manufacturerAr} ${model.manufacturerEn}`}
-                    onSelect={() => handleSelect(model)}
-                    className="flex items-center"
-                  >
-                    <Check className={cn("ml-2 h-4 w-4", selected?.id === model.id ? "opacity-100" : "opacity-0")} />
-                    <span>
-                      {model.nameAr} - {model.nameEn}
-                    </span>
-                    <span className="mr-2 text-xs text-[#888]">| {model.manufacturerAr}</span>
-                  </CommandItem>
-                ))}
+                {models.map((model) => {
+                  const manufacturerName = manufacturersById.get(model.carManufacturerId) || "";
+
+                  return (
+                    <CommandItem
+                      key={model.id}
+                      value={`${model.nameAr} ${model.nameEn} ${manufacturerName}`}
+                      onSelect={() => handleSelect(model)}
+                      className="flex items-center"
+                    >
+                      <Check className={cn("ml-2 h-4 w-4", selected?.id === model.id ? "opacity-100" : "opacity-0")} />
+                      <span>
+                        {model.nameAr} - {model.nameEn}
+                      </span>
+                      {manufacturerName ? <span className="mr-2 text-xs text-[#888]">| {manufacturerName}</span> : null}
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
             </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
+
+      <CarSearchDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        model={selected}
+        onSearch={handleSearch}
+      />
     </div>
   );
 }

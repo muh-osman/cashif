@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, LogIn, LogOut, ShoppingCart, MapPin, ExternalLink, Gift, ChevronLeft, Home as HomeIcon, FileText, SaudiRiyal, Handshake, Loader2, Share2, Truck } from "lucide-react";
+import { Menu, LogIn, LogOut, ShoppingCart, MapPin, ExternalLink, Gift, ChevronLeft, Home as HomeIcon, FileText, SaudiRiyal, Handshake, Loader2, Share2, Truck, Phone } from "lucide-react";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { FalkAcceptTermsDrawer } from "@/components/falk/accept-terms";
 import { FalkSoonDrawer } from "@/components/falk/soon";
 import { useAuth } from "@/components/auth-provider";
 import { clearAuthCookies } from "@/lib/auth";
+import { CONTACT_PHONE } from "@/data/contact";
 
 const MOBILE_NAV = [
   { label: "حسابي", icon: Menu, action: "account" },
@@ -31,6 +32,7 @@ const ACCOUNT_LINKS = [
   { label: "عروض شركائنا", href: "/partners", icon: Gift, activatesAccount: true },
   { label: "أسعار الشحن", href: "/shipping-prices", icon: Truck, activatesAccount: true },
   { label: "تابعنا", href: "/social-media", icon: Share2, activatesAccount: true },
+  { label: "اتصل بنا", href: `tel:${CONTACT_PHONE}`, icon: Phone, tel: true },
 ];
 
 function isAccountPath(pathname) {
@@ -414,7 +416,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
           </DrawerHeader>
 
           <div className="flex flex-col gap-1 p-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-            {ACCOUNT_LINKS.map(({ label, href, icon: Icon, external, action, activatesAccount }) => {
+            {ACCOUNT_LINKS.map(({ label, href, icon: Icon, external, tel, action, activatesAccount }) => {
               const itemClass = "flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-[#002623] transition-colors hover:bg-[#428177]/10";
 
               if (action === "orders" && !isLoggedIn) {
@@ -432,7 +434,9 @@ export function MobileBottomNav({ initialActive = 2 }) {
                   key={label}
                   nativeButton={false}
                   render={
-                    external ? (
+                    tel ? (
+                      <a href={href} className={itemClass} />
+                    ) : external ? (
                       <a href={href} target="_blank" rel="noreferrer" className={itemClass} />
                     ) : (
                       <Link

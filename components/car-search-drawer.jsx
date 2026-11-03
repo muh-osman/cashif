@@ -54,6 +54,7 @@ function clampYear(year) {
 function YearStepper({ resetKey, onYearChange }) {
   const [year, setYear] = useState(DEFAULT_YEAR);
   const [motion, setMotion] = useState("ready"); // ready | instant | hold
+  const [pressedDelta, setPressedDelta] = useState(0);
   const yearRef = useRef(DEFAULT_YEAR);
   const onYearChangeRef = useRef(onYearChange);
   const holdTimerRef = useRef(null);
@@ -64,6 +65,7 @@ function YearStepper({ resetKey, onYearChange }) {
   useEffect(() => {
     yearRef.current = DEFAULT_YEAR;
     setMotion("instant");
+    setPressedDelta(0);
     setYear(DEFAULT_YEAR);
     onYearChangeRef.current?.(String(DEFAULT_YEAR));
     const id = requestAnimationFrame(() => setMotion("ready"));
@@ -91,6 +93,7 @@ function YearStepper({ resetKey, onYearChange }) {
     clearInterval(holdIntervalRef.current);
     holdTimerRef.current = null;
     holdIntervalRef.current = null;
+    setPressedDelta(0);
     setMotion("ready");
   }
 
@@ -100,6 +103,7 @@ function YearStepper({ resetKey, onYearChange }) {
     pointerHandledRef.current = true;
     event.currentTarget.setPointerCapture?.(event.pointerId);
     stopHold();
+    setPressedDelta(delta);
     setMotion("ready");
     applyStep(delta);
     holdTimerRef.current = setTimeout(() => {
@@ -122,8 +126,18 @@ function YearStepper({ resetKey, onYearChange }) {
   const canDecrement = year > MIN_YEAR;
   const canIncrement = year < MAX_YEAR;
 
-  const buttonClassName =
-    "flex size-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-[#002623]/10 bg-white text-[#174545] transition-transform duration-100 ease-out [-webkit-tap-highlight-color:transparent] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100";
+  function buttonClassName(delta) {
+    const pressed = pressedDelta === delta;
+
+    return cn(
+      "flex size-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-[#002623]/10 bg-white text-[#174545] [-webkit-tap-highlight-color:transparent]",
+      "transition-[transform,background-color,box-shadow,color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]",
+      pressed
+        ? "translate-y-px scale-90 bg-[#e8e9eb] text-[#002623] shadow-inner"
+        : "shadow-sm hover:bg-[#f0f1f3]",
+      "disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+    );
+  }
 
   return (
     <div
@@ -140,9 +154,9 @@ function YearStepper({ resetKey, onYearChange }) {
         onLostPointerCapture={stopHold}
         onClick={() => handleClick(-1)}
         onContextMenu={(event) => event.preventDefault()}
-        className={buttonClassName}
+        className={buttonClassName(-1)}
       >
-        <Minus className="size-4" />
+        <Minus className={cn("size-4 transition-transform duration-150", pressedDelta === -1 && "scale-90")} />
       </button>
 
       <div
@@ -182,9 +196,9 @@ function YearStepper({ resetKey, onYearChange }) {
         onLostPointerCapture={stopHold}
         onClick={() => handleClick(1)}
         onContextMenu={(event) => event.preventDefault()}
-        className={buttonClassName}
+        className={buttonClassName(1)}
       >
-        <Plus className="size-4" />
+        <Plus className={cn("size-4 transition-transform duration-150", pressedDelta === 1 && "scale-90")} />
       </button>
     </div>
   );
@@ -301,7 +315,7 @@ export function CarSearchDrawer({
           <div>
             <span className="mb-2 block text-sm font-semibold text-[#002623]">اختر الموديل</span>
             <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
-              <Command dir="rtl" className="rounded-[24px] bg-transparent [&_[data-slot=input-group]]:h-12 [&_[data-slot=command-input]]:text-base">
+              <Command dir="rtl" className="rounded-[24px] bg-transparent [&_[data-slot=input-group]]:h-13 [&_[data-slot=command-input]]:text-base">
                 <CommandInput placeholder="ابحث بالاسم أو الشركة المصنعة..." />
                 <CommandList className="max-h-48">
                   <CommandEmpty>

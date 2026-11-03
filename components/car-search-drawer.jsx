@@ -52,12 +52,21 @@ export function CarSearchDrawer({
 }) {
   const [selectedYear, setSelectedYear] = useState(DEFAULT_YEAR);
   const [selectedService, setSelectedService] = useState("purchaseInspection");
+  const [serviceDetailsOpen, setServiceDetailsOpen] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setServiceDetailsOpen(false);
+      return;
+    }
     setSelectedYear(DEFAULT_YEAR);
     setSelectedService("purchaseInspection");
+    setServiceDetailsOpen(false);
   }, [open]);
+
+  useEffect(() => {
+    setServiceDetailsOpen(false);
+  }, [selectedService]);
 
   const yearValue = Number(selectedYear) || MAX_YEAR;
   const canDecreaseYear = yearValue > MIN_YEAR;
@@ -74,6 +83,7 @@ export function CarSearchDrawer({
   const canSearch = Boolean(model?.id && selectedYear && selectedService);
   const selectedIndex = DRAWER_SERVICES.findIndex((service) => service.param === selectedService);
   const activeService = selectedIndex >= 0 ? DRAWER_SERVICES[selectedIndex] : null;
+  const fullService = SERVICES.find((service) => service.param === selectedService) ?? null;
 
   function handleSearch() {
     if (!canSearch) {
@@ -98,14 +108,14 @@ export function CarSearchDrawer({
           "--drawer-content-max-height": "calc(100dvh - 1rem)",
         }}
       >
-        <DrawerHeader className="text-right md:text-right">
-          <DrawerTitle className="font-display text-[#002623]">اختر التفاصيل</DrawerTitle>
-          <DrawerDescription className="text-[#757575]">
-            {modelLabel || "اختر الموديل وسنة الصنع والخدمة"}
-          </DrawerDescription>
-        </DrawerHeader>
-
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pt-3 pb-6 text-right">
+          <DrawerHeader className="p-0 text-right md:text-right">
+            <DrawerTitle className="font-display text-[#002623]">اختر التفاصيل</DrawerTitle>
+            <DrawerDescription className="text-[#757575]">
+              {modelLabel || "اختر الموديل وسنة الصنع والخدمة"}
+            </DrawerDescription>
+          </DrawerHeader>
+
           <div>
             <span className="mb-2 block text-sm font-semibold text-[#002623]">الخدمة</span>
 
@@ -139,18 +149,17 @@ export function CarSearchDrawer({
                 key={activeService?.param}
                 className="animate-in fade-in-0 slide-in-from-top-1 overflow-visible rounded-[40px] border-none py-0 ring-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] duration-300"
               >
-                <CardContent className="space-y-3 p-5 text-right">
+                <CardContent className="space-y-3 p-5 text-center">
                   {activeService ? (
                     <>
-                      <p className="text-center text-sm leading-relaxed text-[#757575]">{activeService.description}</p>
-                      <ul className="space-y-2">
-                        {activeService.points.map((point, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm font-medium text-[#002623]">
-                            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#4caf50]" />
-                            <span className="min-w-0">{point}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <p className="text-sm leading-relaxed text-[#757575]">{activeService.description}</p>
+                      <button
+                        type="button"
+                        onClick={() => setServiceDetailsOpen(true)}
+                        className="cursor-pointer text-sm font-medium text-[#174545] underline underline-offset-4 hover:text-[#002623]"
+                      >
+                        تفاصيل
+                      </button>
                     </>
                   ) : null}
                 </CardContent>
@@ -159,54 +168,9 @@ export function CarSearchDrawer({
           </div>
 
           <div>
-            <span className="mb-2 block text-sm font-semibold text-[#002623]">سنة الصنع</span>
-            <div
-              dir="ltr"
-              className="mx-auto flex h-13 w-full max-w-[220px] items-center justify-between rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]"
-            >
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="سنة أقدم"
-                disabled={!canDecreaseYear}
-                onClick={() => changeYear(yearValue - 1)}
-                className="size-11 shrink-0 cursor-pointer rounded-full border-[#002623]/10 bg-white text-[#174545] hover:bg-[#f0f1f3] disabled:cursor-not-allowed"
-              >
-                <Minus className="size-4" />
-              </Button>
-
-              <div className="flex min-w-0 flex-1 items-center justify-center px-2 text-center text-base font-semibold tabular-nums">
-                {yearValue === MIN_YEAR ? (
-                  <span>أقدم</span>
-                ) : (
-                  <NumberFlow
-                    value={yearValue}
-                    locales="en-US"
-                    format={{ useGrouping: false, maximumFractionDigits: 0 }}
-                    style={{ fontVariantNumeric: "tabular-nums", lineHeight: 0.85 }}
-                  />
-                )}
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="سنة أحدث"
-                disabled={!canIncreaseYear}
-                onClick={() => changeYear(yearValue + 1)}
-                className="size-11 shrink-0 cursor-pointer rounded-full border-[#002623]/10 bg-white text-[#174545] hover:bg-[#f0f1f3] disabled:cursor-not-allowed"
-              >
-                <Plus className="size-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div>
             <span className="mb-2 block text-sm font-semibold text-[#002623]">الموديل</span>
             <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
-              <Command dir="rtl" className="rounded-[24px] bg-transparent">
+              <Command dir="rtl" className="rounded-[24px] bg-transparent [&_[data-slot=input-group]]:h-12 [&_[data-slot=command-input]]:text-base">
                 <CommandInput placeholder="ابحث بالاسم أو الشركة المصنعة..." />
                 <CommandList className="max-h-48">
                   <CommandEmpty>
@@ -247,6 +211,51 @@ export function CarSearchDrawer({
               </Command>
             </div>
           </div>
+
+          <div>
+            <span className="mb-2 block text-sm font-semibold text-[#002623]">سنة الصنع</span>
+            <div
+              dir="ltr"
+              className="mx-auto flex h-13 w-full max-w-[220px] items-center justify-between rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]"
+            >
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="سنة أقدم"
+                disabled={!canDecreaseYear}
+                onClick={() => changeYear(yearValue - 1)}
+                className="size-11 shrink-0 cursor-pointer rounded-full border-[#002623]/10 bg-white text-[#174545] transition-[transform,background-color,box-shadow] hover:bg-[#f0f1f3] active:translate-y-px active:scale-95 active:bg-[#e8e9eb] active:shadow-inner disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:scale-100"
+              >
+                <Minus className="size-4" />
+              </Button>
+
+              <div className="flex min-w-0 flex-1 items-center justify-center px-2 text-center text-base font-semibold tabular-nums">
+                {yearValue === MIN_YEAR ? (
+                  <span>أقدم</span>
+                ) : (
+                  <NumberFlow
+                    value={yearValue}
+                    locales="en-US"
+                    format={{ useGrouping: false, maximumFractionDigits: 0 }}
+                    style={{ fontVariantNumeric: "tabular-nums", lineHeight: 0.85 }}
+                  />
+                )}
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="سنة أحدث"
+                disabled={!canIncreaseYear}
+                onClick={() => changeYear(yearValue + 1)}
+                className="size-11 shrink-0 cursor-pointer rounded-full border-[#002623]/10 bg-white text-[#174545] transition-[transform,background-color,box-shadow] hover:bg-[#f0f1f3] active:translate-y-px active:scale-95 active:bg-[#e8e9eb] active:shadow-inner disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:scale-100"
+              >
+                <Plus className="size-4" />
+              </Button>
+            </div>
+          </div>
         </div>
 
         <DrawerFooter className="pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
@@ -261,6 +270,46 @@ export function CarSearchDrawer({
             بحث
           </Button>
         </DrawerFooter>
+
+        <Drawer open={serviceDetailsOpen} onOpenChange={setServiceDetailsOpen} showSwipeHandle>
+          <DrawerContent className="sm:mx-auto sm:w-[450px] sm:[--drawer-content-width:450px] sm:data-[swipe-axis=y]:inset-x-0">
+            <DrawerHeader className="text-right md:text-right">
+              <DrawerTitle className="font-display text-[#002623]">
+                {fullService?.title || "تفاصيل الخدمة"}
+              </DrawerTitle>
+              <DrawerDescription className="sr-only">
+                {fullService?.title || "تفاصيل الخدمة"}
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pt-3 pb-6 text-right">
+              {fullService ? (
+                <>
+                  <p className="text-sm leading-relaxed text-[#757575]">{fullService.description}</p>
+                  <ul className="space-y-3">
+                    {fullService.points.map((point, index) => (
+                      <li key={index} className="flex items-start gap-2 text-sm font-medium text-[#002623]">
+                        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#4caf50]" />
+                        <span className="min-w-0">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </div>
+
+            <DrawerFooter className="pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+              <Button
+                type="button"
+                size="lg"
+                onClick={() => setServiceDetailsOpen(false)}
+                className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
+              >
+                حسناً
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       </DrawerContent>
     </Drawer>
   );

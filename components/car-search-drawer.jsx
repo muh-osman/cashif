@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NumberFlow from "@number-flow/react";
 import { Check, Minus, Plus, Search, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -25,6 +25,10 @@ const SERVICE_SHORT_DESCRIPTIONS = {
   passengerCheck: "فحص مخصص قبل السفر للتأكد من سلامة السيارة وجاهزيتها لرحلة آمنة ومريحة",
 };
 
+const SERVICE_DRAWER_TITLES = {
+  checkit: "فحص مخدوم",
+};
+
 const DRAWER_SERVICES = [
   SERVICES.find((service) => service.param === "purchaseInspection"),
   SERVICES.find((service) => service.param === "checkit"),
@@ -33,12 +37,91 @@ const DRAWER_SERVICES = [
   .filter(Boolean)
   .map((service) => ({
     ...service,
+    title: SERVICE_DRAWER_TITLES[service.param] ?? service.title,
     description: SERVICE_SHORT_DESCRIPTIONS[service.param] ?? service.description,
   }));
 
 const MAX_YEAR = YEARS[0];
 const MIN_YEAR = YEARS[YEARS.length - 1];
-const DEFAULT_YEAR = "2024";
+const DEFAULT_YEAR = 2024;
+const YEAR_SPIN_TIMING = { duration: 180, easing: "ease-out" };
+const YEAR_FADE_TIMING = { duration: 100, easing: "ease-out" };
+
+function clampYear(year) {
+  return Math.min(MAX_YEAR, Math.max(MIN_YEAR, year));
+}
+
+function YearStepper({ resetKey, onYearChange }) {
+  const [year, setYear] = useState(DEFAULT_YEAR);
+  const [direction, setDirection] = useState(0);
+  const onYearChangeRef = useRef(onYearChange);
+  onYearChangeRef.current = onYearChange;
+
+  useEffect(() => {
+    setYear(DEFAULT_YEAR);
+    setDirection(0);
+    onYearChangeRef.current?.(String(DEFAULT_YEAR));
+  }, [resetKey]);
+
+  function step(delta) {
+    const next = clampYear(year + delta);
+    if (next === year) return;
+    setDirection(delta);
+    setYear(next);
+    onYearChangeRef.current?.(String(next));
+  }
+
+  return (
+    <div
+      dir="ltr"
+      className="mx-auto flex h-13 w-full max-w-[220px] items-center justify-between rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]"
+    >
+      <button
+        type="button"
+        aria-label="سنة أقدم"
+        disabled={year <= MIN_YEAR}
+        onClick={() => step(-1)}
+        className="flex size-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-[#002623]/10 bg-white text-[#174545] transition-[transform,background-color,box-shadow,opacity] duration-150 hover:bg-[#f0f1f3] active:translate-y-px active:scale-90 active:bg-[#e8e9eb] active:shadow-inner disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0 disabled:active:scale-100"
+      >
+        <Minus className="size-4" />
+      </button>
+
+      <div className="relative flex h-8 min-w-0 flex-1 select-none items-center justify-center overflow-hidden px-2 text-center text-base font-semibold tabular-nums">
+        {year === MIN_YEAR ? (
+          <span
+            key="oldest"
+            className={cn(
+              "animate-in fade-in-0 duration-150",
+              direction < 0 ? "slide-in-from-top-2" : "slide-in-from-bottom-2"
+            )}
+          >
+            أقدم
+          </span>
+        ) : (
+          <NumberFlow
+            value={year}
+            locales="en-US"
+            format={{ useGrouping: false, maximumFractionDigits: 0 }}
+            transformTiming={YEAR_SPIN_TIMING}
+            spinTiming={YEAR_SPIN_TIMING}
+            opacityTiming={YEAR_FADE_TIMING}
+            style={{ fontVariantNumeric: "tabular-nums", lineHeight: 0.85 }}
+          />
+        )}
+      </div>
+
+      <button
+        type="button"
+        aria-label="سنة أحدث"
+        disabled={year >= MAX_YEAR}
+        onClick={() => step(1)}
+        className="flex size-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-[#002623]/10 bg-white text-[#174545] transition-[transform,background-color,box-shadow,opacity] duration-150 hover:bg-[#f0f1f3] active:translate-y-px active:scale-90 active:bg-[#e8e9eb] active:shadow-inner disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0 disabled:active:scale-100"
+      >
+        <Plus className="size-4" />
+      </button>
+    </div>
+  );
+}
 
 export function CarSearchDrawer({
   open,
@@ -50,7 +133,7 @@ export function CarSearchDrawer({
   catalogLoading = false,
   onSearch,
 }) {
-  const [selectedYear, setSelectedYear] = useState(DEFAULT_YEAR);
+  const selectedYearRef = useRef(String(DEFAULT_YEAR));
   const [selectedService, setSelectedService] = useState("purchaseInspection");
   const [serviceDetailsOpen, setServiceDetailsOpen] = useState(false);
 
@@ -59,7 +142,7 @@ export function CarSearchDrawer({
       setServiceDetailsOpen(false);
       return;
     }
-    setSelectedYear(DEFAULT_YEAR);
+    selectedYearRef.current = String(DEFAULT_YEAR);
     setSelectedService("purchaseInspection");
     setServiceDetailsOpen(false);
   }, [open]);
@@ -68,19 +151,7 @@ export function CarSearchDrawer({
     setServiceDetailsOpen(false);
   }, [selectedService]);
 
-  const yearValue = Number(selectedYear) || MAX_YEAR;
-  const canDecreaseYear = yearValue > MIN_YEAR;
-  const canIncreaseYear = yearValue < MAX_YEAR;
-
-  function changeYear(nextYear) {
-    const clamped = Math.min(MAX_YEAR, Math.max(MIN_YEAR, nextYear));
-    setSelectedYear(String(clamped));
-  }
-
-  const modelLabel = model
-    ? `${model.nameAr}${model.nameEn ? ` - ${model.nameEn}` : ""}`
-    : "";
-  const canSearch = Boolean(model?.id && selectedYear && selectedService);
+  const canSearch = Boolean(model?.id && selectedService);
   const selectedIndex = DRAWER_SERVICES.findIndex((service) => service.param === selectedService);
   const activeService = selectedIndex >= 0 ? DRAWER_SERVICES[selectedIndex] : null;
   const fullService = SERVICES.find((service) => service.param === selectedService) ?? null;
@@ -93,7 +164,7 @@ export function CarSearchDrawer({
 
     onSearch?.({
       model,
-      year: selectedYear,
+      year: selectedYearRef.current,
       service: selectedService,
     });
     onOpenChange?.(false);
@@ -109,15 +180,8 @@ export function CarSearchDrawer({
         }}
       >
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pt-3 pb-6 text-right">
-          <DrawerHeader className="p-0 text-right md:text-right">
-            <DrawerTitle className="font-display text-[#002623]">اختر التفاصيل</DrawerTitle>
-            <DrawerDescription className="text-[#757575]">
-              {modelLabel || "اختر الموديل وسنة الصنع والخدمة"}
-            </DrawerDescription>
-          </DrawerHeader>
-
           <div>
-            <span className="mb-2 block text-sm font-semibold text-[#002623]">الخدمة</span>
+            <span className="mb-2 block text-sm font-semibold text-[#002623]">اختر الخدمة</span>
 
             <div className="relative overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
               <span
@@ -149,18 +213,18 @@ export function CarSearchDrawer({
                 key={activeService?.param}
                 className="animate-in fade-in-0 slide-in-from-top-1 overflow-visible rounded-[40px] border-none py-0 ring-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] duration-300"
               >
-                <CardContent className="space-y-3 p-5 text-center">
+                <CardContent className="p-5 text-center">
                   {activeService ? (
-                    <>
-                      <p className="text-sm leading-relaxed text-[#757575]">{activeService.description}</p>
+                    <p className="text-sm leading-relaxed text-[#757575]">
+                      {activeService.description}
                       <button
                         type="button"
                         onClick={() => setServiceDetailsOpen(true)}
-                        className="cursor-pointer text-sm font-medium text-[#174545] underline underline-offset-4 hover:text-[#002623]"
+                        className="ms-1 inline align-middle cursor-pointer text-sm font-medium text-[#174545] underline underline-offset-4 transition hover:text-[#002623]"
                       >
-                        تفاصيل
+                        المزيد
                       </button>
-                    </>
+                    </p>
                   ) : null}
                 </CardContent>
               </Card>
@@ -168,7 +232,7 @@ export function CarSearchDrawer({
           </div>
 
           <div>
-            <span className="mb-2 block text-sm font-semibold text-[#002623]">الموديل</span>
+            <span className="mb-2 block text-sm font-semibold text-[#002623]">اختر الموديل</span>
             <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
               <Command dir="rtl" className="rounded-[24px] bg-transparent [&_[data-slot=input-group]]:h-12 [&_[data-slot=command-input]]:text-base">
                 <CommandInput placeholder="ابحث بالاسم أو الشركة المصنعة..." />
@@ -214,47 +278,12 @@ export function CarSearchDrawer({
 
           <div>
             <span className="mb-2 block text-sm font-semibold text-[#002623]">سنة الصنع</span>
-            <div
-              dir="ltr"
-              className="mx-auto flex h-13 w-full max-w-[220px] items-center justify-between rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]"
-            >
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="سنة أقدم"
-                disabled={!canDecreaseYear}
-                onClick={() => changeYear(yearValue - 1)}
-                className="size-11 shrink-0 cursor-pointer rounded-full border-[#002623]/10 bg-white text-[#174545] transition-[transform,background-color,box-shadow] hover:bg-[#f0f1f3] active:translate-y-px active:scale-95 active:bg-[#e8e9eb] active:shadow-inner disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:scale-100"
-              >
-                <Minus className="size-4" />
-              </Button>
-
-              <div className="flex min-w-0 flex-1 items-center justify-center px-2 text-center text-base font-semibold tabular-nums">
-                {yearValue === MIN_YEAR ? (
-                  <span>أقدم</span>
-                ) : (
-                  <NumberFlow
-                    value={yearValue}
-                    locales="en-US"
-                    format={{ useGrouping: false, maximumFractionDigits: 0 }}
-                    style={{ fontVariantNumeric: "tabular-nums", lineHeight: 0.85 }}
-                  />
-                )}
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="سنة أحدث"
-                disabled={!canIncreaseYear}
-                onClick={() => changeYear(yearValue + 1)}
-                className="size-11 shrink-0 cursor-pointer rounded-full border-[#002623]/10 bg-white text-[#174545] transition-[transform,background-color,box-shadow] hover:bg-[#f0f1f3] active:translate-y-px active:scale-95 active:bg-[#e8e9eb] active:shadow-inner disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:scale-100"
-              >
-                <Plus className="size-4" />
-              </Button>
-            </div>
+            <YearStepper
+              resetKey={open}
+              onYearChange={(year) => {
+                selectedYearRef.current = year;
+              }}
+            />
           </div>
         </div>
 

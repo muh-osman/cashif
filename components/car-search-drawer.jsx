@@ -14,6 +14,13 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SERVICES } from "@/components/services-grid";
 import { cn } from "@/lib/utils";
 import { YEARS } from "@/lib/new-branch-plans";
@@ -50,6 +57,10 @@ const HOLD_REPEAT_MS = 70;
 const COMMAND_NONE = "__none__";
 const MODEL_LIST_MAX_HEIGHT = 192; // max-h-48
 const MODEL_LIST_LOADING_HEIGHT = 72;
+const YEAR_SELECT_ITEMS = YEARS.map((itemYear) => ({
+  value: String(itemYear),
+  label: itemYear === MIN_YEAR ? "أقدم" : String(itemYear),
+}));
 
 function clampYear(year) {
   return Math.min(MAX_YEAR, Math.max(MIN_YEAR, year));
@@ -83,13 +94,21 @@ function YearStepper({ resetKey, onYearChange }) {
     };
   }, []);
 
-  function applyStep(delta) {
-    const next = clampYear(yearRef.current + delta);
+  function applyYear(nextYear, { instant = false } = {}) {
+    const next = clampYear(nextYear);
     if (next === yearRef.current) return false;
     yearRef.current = next;
+    setMotion(instant ? "instant" : "ready");
     setYear(next);
     onYearChangeRef.current?.(String(next));
+    if (instant) {
+      requestAnimationFrame(() => setMotion("ready"));
+    }
     return true;
+  }
+
+  function applyStep(delta) {
+    return applyYear(yearRef.current + delta);
   }
 
   function stopHold() {
@@ -124,6 +143,11 @@ function YearStepper({ resetKey, onYearChange }) {
       return;
     }
     applyStep(delta);
+  }
+
+  function handleSelectYear(value) {
+    if (value == null) return;
+    applyYear(Number(value), { instant: true });
   }
 
   const yearIndex = MAX_YEAR - year;
@@ -170,7 +194,7 @@ function YearStepper({ resetKey, onYearChange }) {
       >
         <div
           className={cn(
-            "will-change-transform",
+            "pointer-events-none will-change-transform",
             motion === "ready" && "transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
             motion === "hold" && "transition-transform duration-75 ease-linear"
           )}
@@ -188,6 +212,32 @@ function YearStepper({ resetKey, onYearChange }) {
             </div>
           ))}
         </div>
+
+        <Select
+          items={YEAR_SELECT_ITEMS}
+          value={String(year)}
+          onValueChange={handleSelectYear}
+        >
+          <SelectTrigger
+            aria-label="سنة الصنع"
+            className="absolute inset-0 z-10 h-auto w-full min-w-0 cursor-pointer justify-center rounded-none border-0 bg-transparent p-0 shadow-none ring-0 focus-visible:border-transparent focus-visible:ring-0 data-[size=default]:h-full [&>svg]:hidden *:data-[slot=select-value]:sr-only"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent
+            align="center"
+            alignItemWithTrigger={false}
+            sideOffset={8}
+            positionerClassName="z-[70]"
+            className="max-h-60 w-[220px] min-w-[220px] rounded-2xl font-display tabular-nums"
+          >
+            {YEAR_SELECT_ITEMS.map((item) => (
+              <SelectItem key={item.value} value={item.value} className="justify-center pr-3 text-center">
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <button

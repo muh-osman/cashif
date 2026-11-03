@@ -49,6 +49,8 @@ export function SiteShell({ children, isLoggedIn = false }) {
   const hideSearch =
     isHome ||
     isKiosk ||
+    pathname === "/prices" ||
+    pathname.startsWith("/prices/") ||
     pathname === "/login" ||
     pathname.startsWith("/login/");
 
@@ -88,9 +90,7 @@ export function SiteShell({ children, isLoggedIn = false }) {
 
   return (
     <AuthProvider initialLoggedIn={isLoggedIn}>
-      <div className={hideSearch ? "hidden" : undefined} aria-hidden={hideSearch || undefined}>
-        <StickySearch />
-      </div>
+      {!hideSearch ? <StickySearch /> : null}
       <div className={hideSearch ? undefined : "pt-24"}>{children}</div>
       {!isKiosk && <WhatsAppButton />}
       {!isKiosk && <MobileBottomNav />}

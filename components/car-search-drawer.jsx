@@ -162,7 +162,7 @@ function YearStepper({ resetKey, onYearChange }) {
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="relative h-8 min-w-0 flex-1 select-none overflow-hidden px-2 text-center text-base font-semibold tabular-nums"
+        className="font-display relative h-8 min-w-0 flex-1 select-none overflow-hidden px-2 text-center text-base tabular-nums"
       >
         <div
           className={cn(
@@ -262,57 +262,6 @@ export function CarSearchDrawer({
       >
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pt-3 pb-6 text-right">
           <div>
-            <span className="mb-2 block text-sm font-semibold text-[#002623]">اختر الخدمة</span>
-
-            <div className="relative overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
-              <span
-                className={cn(
-                  "pointer-events-none absolute inset-y-0 right-0 w-1/3 rounded-[24px] border-4 border-white bg-[#f0f1f3] transition-transform duration-300 ease-out",
-                  selectedIndex === 1 && "-translate-x-full",
-                  selectedIndex === 2 && "-translate-x-[200%]"
-                )}
-              />
-              <div className="relative z-10 grid h-13 grid-cols-3">
-                {DRAWER_SERVICES.map((service) => (
-                  <button
-                    key={service.param}
-                    type="button"
-                    onClick={() => setSelectedService(service.param)}
-                    className={cn(
-                      "flex h-full cursor-pointer items-center justify-center px-1 text-center text-[11px] font-medium leading-4 text-[#174545] sm:text-sm sm:leading-5",
-                      selectedService === service.param && "font-semibold"
-                    )}
-                  >
-                    {service.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-3">
-              <Card
-                key={activeService?.param}
-                className="animate-in fade-in-0 slide-in-from-top-1 overflow-visible rounded-[40px] border-none py-0 ring-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] duration-300"
-              >
-                <CardContent className="p-5 text-center">
-                  {activeService ? (
-                    <p className="text-sm leading-relaxed text-[#757575]">
-                      {activeService.description}
-                      <button
-                        type="button"
-                        onClick={() => setServiceDetailsOpen(true)}
-                        className="ms-1 inline align-middle cursor-pointer text-sm font-medium text-[#174545] underline underline-offset-4 transition hover:text-[#002623]"
-                      >
-                        المزيد
-                      </button>
-                    </p>
-                  ) : null}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <div>
             <span className="mb-2 block text-sm font-semibold text-[#002623]">اختر الموديل</span>
             <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
               <Command dir="rtl" className="rounded-[24px] bg-transparent [&_[data-slot=input-group]]:h-13 [&_[data-slot=command-input]]:text-base">
@@ -365,6 +314,57 @@ export function CarSearchDrawer({
                 selectedYearRef.current = year;
               }}
             />
+          </div>
+
+          <div>
+            <span className="mb-2 block text-sm font-semibold text-[#002623]">اختر الخدمة</span>
+
+            <div className="relative overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
+              <span
+                className={cn(
+                  "pointer-events-none absolute inset-y-0 right-0 w-1/3 rounded-[24px] border-4 border-white bg-[#f0f1f3] transition-transform duration-300 ease-out",
+                  selectedIndex === 1 && "-translate-x-full",
+                  selectedIndex === 2 && "-translate-x-[200%]"
+                )}
+              />
+              <div className="relative z-10 grid h-13 grid-cols-3">
+                {DRAWER_SERVICES.map((service) => (
+                  <button
+                    key={service.param}
+                    type="button"
+                    onClick={() => setSelectedService(service.param)}
+                    className={cn(
+                      "flex h-full cursor-pointer items-center justify-center px-1 text-center text-[11px] font-medium leading-4 text-[#174545] sm:text-sm sm:leading-5",
+                      selectedService === service.param && "font-semibold"
+                    )}
+                  >
+                    {service.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <Card
+                key={activeService?.param}
+                className="animate-in fade-in-0 slide-in-from-top-1 overflow-visible rounded-[40px] border-none py-0 ring-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] duration-300"
+              >
+                <CardContent className="p-5 text-center">
+                  {activeService ? (
+                    <p className="text-sm leading-relaxed text-[#757575]">
+                      {activeService.description}
+                      <button
+                        type="button"
+                        onClick={() => setServiceDetailsOpen(true)}
+                        className="ms-1 inline align-middle cursor-pointer text-sm font-medium text-[#174545] underline underline-offset-4 transition hover:text-[#002623]"
+                      >
+                        المزيد
+                      </button>
+                    </p>
+                  ) : null}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
 

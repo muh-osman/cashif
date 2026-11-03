@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Check, Minus, Plus, Search, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,10 @@ const DEFAULT_YEAR = 2024;
 const YEAR_ITEM_HEIGHT = 32;
 const HOLD_START_MS = 300;
 const HOLD_REPEAT_MS = 70;
+// cmdk auto-highlights the first item; keep a non-matching value so nothing looks selected until the user interacts.
+const COMMAND_NONE = "__none__";
+const MODEL_LIST_MAX_HEIGHT = 192; // max-h-48
+const MODEL_LIST_LOADING_HEIGHT = 72;
 
 function clampYear(year) {
   return Math.min(MAX_YEAR, Math.max(MIN_YEAR, year));
@@ -217,6 +221,9 @@ export function CarSearchDrawer({
   const selectedYearRef = useRef(String(DEFAULT_YEAR));
   const [selectedService, setSelectedService] = useState("purchaseInspection");
   const [serviceDetailsOpen, setServiceDetailsOpen] = useState(false);
+  const [commandValue, setCommandValue] = useState(COMMAND_NONE);
+  // Collapsed while fetching; expands after the first paint so height can animate.
+  const [listReveal, setListReveal] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -226,11 +233,42 @@ export function CarSearchDrawer({
     selectedYearRef.current = String(DEFAULT_YEAR);
     setSelectedService("purchaseInspection");
     setServiceDetailsOpen(false);
+    setCommandValue(COMMAND_NONE);
   }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setListReveal(false);
+      return;
+    }
+    // Before paint: cached data opens fully, in-flight fetch stays collapsed.
+    setListReveal(!catalogLoading);
+  }, [open]);
+
+  useEffect(() => {
+    if (open && catalogLoading) setListReveal(false);
+  }, [open, catalogLoading]);
 
   useEffect(() => {
     setServiceDetailsOpen(false);
   }, [selectedService]);
+
+  useEffect(() => {
+    if (!open || catalogLoading || listReveal) return;
+
+    // Wait until the collapsed loading height is painted, then expand.
+    let outerFrame = 0;
+    let innerFrame = 0;
+    outerFrame = requestAnimationFrame(() => {
+      innerFrame = requestAnimationFrame(() => {
+        setListReveal(true);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(outerFrame);
+      cancelAnimationFrame(innerFrame);
+    };
+  }, [open, catalogLoading, listReveal]);
 
   const canSearch = Boolean(model?.id && selectedService);
   const selectedIndex = DRAWER_SERVICES.findIndex((service) => service.param === selectedService);
@@ -264,13 +302,42 @@ export function CarSearchDrawer({
           <div>
             <span className="mb-2 block text-sm font-semibold text-[#002623]">اختر الموديل</span>
             <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
-              <Command dir="rtl" className="rounded-[24px] bg-transparent [&_[data-slot=input-group]]:h-13 [&_[data-slot=command-input]]:text-base">
-                <CommandInput placeholder="ابحث بالاسم أو الشركة المصنعة..." />
-                <CommandList className="max-h-48">
-                  <CommandEmpty>
-                    {catalogLoading ? (
-                      <span className="block px-4 py-3 text-center text-sm text-[#757575]">جاري التحميل..</span>
-                    ) : (
+              <Command
+                dir="rtl"
+                value={commandValue}
+                onValueChange={setCommandValue}
+                disablePointerSelection
+                className="rounded-[24px] bg-transparent [&_[data-slot=input-group]]:h-13 [&_[data-slot=command-input]]:text-base"
+              >
+                <CommandInput
+                  name="car-model-search"
+                  aria-label="ابحث عن موديل السيارة"
+                  placeholder="ابحث بالاسم أو الشركة المصنعة..."
+                />
+                {catalogLoading || !listReveal ? (
+                  <div
+                    className="overflow-hidden"
+                    style={{ height: MODEL_LIST_LOADING_HEIGHT }}
+                  >
+                    <div className="px-4 py-6 text-center text-sm text-[#757575]">جاري التحميل..</div>
+                  </div>
+                ) : (
+                  <CommandList
+                    className="max-h-none overflow-y-auto transition-[height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                    style={{
+                      // cmdk sets --cmdk-list-height from the visible results sizer.
+                      height: `min(var(--cmdk-list-height, ${MODEL_LIST_LOADING_HEIGHT}px), ${MODEL_LIST_MAX_HEIGHT}px)`,
+                    }}
+                    onPointerLeave={() => {
+                      if (!model) {
+                        setCommandValue(COMMAND_NONE);
+                        return;
+                      }
+                      const manufacturerName = manufacturersById.get(model.carManufacturerId) || "";
+                      setCommandValue(`${model.nameAr} ${model.nameEn} ${manufacturerName}`);
+                    }}
+                  >
+                    <CommandEmpty>
                       <a
                         href="https://wa.me/966920019948?text=استعلام عن موديل غير موجود"
                         target="_blank"
@@ -279,29 +346,37 @@ export function CarSearchDrawer({
                       >
                         لم تجد موديلك؟ تواصل معنا
                       </a>
-                    )}
-                  </CommandEmpty>
-                  <CommandGroup>
-                    {models.map((item) => {
-                      const manufacturerName = manufacturersById.get(item.carManufacturerId) || "";
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {models.map((item) => {
+                        const manufacturerName = manufacturersById.get(item.carManufacturerId) || "";
+                        const itemValue = `${item.nameAr} ${item.nameEn} ${manufacturerName}`;
+                        const isChosen = model?.id === item.id;
 
-                      return (
-                        <CommandItem
-                          key={item.id}
-                          value={`${item.nameAr} ${item.nameEn} ${manufacturerName}`}
-                          onSelect={() => onModelChange?.(item)}
-                          className="flex items-center"
-                        >
-                          <Check className={cn("ml-2 h-4 w-4", model?.id === item.id ? "opacity-100" : "opacity-0")} />
-                          <span>
-                            {item.nameAr} - {item.nameEn}
-                          </span>
-                          {manufacturerName ? <span className="mr-2 text-xs text-[#888]">| {manufacturerName}</span> : null}
-                        </CommandItem>
-                      );
-                    })}
-                  </CommandGroup>
-                </CommandList>
+                        return (
+                          <CommandItem
+                            key={item.id}
+                            value={itemValue}
+                            onSelect={() => {
+                              setCommandValue(itemValue);
+                              onModelChange?.(item);
+                            }}
+                            className={cn(
+                              "flex items-center hover:bg-muted",
+                              isChosen && "bg-[#f0f1f3] hover:bg-[#e8e9eb] data-selected:bg-[#e8e9eb]"
+                            )}
+                          >
+                            <Check className={cn("ml-2 h-4 w-4", isChosen ? "opacity-100" : "opacity-0")} />
+                            <span>
+                              {item.nameAr} - {item.nameEn}
+                            </span>
+                            {manufacturerName ? <span className="mr-2 text-xs text-[#888]">| {manufacturerName}</span> : null}
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                )}
               </Command>
             </div>
           </div>
@@ -344,11 +419,8 @@ export function CarSearchDrawer({
               </div>
             </div>
 
-            <div className="mt-3">
-              <Card
-                key={activeService?.param}
-                className="animate-in fade-in-0 slide-in-from-top-1 overflow-visible rounded-[40px] border-none py-0 ring-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] duration-300"
-              >
+            <div className="mt-3 rounded-[40px] shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
+              <Card className="rounded-[40px] border-none py-0 shadow-none ring-0">
                 <CardContent className="p-5 text-center">
                   {activeService ? (
                     <p className="text-sm leading-relaxed text-[#757575]">

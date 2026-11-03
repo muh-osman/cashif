@@ -57,22 +57,56 @@ function CommandDialog({
 
 function CommandInput({
   className,
+  type = "search",
+  name = "search",
+  enterKeyHint = "search",
   ...props
 }) {
+  const inputRef = React.useRef(null)
+
+  const setInputRef = React.useCallback((node) => {
+    inputRef.current = node
+    // cmdk hardcodes type="text" after spreading props; restore search semantics for the browser.
+    if (node && type) {
+      node.setAttribute("type", type)
+    }
+  }, [type])
+
+  // Re-apply after every commit — later renders from cmdk would otherwise reset type to "text".
+  React.useLayoutEffect(() => {
+    const input = inputRef.current
+    if (!input || !type) return
+    if (input.getAttribute("type") !== type) {
+      input.setAttribute("type", type)
+    }
+  })
+
   return (
     <div data-slot="command-input-wrapper" className="p-1 pb-0">
-      <InputGroup className="h-9 bg-input/50 px-3">
-        <CommandPrimitive.Input
-          data-slot="command-input"
-          className={cn(
-            "w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
-            className
-          )}
-          {...props} />
-        <InputGroupAddon>
-          <SearchIcon className="size-4 shrink-0 opacity-50" />
-        </InputGroupAddon>
-      </InputGroup>
+      <form
+        role="search"
+        action=""
+        onSubmit={(event) => event.preventDefault()}>
+        <InputGroup className="h-9 bg-input/50 px-3">
+          <CommandPrimitive.Input
+            ref={setInputRef}
+            data-slot="command-input"
+            name={name}
+            enterKeyHint={enterKeyHint}
+            inputMode="search"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            className={cn(
+              "w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+              className
+            )}
+            {...props} />
+          <InputGroupAddon>
+            <SearchIcon className="size-4 shrink-0 opacity-50" />
+          </InputGroupAddon>
+        </InputGroup>
+      </form>
     </div>
   );
 }

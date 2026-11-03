@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import NumberFlow from "@number-flow/react";
 import { Check, Minus, Plus, Search, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -44,8 +43,9 @@ const DRAWER_SERVICES = [
 const MAX_YEAR = YEARS[0];
 const MIN_YEAR = YEARS[YEARS.length - 1];
 const DEFAULT_YEAR = 2024;
-const YEAR_SPIN_TIMING = { duration: 180, easing: "ease-out" };
-const YEAR_FADE_TIMING = { duration: 100, easing: "ease-out" };
+const YEAR_ITEM_HEIGHT = 32;
+const HOLD_START_MS = 300;
+const HOLD_REPEAT_MS = 70;
 
 function clampYear(year) {
   return Math.min(MAX_YEAR, Math.max(MIN_YEAR, year));
@@ -53,23 +53,77 @@ function clampYear(year) {
 
 function YearStepper({ resetKey, onYearChange }) {
   const [year, setYear] = useState(DEFAULT_YEAR);
-  const [direction, setDirection] = useState(0);
+  const [motion, setMotion] = useState("ready"); // ready | instant | hold
+  const yearRef = useRef(DEFAULT_YEAR);
   const onYearChangeRef = useRef(onYearChange);
+  const holdTimerRef = useRef(null);
+  const holdIntervalRef = useRef(null);
+  const pointerHandledRef = useRef(false);
   onYearChangeRef.current = onYearChange;
 
   useEffect(() => {
+    yearRef.current = DEFAULT_YEAR;
+    setMotion("instant");
     setYear(DEFAULT_YEAR);
-    setDirection(0);
     onYearChangeRef.current?.(String(DEFAULT_YEAR));
+    const id = requestAnimationFrame(() => setMotion("ready"));
+    return () => cancelAnimationFrame(id);
   }, [resetKey]);
 
-  function step(delta) {
-    const next = clampYear(year + delta);
-    if (next === year) return;
-    setDirection(delta);
+  useEffect(() => {
+    return () => {
+      clearTimeout(holdTimerRef.current);
+      clearInterval(holdIntervalRef.current);
+    };
+  }, []);
+
+  function applyStep(delta) {
+    const next = clampYear(yearRef.current + delta);
+    if (next === yearRef.current) return false;
+    yearRef.current = next;
     setYear(next);
     onYearChangeRef.current?.(String(next));
+    return true;
   }
+
+  function stopHold() {
+    clearTimeout(holdTimerRef.current);
+    clearInterval(holdIntervalRef.current);
+    holdTimerRef.current = null;
+    holdIntervalRef.current = null;
+    setMotion("ready");
+  }
+
+  function startHold(delta, event) {
+    if (event.button != null && event.button !== 0) return;
+    event.preventDefault();
+    pointerHandledRef.current = true;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    stopHold();
+    setMotion("ready");
+    applyStep(delta);
+    holdTimerRef.current = setTimeout(() => {
+      setMotion("hold");
+      holdIntervalRef.current = setInterval(() => {
+        if (!applyStep(delta)) stopHold();
+      }, HOLD_REPEAT_MS);
+    }, HOLD_START_MS);
+  }
+
+  function handleClick(delta) {
+    if (pointerHandledRef.current) {
+      pointerHandledRef.current = false;
+      return;
+    }
+    applyStep(delta);
+  }
+
+  const yearIndex = MAX_YEAR - year;
+  const canDecrement = year > MIN_YEAR;
+  const canIncrement = year < MAX_YEAR;
+
+  const buttonClassName =
+    "flex size-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-[#002623]/10 bg-white text-[#174545] transition-transform duration-100 ease-out [-webkit-tap-highlight-color:transparent] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100";
 
   return (
     <div
@@ -79,43 +133,56 @@ function YearStepper({ resetKey, onYearChange }) {
       <button
         type="button"
         aria-label="سنة أقدم"
-        disabled={year <= MIN_YEAR}
-        onClick={() => step(-1)}
-        className="flex size-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-[#002623]/10 bg-white text-[#174545] transition-[transform,background-color,box-shadow,opacity] duration-150 hover:bg-[#f0f1f3] active:translate-y-px active:scale-90 active:bg-[#e8e9eb] active:shadow-inner disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0 disabled:active:scale-100"
+        disabled={!canDecrement}
+        onPointerDown={(event) => startHold(-1, event)}
+        onPointerUp={stopHold}
+        onPointerCancel={stopHold}
+        onLostPointerCapture={stopHold}
+        onClick={() => handleClick(-1)}
+        onContextMenu={(event) => event.preventDefault()}
+        className={buttonClassName}
       >
         <Minus className="size-4" />
       </button>
 
-      <div className="relative flex h-8 min-w-0 flex-1 select-none items-center justify-center overflow-hidden px-2 text-center text-base font-semibold tabular-nums">
-        {year === MIN_YEAR ? (
-          <span
-            key="oldest"
-            className={cn(
-              "animate-in fade-in-0 duration-150",
-              direction < 0 ? "slide-in-from-top-2" : "slide-in-from-bottom-2"
-            )}
-          >
-            أقدم
-          </span>
-        ) : (
-          <NumberFlow
-            value={year}
-            locales="en-US"
-            format={{ useGrouping: false, maximumFractionDigits: 0 }}
-            transformTiming={YEAR_SPIN_TIMING}
-            spinTiming={YEAR_SPIN_TIMING}
-            opacityTiming={YEAR_FADE_TIMING}
-            style={{ fontVariantNumeric: "tabular-nums", lineHeight: 0.85 }}
-          />
-        )}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="relative h-8 min-w-0 flex-1 select-none overflow-hidden px-2 text-center text-base font-semibold tabular-nums"
+      >
+        <div
+          className={cn(
+            "will-change-transform",
+            motion === "ready" && "transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+            motion === "hold" && "transition-transform duration-75 ease-linear"
+          )}
+          style={{
+            transform: `translate3d(0, ${-yearIndex * YEAR_ITEM_HEIGHT}px, 0)`,
+          }}
+        >
+          {YEARS.map((itemYear) => (
+            <div
+              key={itemYear}
+              className="flex h-8 items-center justify-center leading-none"
+              aria-hidden={itemYear !== year}
+            >
+              {itemYear === MIN_YEAR ? "أقدم" : itemYear}
+            </div>
+          ))}
+        </div>
       </div>
 
       <button
         type="button"
         aria-label="سنة أحدث"
-        disabled={year >= MAX_YEAR}
-        onClick={() => step(1)}
-        className="flex size-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-[#002623]/10 bg-white text-[#174545] transition-[transform,background-color,box-shadow,opacity] duration-150 hover:bg-[#f0f1f3] active:translate-y-px active:scale-90 active:bg-[#e8e9eb] active:shadow-inner disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0 disabled:active:scale-100"
+        disabled={!canIncrement}
+        onPointerDown={(event) => startHold(1, event)}
+        onPointerUp={stopHold}
+        onPointerCancel={stopHold}
+        onLostPointerCapture={stopHold}
+        onClick={() => handleClick(1)}
+        onContextMenu={(event) => event.preventDefault()}
+        className={buttonClassName}
       >
         <Plus className="size-4" />
       </button>

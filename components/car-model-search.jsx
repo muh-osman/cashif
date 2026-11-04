@@ -1,17 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
 import { CarSearchDrawer } from "@/components/car-search-drawer";
 import { getCachedCarCatalog, loadCarCatalog } from "@/lib/car-catalog";
 import { cn } from "@/lib/utils";
 
 const PLACEHOLDERS = ["أسعار الفحص...", "كامري | تويوتا", "أكورد | هوندا", "التيما | نيسان"];
+const DEFAULT_SERVICE = "purchaseInspection";
+const OPEN_SEARCH_PARAM = "openSearch";
 
-export function CarModelSearch({ className, isStuck, hideTrigger = false }) {
+export function CarModelSearch({ className, isStuck, hideTrigger = false, onSearch }) {
   const cachedCatalog = getCachedCarCatalog();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [defaultService, setDefaultService] = useState(DEFAULT_SERVICE);
   const [selected, setSelected] = useState(null);
   const [models, setModels] = useState(() => cachedCatalog?.models ?? []);
   const [manufacturersById, setManufacturersById] = useState(() => cachedCatalog?.manufacturersById ?? new Map());
@@ -20,7 +23,9 @@ export function CarModelSearch({ className, isStuck, hideTrigger = false }) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isPricesPage = pathname === "/prices" || pathname.startsWith("/prices/");
+  const openSearchService = searchParams.get(OPEN_SEARCH_PARAM);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,10 +59,19 @@ export function CarModelSearch({ className, isStuck, hideTrigger = false }) {
   }, [cachedCatalog]);
 
   useEffect(() => {
-    if (!isPricesPage) {
-      setDrawerOpen(false);
-      return;
-    }
+    if (!openSearchService) return;
+
+    setDefaultService(openSearchService);
+    setDrawerOpen(true);
+
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete(OPEN_SEARCH_PARAM);
+    const query = next.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [openSearchService, pathname, router, searchParams]);
+
+  useEffect(() => {
+    if (!isPricesPage) return;
 
     const timer = setTimeout(() => setDrawerOpen(true), 0);
     return () => clearTimeout(timer);
@@ -78,8 +92,14 @@ export function CarModelSearch({ className, isStuck, hideTrigger = false }) {
     return () => clearInterval(interval);
   }, [selected]);
 
-  function handleSearch({ model, year, service }) {
+  async function handleSearch(payload) {
+    const { model, year, service } = payload ?? {};
     if (!model?.id || !year || !service) return;
+
+    if (onSearch) {
+      await onSearch(payload);
+      return;
+    }
 
     const params = new URLSearchParams({
       modelId: String(model.id),
@@ -110,7 +130,10 @@ export function CarModelSearch({ className, isStuck, hideTrigger = false }) {
 
           <button
             type="button"
-            onClick={() => setDrawerOpen(true)}
+            onClick={() => {
+              setDefaultService(DEFAULT_SERVICE);
+              setDrawerOpen(true);
+            }}
             className={cn(
               "flex h-16 cursor-pointer items-center justify-between rounded-full border-none bg-[#f0f1f3cf] backdrop-saturate-150 backdrop-blur-xl px-6 text-base font-normal text-[#002623] shadow-xl sm:text-lg",
               "transition-[width] duration-300 ease-out",
@@ -152,12 +175,16 @@ export function CarModelSearch({ className, isStuck, hideTrigger = false }) {
 
       <CarSearchDrawer
         open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        onOpenChange={(nextOpen) => {
+          setDrawerOpen(nextOpen);
+          if (!nextOpen) setDefaultService(DEFAULT_SERVICE);
+        }}
         model={selected}
         onModelChange={setSelected}
         models={models}
         manufacturersById={manufacturersById}
         catalogLoading={catalogLoading}
+        defaultService={defaultService}
         onSearch={handleSearch}
       />
     </div>

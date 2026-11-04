@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Check, Minus, Plus, Search, ShieldCheck } from "lucide-react";
+import { Check, Loader2, Minus, Plus, Search, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -76,6 +76,8 @@ function YearStepper({ resetKey, onYearChange }) {
   const holdTimerRef = useRef(null);
   const holdIntervalRef = useRef(null);
   const pointerHandledRef = useRef(false);
+  const rootRef = useRef(null);
+  const [menuWidth, setMenuWidth] = useState(0);
   onYearChangeRef.current = onYearChange;
 
   useEffect(() => {
@@ -94,6 +96,17 @@ function YearStepper({ resetKey, onYearChange }) {
       clearTimeout(holdTimerRef.current);
       clearInterval(holdIntervalRef.current);
     };
+  }, []);
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const updateWidth = () => setMenuWidth(root.offsetWidth);
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(root);
+    return () => observer.disconnect();
   }, []);
 
   function applyYear(nextYear, { instant = false } = {}) {
@@ -162,7 +175,7 @@ function YearStepper({ resetKey, onYearChange }) {
     const pressed = pressedDelta === delta;
 
     return cn(
-      "flex size-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-[#002623]/10 bg-white text-[#174545] [-webkit-tap-highlight-color:transparent]",
+      "flex aspect-[2/1] h-11 w-auto shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-[#002623]/10 bg-white text-[#174545] [-webkit-tap-highlight-color:transparent]",
       "transition-[transform,background-color,box-shadow,color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]",
       pressed
         ? "translate-y-px scale-90 bg-[#e8e9eb] text-[#002623] shadow-inner"
@@ -173,8 +186,9 @@ function YearStepper({ resetKey, onYearChange }) {
 
   return (
     <div
+      ref={rootRef}
       dir="ltr"
-      className="mx-auto flex h-13 w-full max-w-[220px] items-center justify-between rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]"
+      className="mx-auto flex h-13 w-full max-w-[320px] items-center justify-between rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]"
     >
       <button
         type="button"
@@ -235,7 +249,8 @@ function YearStepper({ resetKey, onYearChange }) {
             alignItemWithTrigger={false}
             sideOffset={8}
             positionerClassName="z-[70]"
-            className="max-h-60 w-[220px] min-w-[220px] rounded-2xl font-display tabular-nums"
+            className="max-h-60 rounded-2xl font-display tabular-nums"
+            style={menuWidth > 0 ? { width: menuWidth, minWidth: menuWidth } : undefined}
           >
             {YEAR_SELECT_ITEMS.map((item) => (
               <SelectItem
@@ -268,6 +283,13 @@ function YearStepper({ resetKey, onYearChange }) {
   );
 }
 
+const DEFAULT_SERVICE = "purchaseInspection";
+const DRAWER_SERVICE_PARAMS = new Set(DRAWER_SERVICES.map((service) => service.param));
+
+function resolveDrawerService(service) {
+  return DRAWER_SERVICE_PARAMS.has(service) ? service : DEFAULT_SERVICE;
+}
+
 export function CarSearchDrawer({
   open,
   onOpenChange,
@@ -276,12 +298,15 @@ export function CarSearchDrawer({
   models = [],
   manufacturersById = new Map(),
   catalogLoading = false,
+  defaultService = DEFAULT_SERVICE,
   onSearch,
 }) {
   const selectedYearRef = useRef(String(DEFAULT_YEAR));
-  const [selectedService, setSelectedService] = useState("purchaseInspection");
+  const initialService = resolveDrawerService(defaultService);
+  const [selectedService, setSelectedService] = useState(initialService);
   const [serviceDetailsOpen, setServiceDetailsOpen] = useState(false);
   const [commandValue, setCommandValue] = useState(COMMAND_NONE);
+  const [searching, setSearching] = useState(false);
   // Collapsed while fetching; expands after the first paint so height can animate.
   const [listReveal, setListReveal] = useState(false);
 
@@ -291,10 +316,10 @@ export function CarSearchDrawer({
       return;
     }
     selectedYearRef.current = String(DEFAULT_YEAR);
-    setSelectedService("purchaseInspection");
+    setSelectedService(resolveDrawerService(defaultService));
     setServiceDetailsOpen(false);
     setCommandValue(COMMAND_NONE);
-  }, [open]);
+  }, [open, defaultService]);
 
   useLayoutEffect(() => {
     if (!open) {
@@ -334,18 +359,27 @@ export function CarSearchDrawer({
   const activeService = selectedIndex >= 0 ? DRAWER_SERVICES[selectedIndex] : null;
   const fullService = SERVICES.find((service) => service.param === selectedService) ?? null;
 
-  function handleSearch() {
+  async function handleSearch() {
     if (!model?.id || !selectedYearRef.current || !selectedService) {
       toast.warning("الرجاء ادخال جميع البيانات");
       return;
     }
 
-    onSearch?.({
-      model,
-      year: selectedYearRef.current,
-      service: selectedService,
-    });
-    onOpenChange?.(false);
+    if (searching) return;
+
+    setSearching(true);
+    try {
+      await onSearch?.({
+        model,
+        year: selectedYearRef.current,
+        service: selectedService,
+      });
+      onOpenChange?.(false);
+    } catch {
+      // Keep the drawer open so the user can adjust and retry.
+    } finally {
+      setSearching(false);
+    }
   }
 
   return (
@@ -504,9 +538,10 @@ export function CarSearchDrawer({
             type="button"
             size="lg"
             onClick={handleSearch}
+            disabled={searching}
             className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
           >
-            <Search className="size-5" />
+            {searching ? <Loader2 className="size-5 animate-spin" /> : <Search className="size-5" />}
             بحث
           </Button>
         </DrawerFooter>

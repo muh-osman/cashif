@@ -100,10 +100,11 @@ export function MakdomDrawer({ open, onOpenChange }) {
   const pathname = usePathname();
 
   function handleRequest() {
-    onOpenChange?.(false);
-    if (pathname !== "/") {
-      router.push("/");
-    }
+    const isMakdomPage = pathname === "/makdom" || pathname.startsWith("/makdom/");
+    const target = pathname === "/prices" || pathname.startsWith("/prices/") ? "/prices" : "/";
+    router.push(`${target}?openSearch=checkit`);
+    // /makdom unmounts on navigation; closing first would race with replace("/")
+    if (!isMakdomPage) onOpenChange?.(false);
   }
 
   return (

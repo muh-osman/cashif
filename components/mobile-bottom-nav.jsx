@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, LogIn, LogOut, ShoppingCart, MapPin, ExternalLink, Gift, ChevronLeft, Home as HomeIcon, FileText, SaudiRiyal, Handshake, Loader2, Share2, Truck, Phone } from "lucide-react";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { openPriceDrawer } from "@/components/car-model-search";
 import { FalkAcceptTermsDrawer } from "@/components/falk/accept-terms";
 import { FalkSoonDrawer } from "@/components/falk/soon";
 import { useAuth } from "@/components/auth-provider";
@@ -380,6 +381,20 @@ export function MobileBottomNav({ initialActive = 2 }) {
                       spinning={falkChecking}
                     />
                   </button>
+                ) : label === "الأسعار" ? (
+                  <Link
+                    href={href}
+                    onClick={(event) => {
+                      playExpand();
+                      setActive(i);
+                      if (!isPricesPage) return;
+                      event.preventDefault();
+                      openPriceDrawer();
+                    }}
+                    className={itemClass}
+                  >
+                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
+                  </Link>
                 ) : (
                   <Link
                     href={href}

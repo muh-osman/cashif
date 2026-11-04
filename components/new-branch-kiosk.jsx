@@ -13,7 +13,7 @@ import {
   CHECKLIST_ITEMS,
   DISCOUNT_PERCENT,
   YEARS,
-  buildPlansFromPrices,
+  buildNewBranchPlansFromPrices,
 } from "@/lib/new-branch-plans";
 
 const RESET_MS = 2 * 60 * 1000;
@@ -42,7 +42,11 @@ function ChecklistItem({ checked, text, tooltip }) {
         >
           <Info className="h-3.5 w-3.5" />
         </PopoverTrigger>
-        <PopoverContent align="center" side="top" className="w-56 p-3 text-right text-xs leading-relaxed text-[#002623]">
+        <PopoverContent
+          align="center"
+          side="top"
+          className="w-56 max-w-[calc(100vw-1.5rem)] p-3 text-right text-xs leading-relaxed text-[#002623]"
+        >
           {tooltip}
         </PopoverContent>
       </Popover>
@@ -274,7 +278,7 @@ export function NewBranchKiosk() {
         return;
       }
 
-      const nextPlans = buildPlansFromPrices(data);
+      const nextPlans = buildNewBranchPlansFromPrices(data);
       setPlans(nextPlans);
       setShowPlans(nextPlans.length > 0);
 

@@ -66,12 +66,13 @@ function clampYear(year) {
   return Math.min(MAX_YEAR, Math.max(MIN_YEAR, year));
 }
 
-function YearStepper({ resetKey, onYearChange }) {
-  const [year, setYear] = useState(DEFAULT_YEAR);
+function YearStepper({ resetKey, defaultYear = DEFAULT_YEAR, onYearChange }) {
+  const initialYear = clampYear(Number(defaultYear) || DEFAULT_YEAR);
+  const [year, setYear] = useState(initialYear);
   const [motion, setMotion] = useState("ready"); // ready | instant | hold
   const [pressedDelta, setPressedDelta] = useState(0);
   const [selectOpen, setSelectOpen] = useState(false);
-  const yearRef = useRef(DEFAULT_YEAR);
+  const yearRef = useRef(initialYear);
   const onYearChangeRef = useRef(onYearChange);
   const holdTimerRef = useRef(null);
   const holdIntervalRef = useRef(null);
@@ -81,15 +82,16 @@ function YearStepper({ resetKey, onYearChange }) {
   onYearChangeRef.current = onYearChange;
 
   useEffect(() => {
-    yearRef.current = DEFAULT_YEAR;
+    const nextYear = clampYear(Number(defaultYear) || DEFAULT_YEAR);
+    yearRef.current = nextYear;
     setMotion("instant");
     setPressedDelta(0);
     setSelectOpen(false);
-    setYear(DEFAULT_YEAR);
-    onYearChangeRef.current?.(String(DEFAULT_YEAR));
+    setYear(nextYear);
+    onYearChangeRef.current?.(String(nextYear));
     const id = requestAnimationFrame(() => setMotion("ready"));
     return () => cancelAnimationFrame(id);
-  }, [resetKey]);
+  }, [resetKey, defaultYear]);
 
   useEffect(() => {
     return () => {
@@ -299,9 +301,13 @@ export function CarSearchDrawer({
   manufacturersById = new Map(),
   catalogLoading = false,
   defaultService = DEFAULT_SERVICE,
+  defaultYear = DEFAULT_YEAR,
   onSearch,
 }) {
-  const selectedYearRef = useRef(String(DEFAULT_YEAR));
+  const resolvedDefaultYear = String(clampYear(Number(defaultYear) || DEFAULT_YEAR));
+  const selectedYearRef = useRef(resolvedDefaultYear);
+  const modelRef = useRef(model);
+  const manufacturersByIdRef = useRef(manufacturersById);
   const initialService = resolveDrawerService(defaultService);
   const [selectedService, setSelectedService] = useState(initialService);
   const [serviceDetailsOpen, setServiceDetailsOpen] = useState(false);
@@ -309,17 +315,32 @@ export function CarSearchDrawer({
   const [searching, setSearching] = useState(false);
   // Collapsed while fetching; expands after the first paint so height can animate.
   const [listReveal, setListReveal] = useState(false);
+  const [yearSeed, setYearSeed] = useState(0);
+
+  modelRef.current = model;
+  manufacturersByIdRef.current = manufacturersById;
 
   useEffect(() => {
     if (!open) {
       setServiceDetailsOpen(false);
       return;
     }
-    selectedYearRef.current = String(DEFAULT_YEAR);
+
+    const currentModel = modelRef.current;
+    const currentManufacturers = manufacturersByIdRef.current;
+
+    selectedYearRef.current = resolvedDefaultYear;
     setSelectedService(resolveDrawerService(defaultService));
     setServiceDetailsOpen(false);
-    setCommandValue(COMMAND_NONE);
-  }, [open, defaultService]);
+    setYearSeed((seed) => seed + 1);
+
+    if (currentModel) {
+      const manufacturerName = currentManufacturers.get(currentModel.carManufacturerId) || "";
+      setCommandValue(`${currentModel.nameAr} ${currentModel.nameEn} ${manufacturerName}`);
+    } else {
+      setCommandValue(COMMAND_NONE);
+    }
+  }, [open, defaultService, resolvedDefaultYear]);
 
   useLayoutEffect(() => {
     if (!open) {
@@ -477,7 +498,9 @@ export function CarSearchDrawer({
           <div>
             <span className="mb-2 block text-sm font-semibold text-[#002623]">سنة الصنع</span>
             <YearStepper
-              resetKey={open}
+              key={`year-${yearSeed}-${resolvedDefaultYear}`}
+              resetKey={yearSeed}
+              defaultYear={resolvedDefaultYear}
               onYearChange={(year) => {
                 selectedYearRef.current = year;
               }}
@@ -487,23 +510,24 @@ export function CarSearchDrawer({
           <div>
             <span className="mb-2 block text-sm font-semibold text-[#002623]">اختر الخدمة</span>
 
-            <div className="relative overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
+            <div className="relative h-13 w-full rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
               <span
+                aria-hidden
                 className={cn(
-                  "pointer-events-none absolute inset-y-0 right-0 w-1/3 rounded-[24px] border-4 border-white bg-[#f0f1f3] transition-transform duration-300 ease-out",
+                  "pointer-events-none absolute top-1 bottom-1 right-1 w-[calc((100%-0.5rem)/3)] rounded-full border border-[#002623]/10 bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
                   selectedIndex === 1 && "-translate-x-full",
                   selectedIndex === 2 && "-translate-x-[200%]"
                 )}
               />
-              <div className="relative z-10 grid h-13 grid-cols-3">
+              <div className="relative z-10 grid h-full grid-cols-3">
                 {DRAWER_SERVICES.map((service) => (
                   <button
                     key={service.param}
                     type="button"
                     onClick={() => setSelectedService(service.param)}
                     className={cn(
-                      "flex h-full cursor-pointer items-center justify-center px-1 text-center text-[11px] font-medium leading-4 text-[#174545] sm:text-sm sm:leading-5",
-                      selectedService === service.param && "font-semibold"
+                      "flex h-full cursor-pointer items-center justify-center rounded-full px-1 text-center text-[11px] font-medium leading-4 text-[#174545] transition-colors sm:text-sm sm:leading-5",
+                      selectedService === service.param ? "font-semibold" : "hover:text-[#002623]"
                     )}
                   >
                     {service.title}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
 import { CarSearchDrawer } from "@/components/car-search-drawer";
@@ -10,11 +10,25 @@ import { cn } from "@/lib/utils";
 const PLACEHOLDERS = ["أسعار الفحص...", "كامري | تويوتا", "أكورد | هوندا", "التيما | نيسان"];
 const DEFAULT_SERVICE = "purchaseInspection";
 const OPEN_SEARCH_PARAM = "openSearch";
+const OPEN_PRICE_DRAWER_EVENT = "cashif:open-price-drawer";
 
-export function CarModelSearch({ className, isStuck, hideTrigger = false, onSearch }) {
+export function openPriceDrawer() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(OPEN_PRICE_DRAWER_EVENT));
+}
+
+export function CarModelSearch({
+  className,
+  isStuck,
+  hideTrigger = false,
+  onSearch,
+  prefill = null,
+  reopenKey = 0,
+}) {
   const cachedCatalog = getCachedCarCatalog();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [defaultService, setDefaultService] = useState(DEFAULT_SERVICE);
+  const [defaultYear, setDefaultYear] = useState(null);
   const [selected, setSelected] = useState(null);
   const [models, setModels] = useState(() => cachedCatalog?.models ?? []);
   const [manufacturersById, setManufacturersById] = useState(() => cachedCatalog?.manufacturersById ?? new Map());
@@ -26,6 +40,30 @@ export function CarModelSearch({ className, isStuck, hideTrigger = false, onSear
   const searchParams = useSearchParams();
   const isPricesPage = pathname === "/prices" || pathname.startsWith("/prices/");
   const openSearchService = searchParams.get(OPEN_SEARCH_PARAM);
+
+  const prefillRef = useRef(prefill);
+  const [prevReopenKey, setPrevReopenKey] = useState(0);
+  prefillRef.current = prefill;
+
+  function rememberSelection(next) {
+    if (!next?.model?.id) return;
+    setSelected(next.model);
+    setDefaultYear(next.year != null ? String(next.year) : null);
+    setDefaultService(next.service || DEFAULT_SERVICE);
+  }
+
+  // Apply prefill + open in the same render pass so the drawer never mounts empty.
+  if (reopenKey !== prevReopenKey) {
+    setPrevReopenKey(reopenKey);
+    if (reopenKey > 0) {
+      if (prefill?.model?.id) {
+        setSelected(prefill.model);
+        setDefaultYear(prefill.year != null ? String(prefill.year) : null);
+        setDefaultService(prefill.service || DEFAULT_SERVICE);
+      }
+      setDrawerOpen(true);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -78,6 +116,25 @@ export function CarModelSearch({ className, isStuck, hideTrigger = false, onSear
   }, [isPricesPage]);
 
   useEffect(() => {
+    rememberSelection(prefill);
+  }, [prefill]);
+
+  useEffect(() => {
+    function handleOpenPriceDrawer() {
+      const next = prefillRef.current;
+      if (next?.model?.id) {
+        setSelected(next.model);
+        setDefaultYear(next.year != null ? String(next.year) : null);
+        setDefaultService(next.service || DEFAULT_SERVICE);
+      }
+      setDrawerOpen(true);
+    }
+
+    window.addEventListener(OPEN_PRICE_DRAWER_EVENT, handleOpenPriceDrawer);
+    return () => window.removeEventListener(OPEN_PRICE_DRAWER_EVENT, handleOpenPriceDrawer);
+  }, []);
+
+  useEffect(() => {
     if (selected) return;
 
     const interval = setInterval(() => {
@@ -98,8 +155,11 @@ export function CarModelSearch({ className, isStuck, hideTrigger = false, onSear
 
     if (onSearch) {
       await onSearch(payload);
+      rememberSelection(payload);
       return;
     }
+
+    rememberSelection(payload);
 
     const params = new URLSearchParams({
       modelId: String(model.id),
@@ -175,16 +235,14 @@ export function CarModelSearch({ className, isStuck, hideTrigger = false, onSear
 
       <CarSearchDrawer
         open={drawerOpen}
-        onOpenChange={(nextOpen) => {
-          setDrawerOpen(nextOpen);
-          if (!nextOpen) setDefaultService(DEFAULT_SERVICE);
-        }}
+        onOpenChange={setDrawerOpen}
         model={selected}
         onModelChange={setSelected}
         models={models}
         manufacturersById={manufacturersById}
         catalogLoading={catalogLoading}
         defaultService={defaultService}
+        defaultYear={defaultYear ?? undefined}
         onSearch={handleSearch}
       />
     </div>

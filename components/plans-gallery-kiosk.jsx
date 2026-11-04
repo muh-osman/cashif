@@ -41,7 +41,11 @@ function ChecklistItem({ checked, text, tooltip }) {
         >
           <Info className="h-3.5 w-3.5" />
         </PopoverTrigger>
-        <PopoverContent align="center" side="top" className="w-56 p-3 text-right text-xs leading-relaxed text-[#002623]">
+        <PopoverContent
+          align="center"
+          side="top"
+          className="w-56 max-w-[calc(100vw-1.5rem)] p-3 text-right text-xs leading-relaxed text-[#002623]"
+        >
           {tooltip}
         </PopoverContent>
       </Popover>

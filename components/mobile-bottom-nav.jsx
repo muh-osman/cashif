@@ -382,19 +382,21 @@ export function MobileBottomNav({ initialActive = 2 }) {
                     />
                   </button>
                 ) : label === "الأسعار" ? (
-                  <Link
-                    href={href}
-                    onClick={(event) => {
-                      playExpand();
-                      setActive(i);
-                      if (!isPricesPage) return;
-                      event.preventDefault();
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Only highlight after landing on /prices (successful بحث).
+                      // Login has no CarModelSearch mounted — land on home with the drawer open.
+                      if (pathname === "/login" || pathname.startsWith("/login/")) {
+                        router.push("/?openSearch=purchaseInspection");
+                        return;
+                      }
                       openPriceDrawer();
                     }}
-                    className={itemClass}
+                    className={`${itemClass} cursor-pointer`}
                   >
                     <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
-                  </Link>
+                  </button>
                 ) : (
                   <Link
                     href={href}

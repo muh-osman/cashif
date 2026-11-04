@@ -217,18 +217,33 @@ export default function OrdersPage() {
         </p>
       </div>
 
-      <div className="relative mb-6 overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
+      <div className="relative mb-6 h-13 w-full rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
         <span
+          aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 w-1/2 rounded-[24px] border-4 border-white bg-[#f0f1f3] transition-transform duration-300 ease-out",
+            "pointer-events-none absolute top-1 bottom-1 right-1 w-[calc((100%-0.5rem)/2)] rounded-full border border-[#002623]/10 bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
             tab === "shipping" && "-translate-x-full"
           )}
         />
-        <div className="relative z-10 grid h-13 grid-cols-2">
-          <button type="button" onClick={() => setTab("inspection")} className="flex h-full cursor-pointer items-center justify-center text-sm font-medium text-[#174545]">
+        <div className="relative z-10 grid h-full grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setTab("inspection")}
+            className={cn(
+              "flex h-full cursor-pointer items-center justify-center rounded-full text-sm font-medium text-[#174545] transition-colors hover:text-[#002623]",
+              tab === "inspection" && "font-semibold"
+            )}
+          >
             طلبات الفحص
           </button>
-          <button type="button" onClick={() => setTab("shipping")} className="flex h-full cursor-pointer items-center justify-center text-sm font-medium text-[#174545]">
+          <button
+            type="button"
+            onClick={() => setTab("shipping")}
+            className={cn(
+              "flex h-full cursor-pointer items-center justify-center rounded-full text-sm font-medium text-[#174545] transition-colors hover:text-[#002623]",
+              tab === "shipping" && "font-semibold"
+            )}
+          >
             طلبات الشحن
           </button>
         </div>

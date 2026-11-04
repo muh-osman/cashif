@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { CarModelSearch } from "@/components/car-model-search";
 import { InspectionPlansGrid } from "@/components/inspection-plan-card";
@@ -51,6 +52,7 @@ export default function PricesPage() {
   const [selection, setSelection] = useState(() =>
     pending?.plans?.length ? { model: pending.model, year: pending.year, service: pending.service } : null
   );
+  const [loading, setLoading] = useState(() => Boolean(queryKey) && !(pending?.plans?.length > 0));
   const [reopenKey, setReopenKey] = useState(0);
   const [bootKey, setBootKey] = useState(() => (pending?.plans?.length ? queryKey : ""));
   const appliedQueryRef = useRef(pending?.plans?.length ? queryKey : "");
@@ -60,6 +62,7 @@ export default function PricesPage() {
     setBootKey(queryKey);
     setPlans(pending.plans);
     setShowPlans(true);
+    setLoading(false);
     setSelection({ model: pending.model, year: pending.year, service: pending.service });
     appliedQueryRef.current = queryKey;
   }
@@ -107,14 +110,19 @@ export default function PricesPage() {
 
   // Direct visits / refresh: no prefetch stash — load from URL params.
   useEffect(() => {
-    if (!queryKey) return;
+    if (!queryKey) {
+      setLoading(false);
+      return;
+    }
     if (appliedQueryRef.current === queryKey) return;
     if (pending?.plans?.length) {
       appliedQueryRef.current = queryKey;
+      setLoading(false);
       return;
     }
 
     appliedQueryRef.current = queryKey;
+    setLoading(true);
     let active = true;
 
     (async () => {
@@ -125,6 +133,7 @@ export default function PricesPage() {
         const model = catalog.models.find((item) => String(item.id) === String(modelId));
         if (!model) {
           toast.error("تعذر العثور على الموديل المحدد");
+          setLoading(false);
           return;
         }
 
@@ -141,6 +150,8 @@ export default function PricesPage() {
         toast.error(error?.messageAr || error?.message || "تعذر تحميل أسعار الباقات");
         clearResults();
         if (appliedQueryRef.current === queryKey) appliedQueryRef.current = "";
+      } finally {
+        if (active) setLoading(false);
       }
     })();
 
@@ -170,7 +181,14 @@ export default function PricesPage() {
 
       <CarModelSearch hideTrigger onSearch={handleSearch} prefill={selection} reopenKey={reopenKey} />
 
-      {showPlans ? <InspectionPlansGrid plans={plans} /> : null}
+      {loading ? (
+        <div className="flex min-h-[40vh] items-center justify-center" role="status" aria-live="polite">
+          <Loader2 className="h-10 w-10 animate-spin text-[#174545]" />
+          <span className="sr-only">جاري تحميل الأسعار</span>
+        </div>
+      ) : showPlans ? (
+        <InspectionPlansGrid plans={plans} />
+      ) : null}
     </main>
   );
 }

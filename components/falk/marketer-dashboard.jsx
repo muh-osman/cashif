@@ -326,22 +326,26 @@ export function FalkMarketerDashboard() {
           <h2 className="mb-3 text-base font-semibold text-[#002623]">حقيبة المسوق</h2>
           <div className="mb-4 h-px bg-[#002623]/10" />
 
-          <div className="relative mb-4 overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
+          <div className="relative mb-4 h-13 w-full rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
             <span
+              aria-hidden
               className={cn(
-                "pointer-events-none absolute inset-y-0 right-0 w-1/4 rounded-[24px] border-4 border-white bg-[#f0f1f3] transition-transform duration-300 ease-out",
+                "pointer-events-none absolute top-1 bottom-1 right-1 w-[calc((100%-0.5rem)/4)] rounded-full border border-[#002623]/10 bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
                 tab === "how" && "-translate-x-full",
                 tab === "instructions" && "-translate-x-[200%]",
                 tab === "content" && "-translate-x-[300%]"
               )}
             />
-            <div className="relative z-10 grid h-13 grid-cols-4">
+            <div className="relative z-10 grid h-full grid-cols-4">
               {TABS.map((item) => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => setTab(item.id)}
-                  className="flex h-full cursor-pointer items-center justify-center px-1 text-center text-[11px] font-medium leading-4 text-[#174545] sm:text-sm sm:leading-5"
+                  className={cn(
+                    "flex h-full cursor-pointer items-center justify-center rounded-full px-1 text-center text-[11px] font-medium leading-4 text-[#174545] transition-colors sm:text-sm sm:leading-5",
+                    tab === item.id ? "font-semibold" : "hover:text-[#002623]"
+                  )}
                 >
                   {item.label}
                 </button>
@@ -362,20 +366,24 @@ export function FalkMarketerDashboard() {
                   tab === "content" ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
                 )}
               >
-                <div className="relative overflow-hidden rounded-[24px] bg-white shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
+                <div className="relative h-13 w-full rounded-full border border-[#002623]/10 bg-secondary p-1 text-[#174545] shadow-[0_7px_29px_0_rgba(100,100,111,0.12)]">
                   <span
+                    aria-hidden
                     className={cn(
-                      "pointer-events-none absolute inset-y-0 right-0 w-1/2 rounded-[24px] border-4 border-white bg-[#f0f1f3] transition-transform duration-300 ease-out",
+                      "pointer-events-none absolute top-1 bottom-1 right-1 w-[calc((100%-0.5rem)/2)] rounded-full border border-[#002623]/10 bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
                       contentSubTab === "videos" && "-translate-x-full"
                     )}
                   />
-                  <div className="relative z-10 grid h-13 grid-cols-2">
+                  <div className="relative z-10 grid h-full grid-cols-2">
                     {CONTENT_SUB_TABS.map((item) => (
                       <button
                         key={item.id}
                         type="button"
                         onClick={() => setContentSubTab(item.id)}
-                        className="flex h-full cursor-pointer items-center justify-center text-sm font-medium text-[#174545]"
+                        className={cn(
+                          "flex h-full cursor-pointer items-center justify-center rounded-full text-sm font-medium text-[#174545] transition-colors",
+                          contentSubTab === item.id ? "font-semibold" : "hover:text-[#002623]"
+                        )}
                       >
                         {item.label}
                       </button>

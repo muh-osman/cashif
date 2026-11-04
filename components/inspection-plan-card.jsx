@@ -10,25 +10,25 @@ function ChecklistItem({ checked, text, tooltip }) {
   return (
     <li
       className={cn(
-        "flex items-center gap-0.5 text-[9px] leading-none @min-[160px]:text-[11px] @min-[210px]:gap-1.5 @min-[210px]:text-xs",
+        "flex items-center gap-1.5 text-sm leading-snug",
         checked ? "text-[#002623]" : "text-[#b0b0b0]"
       )}
     >
       {checked ? (
-        <Check className="size-3 shrink-0 text-[#25d366] @min-[210px]:size-3.5" strokeWidth={3} />
+        <Check className="size-4 shrink-0 text-[#25d366]" strokeWidth={3} />
       ) : (
-        <X className="size-3 shrink-0 text-[#b0b0b0] @min-[210px]:size-3.5" strokeWidth={3} />
+        <X className="size-4 shrink-0 text-[#b0b0b0]" strokeWidth={3} />
       )}
-      <span className="whitespace-nowrap">{text}</span>
+      <span className="min-w-0">{text}</span>
       <Popover>
         <PopoverTrigger
           className={cn(
-            "ms-auto inline-flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-full transition hover:bg-[#174545]/10 hover:text-[#174545] @min-[210px]:size-5",
+            "ms-auto inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-full transition hover:bg-[#174545]/10 hover:text-[#174545]",
             checked ? "text-[#757575]" : "text-[#b0b0b0]"
           )}
           aria-label={`معلومات عن ${text}`}
         >
-          <Info className="size-3 @min-[210px]:size-3.5" />
+          <Info className="size-3.5" />
         </PopoverTrigger>
         <PopoverContent
           align="center"
@@ -42,12 +42,13 @@ function ChecklistItem({ checked, text, tooltip }) {
   );
 }
 
-export function InspectionPlanCard({ plan }) {
+export function InspectionPlanCard({ plan, className }) {
   return (
     <Card
       className={cn(
         "@container relative min-w-0 gap-0 overflow-hidden rounded-3xl py-0 shadow-md ring-1 ring-[#002623]/8",
-        plan.featured && "ring-2 ring-[#174545]"
+        plan.featured && "ring-2 ring-[#174545]",
+        className
       )}
     >
       <div
@@ -87,11 +88,11 @@ export function InspectionPlanCard({ plan }) {
           )}
         </div>
 
-        <p className="text-center text-[10px] font-semibold whitespace-nowrap text-[#002623] @min-[188px]:text-[11px] @min-[240px]:text-xs">
+        <p className="text-center text-sm font-semibold text-[#002623]">
           تشمل فحص:
         </p>
 
-        <ul className="space-y-1.5">
+        <ul className="space-y-2">
           {CHECKLIST_ITEMS.map((item, index) => (
             <ChecklistItem
               key={item.text}
@@ -112,10 +113,24 @@ export function InspectionPlansGrid({ plans }) {
   return (
     <section className="mt-10">
       <h2 className="mb-6 text-center font-display text-xl text-[#002623] sm:text-2xl">اختر الباقة المناسبة</h2>
-      <div className="grid grid-cols-2 items-stretch gap-2.5 sm:gap-4 lg:grid-cols-3 lg:gap-5">
-        {plans.map((plan) => (
-          <InspectionPlanCard key={plan.key} plan={plan} />
-        ))}
+      <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
+        {plans.map((plan, index) => {
+          // Center a trailing odd card only while the 2-col layout is active (sm–lg).
+          // Order follows source array; CSS order only affects the 1-col (xs) stack.
+          const centerLastOnTwoCol = plans.length % 2 === 1 && index === plans.length - 1;
+
+          return (
+            <InspectionPlanCard
+              key={plan.key}
+              plan={plan}
+              className={cn(
+                plan.featured && "order-first sm:order-none",
+                centerLastOnTwoCol &&
+                  "sm:col-span-2 sm:w-[calc((100%-1rem)/2)] sm:justify-self-center lg:col-span-1 lg:w-auto lg:justify-self-stretch"
+              )}
+            />
+          );
+        })}
       </div>
     </section>
   );

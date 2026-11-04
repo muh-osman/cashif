@@ -74,7 +74,7 @@ export function InspectionPlanCard({ plan }) {
           </p>
 
           {plan.youSave > 0 && (
-            <div className="mt-2 inline-flex max-w-full rounded-full text-[10px] font-bold @min-[220px]:text-[11px] @min-[260px]:text-xs">
+            <div className="mt-2 inline-flex max-w-full overflow-hidden rounded-full text-[10px] font-bold @min-[220px]:text-[11px] @min-[260px]:text-xs">
               <span className="inline-flex shrink-0 items-center justify-center gap-0.5 whitespace-nowrap bg-[#fce8e8] px-1.5 py-1 text-[#d32f2f] line-through @min-[220px]:px-2.5">
                 {plan.originalPrice}
                 <SaudiRiyal className="size-3 shrink-0" />

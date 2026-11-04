@@ -5,7 +5,9 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
 import { CarSearchDrawer } from "@/components/car-search-drawer";
 import { getCachedCarCatalog, loadCarCatalog } from "@/lib/car-catalog";
+import { fetchInspectionPlans, stashPendingPricesSearch } from "@/lib/inspection-plans";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const PLACEHOLDERS = ["أسعار الفحص...", "كامري | تويوتا", "أكورد | هوندا", "التيما | نيسان"];
 const DEFAULT_SERVICE = "purchaseInspection";
@@ -40,6 +42,7 @@ export function CarModelSearch({
   const searchParams = useSearchParams();
   const isPricesPage = pathname === "/prices" || pathname.startsWith("/prices/");
   const openSearchService = searchParams.get(OPEN_SEARCH_PARAM);
+  const hasCompletedSearchParams = Boolean(searchParams.get("modelId") && searchParams.get("year"));
 
   const prefillRef = useRef(prefill);
   const [prevReopenKey, setPrevReopenKey] = useState(0);
@@ -109,11 +112,13 @@ export function CarModelSearch({
   }, [openSearchService, pathname, router, searchParams]);
 
   useEffect(() => {
-    if (!isPricesPage) return;
+    // Empty /prices opens the drawer. Arriving with modelId+year means the search
+    // already happened elsewhere — show plans, don't reopen the drawer.
+    if (!isPricesPage || hasCompletedSearchParams || openSearchService) return;
 
     const timer = setTimeout(() => setDrawerOpen(true), 0);
     return () => clearTimeout(timer);
-  }, [isPricesPage]);
+  }, [isPricesPage, hasCompletedSearchParams, openSearchService]);
 
   useEffect(() => {
     rememberSelection(prefill);
@@ -159,15 +164,30 @@ export function CarModelSearch({
       return;
     }
 
-    rememberSelection(payload);
+    // Fetch before navigating so /prices can render plans immediately.
+    try {
+      const plans = await fetchInspectionPlans(model.id, year);
+      if (plans.length === 0) {
+        toast.warning("لا توجد أسعار متاحة لهذا الموديل");
+        throw new Error("empty");
+      }
 
-    const params = new URLSearchParams({
-      modelId: String(model.id),
-      year: String(year),
-      [service]: "true",
-    });
+      rememberSelection(payload);
+      stashPendingPricesSearch({ model, year, service, plans });
 
-    router.push(`/prices?${params}`);
+      const params = new URLSearchParams({
+        modelId: String(model.id),
+        year: String(year),
+        [service]: "true",
+      });
+
+      router.push(`/prices?${params}`);
+    } catch (error) {
+      if (error?.message !== "empty") {
+        toast.error(error?.messageAr || error?.message || "تعذر تحميل أسعار الباقات");
+      }
+      throw error;
+    }
   }
 
   return (

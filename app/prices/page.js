@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { CarModelSearch } from "@/components/car-model-search";
 import { InspectionPlansGrid } from "@/components/inspection-plan-card";
-import { buildPlansFromPrices, YEARS } from "@/lib/new-branch-plans";
+import { loadCarCatalog } from "@/lib/car-catalog";
+import { fetchInspectionPlans, getPendingPricesSearch } from "@/lib/inspection-plans";
+import { YEARS } from "@/lib/new-branch-plans";
+
+const SERVICE_KEYS = ["purchaseInspection", "checkit", "passengerCheck"];
 
 const SERVICE_LABELS = {
   purchaseInspection: "فحص الشراء",
@@ -28,11 +33,42 @@ function formatSelectedSearch(selection) {
   return label || null;
 }
 
+function serviceFromSearchParams(searchParams) {
+  return SERVICE_KEYS.find((key) => searchParams.get(key) === "true") || "purchaseInspection";
+}
+
 export default function PricesPage() {
-  const [plans, setPlans] = useState([]);
-  const [showPlans, setShowPlans] = useState(false);
-  const [selection, setSelection] = useState(null);
+  const searchParams = useSearchParams();
+  const modelId = searchParams.get("modelId");
+  const year = searchParams.get("year");
+  const service = serviceFromSearchParams(searchParams);
+  const queryKey = modelId && year ? `${modelId}|${year}|${service}` : "";
+
+  const pending = queryKey ? getPendingPricesSearch({ modelId, year, service }) : null;
+
+  const [plans, setPlans] = useState(() => pending?.plans ?? []);
+  const [showPlans, setShowPlans] = useState(() => (pending?.plans?.length ?? 0) > 0);
+  const [selection, setSelection] = useState(() =>
+    pending?.plans?.length ? { model: pending.model, year: pending.year, service: pending.service } : null
+  );
   const [reopenKey, setReopenKey] = useState(0);
+  const [bootKey, setBootKey] = useState(() => (pending?.plans?.length ? queryKey : ""));
+  const appliedQueryRef = useRef(pending?.plans?.length ? queryKey : "");
+
+  // Keep UI in sync if the URL query changes after mount.
+  if (pending?.plans?.length && bootKey !== queryKey) {
+    setBootKey(queryKey);
+    setPlans(pending.plans);
+    setShowPlans(true);
+    setSelection({ model: pending.model, year: pending.year, service: pending.service });
+    appliedQueryRef.current = queryKey;
+  }
+
+  function applyResult({ model, year: nextYear, service: nextService, plans: nextPlans }) {
+    setPlans(nextPlans);
+    setShowPlans(nextPlans.length > 0);
+    setSelection(nextPlans.length > 0 ? { model, year: nextYear, service: nextService } : null);
+  }
 
   function clearResults() {
     setShowPlans(false);
@@ -40,49 +76,78 @@ export default function PricesPage() {
     setSelection(null);
   }
 
-  async function handleSearch({ model, year, service }) {
-    if (!model?.id || !year) {
+  async function handleSearch({ model, year: nextYear, service: nextService }) {
+    if (!model?.id || !nextYear) {
       toast.warning("الرجاء ادخال جميع البيانات");
       throw new Error("incomplete");
     }
 
     try {
-      const [pricesResponse, discountsResponse] = await Promise.all([
-        fetch(
-          `/api/service-prices?year=${encodeURIComponent(year)}&markId=${encodeURIComponent(model.id)}`
-        ),
-        fetch("/api/service-discounts"),
-      ]);
-
-      const data = await pricesResponse.json().catch(() => []);
-      const discounts = discountsResponse.ok
-        ? await discountsResponse.json().catch(() => [])
-        : [];
-
-      if (!pricesResponse.ok) {
-        toast.error(data?.message || "تعذر تحميل أسعار الباقات");
-        clearResults();
-        throw new Error("fetch-failed");
-      }
-
-      const nextPlans = buildPlansFromPrices(data, Array.isArray(discounts) ? discounts : []);
-      setPlans(nextPlans);
-      setShowPlans(nextPlans.length > 0);
-      setSelection(nextPlans.length > 0 ? { model, year, service } : null);
+      const nextPlans = await fetchInspectionPlans(model.id, nextYear);
+      applyResult({ model, year: nextYear, service: nextService, plans: nextPlans });
 
       if (nextPlans.length === 0) {
         toast.warning("لا توجد أسعار متاحة لهذا الموديل");
         throw new Error("empty");
       }
     } catch (error) {
-      if (error?.message === "fetch-failed" || error?.message === "empty" || error?.message === "incomplete") {
+      if (error?.message === "empty" || error?.message === "incomplete") {
         throw error;
       }
-      toast.error("تعذر تحميل أسعار الباقات");
+      if (error?.code === "fetch-failed") {
+        toast.error(error.messageAr || error.message);
+        clearResults();
+        throw error;
+      }
+      toast.error(error?.messageAr || error?.message || "تعذر تحميل أسعار الباقات");
       clearResults();
       throw error;
     }
   }
+
+  // Direct visits / refresh: no prefetch stash — load from URL params.
+  useEffect(() => {
+    if (!queryKey) return;
+    if (appliedQueryRef.current === queryKey) return;
+    if (pending?.plans?.length) {
+      appliedQueryRef.current = queryKey;
+      return;
+    }
+
+    appliedQueryRef.current = queryKey;
+    let active = true;
+
+    (async () => {
+      try {
+        const catalog = await loadCarCatalog();
+        if (!active) return;
+
+        const model = catalog.models.find((item) => String(item.id) === String(modelId));
+        if (!model) {
+          toast.error("تعذر العثور على الموديل المحدد");
+          return;
+        }
+
+        const nextPlans = await fetchInspectionPlans(model.id, year);
+        if (!active) return;
+
+        applyResult({ model, year, service, plans: nextPlans });
+
+        if (nextPlans.length === 0) {
+          toast.warning("لا توجد أسعار متاحة لهذا الموديل");
+        }
+      } catch (error) {
+        if (!active) return;
+        toast.error(error?.messageAr || error?.message || "تعذر تحميل أسعار الباقات");
+        clearResults();
+        if (appliedQueryRef.current === queryKey) appliedQueryRef.current = "";
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [queryKey, modelId, year, service, pending]);
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-6 pt-4 text-[#002623] sm:pb-36">
@@ -96,7 +161,7 @@ export default function PricesPage() {
           <button
             type="button"
             onClick={() => setReopenKey((key) => key + 1)}
-            className="cursor-pointer text-sm font-medium text-[#174545] underline-offset-4 hover:underline"
+            className="cursor-pointer text-sm font-medium text-[#174545] underline underline-offset-4"
           >
             تعديل
           </button>

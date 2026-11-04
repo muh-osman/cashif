@@ -70,6 +70,7 @@ function YearStepper({ resetKey, onYearChange }) {
   const [year, setYear] = useState(DEFAULT_YEAR);
   const [motion, setMotion] = useState("ready"); // ready | instant | hold
   const [pressedDelta, setPressedDelta] = useState(0);
+  const [selectOpen, setSelectOpen] = useState(false);
   const yearRef = useRef(DEFAULT_YEAR);
   const onYearChangeRef = useRef(onYearChange);
   const holdTimerRef = useRef(null);
@@ -81,6 +82,7 @@ function YearStepper({ resetKey, onYearChange }) {
     yearRef.current = DEFAULT_YEAR;
     setMotion("instant");
     setPressedDelta(0);
+    setSelectOpen(false);
     setYear(DEFAULT_YEAR);
     onYearChangeRef.current?.(String(DEFAULT_YEAR));
     const id = requestAnimationFrame(() => setMotion("ready"));
@@ -108,6 +110,8 @@ function YearStepper({ resetKey, onYearChange }) {
   }
 
   function applyStep(delta) {
+    // Close the select so the highlight/check don't drift apart while stepping.
+    setSelectOpen(false);
     return applyYear(yearRef.current + delta);
   }
 
@@ -216,6 +220,8 @@ function YearStepper({ resetKey, onYearChange }) {
         <Select
           items={YEAR_SELECT_ITEMS}
           value={String(year)}
+          open={selectOpen}
+          onOpenChange={setSelectOpen}
           onValueChange={handleSelectYear}
         >
           <SelectTrigger
@@ -232,7 +238,11 @@ function YearStepper({ resetKey, onYearChange }) {
             className="max-h-60 w-[220px] min-w-[220px] rounded-2xl font-display tabular-nums"
           >
             {YEAR_SELECT_ITEMS.map((item) => (
-              <SelectItem key={item.value} value={item.value} className="justify-center pr-3 text-center">
+              <SelectItem
+                key={item.value}
+                value={item.value}
+                className="justify-center text-center [&>div:first-child]:justify-center"
+              >
                 {item.label}
               </SelectItem>
             ))}
@@ -320,13 +330,12 @@ export function CarSearchDrawer({
     };
   }, [open, catalogLoading, listReveal]);
 
-  const canSearch = Boolean(model?.id && selectedService);
   const selectedIndex = DRAWER_SERVICES.findIndex((service) => service.param === selectedService);
   const activeService = selectedIndex >= 0 ? DRAWER_SERVICES[selectedIndex] : null;
   const fullService = SERVICES.find((service) => service.param === selectedService) ?? null;
 
   function handleSearch() {
-    if (!canSearch) {
+    if (!model?.id || !selectedYearRef.current || !selectedService) {
       toast.warning("الرجاء ادخال جميع البيانات");
       return;
     }
@@ -495,8 +504,7 @@ export function CarSearchDrawer({
             type="button"
             size="lg"
             onClick={handleSearch}
-            disabled={!canSearch}
-            className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90 disabled:cursor-not-allowed"
+            className="w-full cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
           >
             <Search className="size-5" />
             بحث

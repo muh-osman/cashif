@@ -14,8 +14,9 @@ import {
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
 } from "@/components/ui/input-group"
-import { SearchIcon, CheckIcon } from "lucide-react"
+import { SearchIcon, CheckIcon, XIcon } from "lucide-react"
 
 function Command({
   className,
@@ -60,9 +61,15 @@ function CommandInput({
   type = "search",
   name = "search",
   enterKeyHint = "search",
+  value,
+  defaultValue,
+  onValueChange,
   ...props
 }) {
   const inputRef = React.useRef(null)
+  const [hasValue, setHasValue] = React.useState(() =>
+    Boolean(value ?? defaultValue)
+  )
 
   const setInputRef = React.useCallback((node) => {
     inputRef.current = node
@@ -70,7 +77,10 @@ function CommandInput({
     if (node && type) {
       node.setAttribute("type", type)
     }
-  }, [type])
+    if (node && value === undefined) {
+      setHasValue(Boolean(node.value))
+    }
+  }, [type, value])
 
   // Re-apply after every commit — later renders from cmdk would otherwise reset type to "text".
   React.useLayoutEffect(() => {
@@ -80,6 +90,30 @@ function CommandInput({
       input.setAttribute("type", type)
     }
   })
+
+  React.useEffect(() => {
+    if (value !== undefined) {
+      setHasValue(Boolean(value))
+    }
+  }, [value])
+
+  function clearSearch(event) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const input = inputRef.current
+    if (!input) return
+
+    const descriptor = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value"
+    )
+    descriptor?.set?.call(input, "")
+    input.dispatchEvent(new Event("input", { bubbles: true }))
+    onValueChange?.("")
+    setHasValue(false)
+    input.focus()
+  }
 
   return (
     <div data-slot="command-input-wrapper" className="p-1 pb-0">
@@ -97,11 +131,33 @@ function CommandInput({
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
+            {...(value !== undefined ? { value } : { defaultValue })}
+            onValueChange={(next) => {
+              setHasValue(Boolean(next))
+              onValueChange?.(next)
+            }}
             className={cn(
               "w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+              type === "search" &&
+                "[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden",
               className
             )}
             {...props} />
+          {hasValue ? (
+            <InputGroupAddon align="inline-end" className="cursor-pointer pr-0">
+              <InputGroupButton
+                type="button"
+                size="icon-xs"
+                variant="ghost"
+                aria-label="مسح"
+                className="cursor-pointer opacity-50 hover:opacity-100"
+                onPointerDown={(event) => event.preventDefault()}
+                onClick={clearSearch}
+              >
+                <XIcon className="size-4" />
+              </InputGroupButton>
+            </InputGroupAddon>
+          ) : null}
           <InputGroupAddon>
             <SearchIcon className="size-4 shrink-0 opacity-50" />
           </InputGroupAddon>

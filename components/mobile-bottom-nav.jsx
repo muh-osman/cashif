@@ -66,29 +66,22 @@ function isHomePath(pathname) {
   return pathname === "/";
 }
 
-function MobileNavItem({ icon: Icon, label, isActive, expandKey = 0, spinning = false }) {
+function MobileNavItem({ icon: Icon, label, isActive, spinning = false }) {
   return (
     <>
       <span className="flex h-8 w-14 items-center justify-center">
-        <span
-          className={`relative flex h-8 w-14 items-center justify-center overflow-hidden rounded-2xl transition-colors duration-200 ease-out ${
-            isActive ? "bg-[#4281775e]" : "bg-transparent group-hover:bg-[#428177]/25"
-          }`}
-        >
-          {expandKey > 0 && (
-            <span
-              key={expandKey}
-              aria-hidden
-              className="nav-bg-expand pointer-events-none absolute inset-0 rounded-2xl bg-[#428177]/25"
-            />
-          )}
-          <Icon
-            className={`relative z-10 h-6 w-6 shrink-0 text-[#002623] transition-colors duration-200 group-hover:text-[#174545] ${spinning ? "animate-spin" : ""}`}
-            strokeWidth={isActive ? 2.2 : 1.8}
-          />
-        </span>
+        <Icon
+          className={`h-6 w-6 shrink-0 text-[#002623] transition-colors duration-200 group-hover:text-[#174545] ${spinning ? "animate-spin" : ""}`}
+          strokeWidth={isActive ? 2.2 : 1.8}
+        />
       </span>
-      <span className="font-display text-[12px] font-medium leading-none tracking-wide text-[#002623] transition-colors duration-200 group-hover:text-[#174545]">{label}</span>
+      <span
+        className={`font-display text-[12px] leading-none tracking-wide transition-colors duration-200 ${
+          isActive ? "font-semibold text-[#002623]" : "font-medium text-[#002623] group-hover:text-[#174545]"
+        }`}
+      >
+        {label}
+      </span>
     </>
   );
 }
@@ -297,10 +290,28 @@ export function MobileBottomNav({ initialActive = 2 }) {
     });
   }, [pathname]);
 
+  const routeIndex = isAccountPage
+    ? ACCOUNT_NAV_INDEX
+    : isReportsPage
+      ? REPORTS_NAV_INDEX
+      : isFalkPage
+        ? FALK_NAV_INDEX
+        : isPricesPage
+          ? PRICES_NAV_INDEX
+          : isHomePage
+            ? HOME_NAV_INDEX
+            : null;
+  const highlightedIndex = expanding.index ?? routeIndex ?? active;
+
   return (
     <>
-      <nav className="fixed bottom-0 left-1/2 z-50 w-full -translate-x-1/2 bg-[#f0f1f3cf] pt-3 pb-4 backdrop-blur-xl backdrop-saturate-150 sm:bottom-4 sm:w-[450px] sm:rounded-[40px]">
-        <ul className="flex h-[52px] items-center">
+      <nav className="fixed bottom-0 left-1/2 z-50 h-20 w-full -translate-x-1/2 overflow-hidden bg-[#f0f1f3cf] p-[9px] backdrop-blur-xl backdrop-saturate-150 sm:bottom-4 sm:w-[450px] sm:rounded-[40px]">
+        <ul className="relative flex h-full items-stretch">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 z-0 w-1/5 rounded-full border border-[#002623]/10 bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{ transform: `translateX(${highlightedIndex * -100}%)` }}
+          />
           {MOBILE_NAV.map(({ label, icon: Icon, href, action }, i) => {
             const isActive =
               action === "account"
@@ -314,15 +325,14 @@ export function MobileBottomNav({ initialActive = 2 }) {
                       : label === "الرئيسية"
                         ? isHomePage
                         : !isAccountPage && !isReportsPage && !isFalkPage && !isPricesPage && active === i;
-            const itemClass = "group flex w-full cursor-pointer flex-col items-center justify-center gap-1";
-            const expandKey = expanding.index === i ? expanding.key : 0;
+            const itemClass = "group flex h-full w-full cursor-pointer flex-col items-center justify-center gap-1";
             const isHighlighted = expanding.index === i || (isActive && expanding.index === null);
             const playExpand = () => {
               setExpanding((prev) => ({ index: i, key: prev.key + 1 }));
             };
 
             return (
-              <li key={label} className="min-w-0 flex-1">
+              <li key={label} className="relative z-10 flex min-w-0 flex-1">
                 {action === "account" ? (
                   <button
                     type="button"
@@ -332,7 +342,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
                     }}
                     className={`${itemClass} cursor-pointer`}
                   >
-                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
+                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} />
                   </button>
                 ) : action === "reports" ? (
                   <button
@@ -348,7 +358,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
                     }}
                     className={`${itemClass} cursor-pointer`}
                   >
-                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
+                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} />
                   </button>
                 ) : action === "falk" ? (
                   <button
@@ -377,7 +387,6 @@ export function MobileBottomNav({ initialActive = 2 }) {
                       icon={falkChecking ? Loader2 : Icon}
                       label={label}
                       isActive={isHighlighted}
-                      expandKey={expandKey}
                       spinning={falkChecking}
                     />
                   </button>
@@ -395,7 +404,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
                     }}
                     className={`${itemClass} cursor-pointer`}
                   >
-                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
+                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} />
                   </button>
                 ) : (
                   <Link
@@ -406,7 +415,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
                     }}
                     className={itemClass}
                   >
-                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} expandKey={expandKey} />
+                    <MobileNavItem icon={Icon} label={label} isActive={isHighlighted} />
                   </Link>
                 )}
               </li>

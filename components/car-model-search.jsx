@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
 import { CarSearchDrawer } from "@/components/car-search-drawer";
-import { getCachedCarCatalog, loadCarCatalog } from "@/lib/car-catalog";
+import { loadCarCatalog } from "@/lib/car-catalog";
 import { fetchInspectionPlans, stashPendingPricesSearch } from "@/lib/inspection-plans";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -27,14 +27,14 @@ export function CarModelSearch({
   prefill = null,
   reopenKey = 0,
 }) {
-  const cachedCatalog = getCachedCarCatalog();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [defaultService, setDefaultService] = useState(DEFAULT_SERVICE);
   const [defaultYear, setDefaultYear] = useState(null);
   const [selected, setSelected] = useState(null);
-  const [models, setModels] = useState(() => cachedCatalog?.models ?? []);
-  const [manufacturersById, setManufacturersById] = useState(() => cachedCatalog?.manufacturersById ?? new Map());
-  const [catalogLoading, setCatalogLoading] = useState(() => !cachedCatalog);
+  const [models, setModels] = useState([]);
+  const [manufacturersById, setManufacturersById] = useState(() => new Map());
+  // Idle until the drawer opens — don't fetch catalog on page load.
+  const [catalogLoading, setCatalogLoading] = useState(false);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const pathname = usePathname();
@@ -69,16 +69,11 @@ export function CarModelSearch({
   }
 
   useEffect(() => {
+    if (!drawerOpen) return;
+
     let cancelled = false;
-
-    if (cachedCatalog) {
-      setModels(cachedCatalog.models);
-      setManufacturersById(cachedCatalog.manufacturersById);
-      setCatalogLoading(false);
-      return;
-    }
-
     setCatalogLoading(true);
+
     loadCarCatalog()
       .then((catalog) => {
         if (cancelled) return;
@@ -97,7 +92,7 @@ export function CarModelSearch({
     return () => {
       cancelled = true;
     };
-  }, [cachedCatalog]);
+  }, [drawerOpen]);
 
   useEffect(() => {
     if (!openSearchService) return;

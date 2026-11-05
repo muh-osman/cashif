@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { defaultFilter } from "cmdk";
 import { Check, Loader2, Minus, Plus, Search, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,12 @@ const HOLD_REPEAT_MS = 70;
 const COMMAND_NONE = "__none__";
 const MODEL_LIST_MAX_HEIGHT = 192; // max-h-48
 const MODEL_LIST_LOADING_HEIGHT = 72;
+
+// Keep fuzzy matching, but give every hit the same score so cmdk does not
+// reshuffle the list as the query changes (or when letters are deleted).
+function stableModelFilter(value, search, keywords) {
+  return defaultFilter(value, search, keywords) > 0 ? 1 : 0;
+}
 const YEAR_SELECT_ITEMS = YEARS.map((itemYear) => ({
   value: String(itemYear),
   label: itemYear === MIN_YEAR ? "أقدم" : String(itemYear),
@@ -420,8 +427,9 @@ export function CarSearchDrawer({
                 dir="rtl"
                 value={commandValue}
                 onValueChange={setCommandValue}
+                filter={stableModelFilter}
                 disablePointerSelection
-                className="rounded-[24px] bg-transparent [&_[data-slot=input-group]]:h-13 [&_[data-slot=command-input]]:text-base"
+                className="rounded-[24px] bg-transparent p-1 pb-0 [&_[data-slot=input-group]]:h-13 [&_[data-slot=command-input]]:text-base"
               >
                 <CommandInput
                   name="car-model-search"
@@ -430,10 +438,10 @@ export function CarSearchDrawer({
                 />
                 {catalogLoading || !listReveal ? (
                   <div
-                    className="overflow-hidden"
+                    className="flex items-center justify-center overflow-hidden"
                     style={{ height: MODEL_LIST_LOADING_HEIGHT }}
                   >
-                    <div className="px-4 py-6 text-center text-sm text-[#757575]">جاري التحميل..</div>
+                    <div className="px-4 text-center text-sm text-[#757575]">جاري التحميل..</div>
                   </div>
                 ) : (
                   <CommandList
@@ -451,12 +459,15 @@ export function CarSearchDrawer({
                       setCommandValue(`${model.nameAr} ${model.nameEn} ${manufacturerName}`);
                     }}
                   >
-                    <CommandEmpty>
+                    <CommandEmpty
+                      className="flex items-center justify-center py-0"
+                      style={{ minHeight: MODEL_LIST_LOADING_HEIGHT }}
+                    >
                       <a
                         href="https://wa.me/966920019948?text=استعلام عن موديل غير موجود"
                         target="_blank"
                         rel="noreferrer"
-                        className="block px-4 py-3 text-center text-sm text-[#0b6bcb] underline"
+                        className="block px-4 text-center text-sm text-[#0b6bcb] underline"
                       >
                         لم تجد موديلك؟ تواصل معنا
                       </a>

@@ -309,7 +309,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
         <ul className="relative flex h-full items-stretch">
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 z-0 w-1/5 rounded-full border border-[#002623]/10 bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            className="pointer-events-none absolute inset-y-0 right-0 z-0 my-auto h-[58px] w-1/5 self-center rounded-full border border-[#002623]/10 bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:my-0 sm:h-auto sm:self-stretch"
             style={{ transform: `translateX(${highlightedIndex * -100}%)` }}
           />
           {MOBILE_NAV.map(({ label, icon: Icon, href, action }, i) => {

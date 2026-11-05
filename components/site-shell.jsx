@@ -6,7 +6,6 @@ import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { StickySearch } from "@/components/sticky-search";
 import { AuthProvider } from "@/components/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { WhatsAppButton } from "@/components/whatsapp-button";
 
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
@@ -94,7 +93,6 @@ export function SiteShell({ children, isLoggedIn = false }) {
     <AuthProvider initialLoggedIn={isLoggedIn}>
       {!hideSearch ? <StickySearch /> : null}
       <div className={hideSearch ? undefined : "pt-24"}>{children}</div>
-      {!isKiosk && <WhatsAppButton />}
       {!isKiosk && <MobileBottomNav />}
       <Toaster position="top-center" richColors />
     </AuthProvider>

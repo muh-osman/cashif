@@ -8,9 +8,10 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, Dr
 import { openPriceDrawer } from "@/components/car-model-search";
 import { FalkAcceptTermsDrawer } from "@/components/falk/accept-terms";
 import { FalkSoonDrawer } from "@/components/falk/soon";
+import { WhatsAppIcon } from "@/components/whatsapp-icon";
 import { useAuth } from "@/components/auth-provider";
 import { clearAuthCookies } from "@/lib/auth";
-import { CONTACT_PHONE } from "@/data/contact";
+import { CONTACT_PHONE, WHATSAPP_HREF } from "@/data/contact";
 
 const MOBILE_NAV = [
   { label: "حسابي", icon: Menu, action: "account" },
@@ -33,7 +34,7 @@ const ACCOUNT_LINKS = [
   { label: "عروض شركائنا", href: "/partners", icon: Gift, activatesAccount: true },
   { label: "أسعار الشحن", href: "/shipping-prices", icon: Truck, activatesAccount: true },
   { label: "تابعنا", href: "/social-media", icon: Share2, activatesAccount: true },
-  { label: "اتصل بنا", href: `tel:${CONTACT_PHONE}`, icon: Phone, tel: true },
+  { label: "اتصل بنا", icon: Phone, action: "contact" },
 ];
 
 function isAccountPath(pathname) {
@@ -135,6 +136,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
   const [falkAccess, setFalkAccess] = useState(null);
   const [falkChecking, setFalkChecking] = useState(false);
   const [ordersOpen, setOrdersOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const keepAccountExpandRef = useRef(false);
   const falkAccessPromiseRef = useRef(null);
   const { isLoggedIn, setIsLoggedIn } = useAuth();
@@ -268,6 +270,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
     setFalkSoonOpen(false);
     setFalkTermsOpen(false);
     setOrdersOpen(false);
+    setContactOpen(false);
 
     setExpanding((prev) => {
       if (isAccountPath(pathname)) {
@@ -430,6 +433,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
           setAccountOpen(open);
           if (!open) {
             setOrdersOpen(false);
+            setContactOpen(false);
             clearAccountExpandIfNeeded();
           }
         }}
@@ -442,7 +446,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
           </DrawerHeader>
 
           <div className="flex flex-col gap-1 p-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-            {ACCOUNT_LINKS.map(({ label, href, icon: Icon, external, tel, action, activatesAccount }) => {
+            {ACCOUNT_LINKS.map(({ label, href, icon: Icon, external, action, activatesAccount }) => {
               const itemClass = "flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-[#002623] transition-colors hover:bg-[#428177]/10";
 
               if (action === "orders" && !isLoggedIn) {
@@ -455,14 +459,22 @@ export function MobileBottomNav({ initialActive = 2 }) {
                 );
               }
 
+              if (action === "contact") {
+                return (
+                  <button key={label} type="button" onClick={() => setContactOpen(true)} className={`${itemClass} cursor-pointer`}>
+                    <Icon className="h-5 w-5 shrink-0" />
+                    <span className="flex-1 text-right text-base font-medium">{label}</span>
+                    <ChevronLeft className="h-4 w-4 shrink-0 text-[#757575]" />
+                  </button>
+                );
+              }
+
               return (
                 <DrawerClose
                   key={label}
                   nativeButton={false}
                   render={
-                    tel ? (
-                      <a href={href} className={itemClass} />
-                    ) : external ? (
+                    external ? (
                       <a href={href} target="_blank" rel="noreferrer" className={itemClass} />
                     ) : (
                       <Link
@@ -520,6 +532,46 @@ export function MobileBottomNav({ initialActive = 2 }) {
               setAccountOpen(false);
             }}
           />
+
+          <Drawer open={contactOpen} onOpenChange={setContactOpen} showSwipeHandle>
+            <DrawerContent className="sm:w-[450px] sm:[--drawer-content-width:450px] sm:data-[swipe-axis=y]:inset-x-0 sm:mx-auto">
+              <DrawerHeader className="text-right md:text-right">
+                <DrawerTitle className="font-display text-[#002623]">اتصل بنا</DrawerTitle>
+                <DrawerDescription className="sr-only">اختر طريقة التواصل</DrawerDescription>
+              </DrawerHeader>
+
+              <div className="flex flex-col gap-1 p-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+                <DrawerClose
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={`tel:${CONTACT_PHONE}`}
+                      className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-[#002623] transition-colors hover:bg-[#428177]/10"
+                    />
+                  }
+                >
+                  <Phone className="h-5 w-5 shrink-0" />
+                  <span className="flex-1 text-right text-base font-medium">مكالمة</span>
+                  <ChevronLeft className="h-4 w-4 shrink-0 text-[#757575]" />
+                </DrawerClose>
+                <DrawerClose
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={WHATSAPP_HREF}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-[#002623] transition-colors hover:bg-[#428177]/10"
+                    />
+                  }
+                >
+                  <WhatsAppIcon className="h-5 w-5 shrink-0 text-[#25d366]" />
+                  <span className="flex-1 text-right text-base font-medium">واتساب</span>
+                  <ChevronLeft className="h-4 w-4 shrink-0 text-[#757575]" />
+                </DrawerClose>
+              </div>
+            </DrawerContent>
+          </Drawer>
         </DrawerContent>
       </Drawer>
 

@@ -325,7 +325,7 @@ export function MobileBottomNav({ initialActive = 2 }) {
                       : label === "الرئيسية"
                         ? isHomePage
                         : !isAccountPage && !isReportsPage && !isFalkPage && !isPricesPage && active === i;
-            const itemClass = "group flex h-full w-full cursor-pointer flex-col items-center justify-center gap-1";
+            const itemClass = "group flex h-full w-full cursor-pointer flex-col items-center justify-center gap-0 sm:gap-1";
             const isHighlighted = expanding.index === i || (isActive && expanding.index === null);
             const playExpand = () => {
               setExpanding((prev) => ({ index: i, key: prev.key + 1 }));

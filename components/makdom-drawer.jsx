@@ -193,7 +193,7 @@ export function MakdomDrawer({ open, onOpenChange }) {
             </div>
           </div>
 
-          <DrawerFooter className="pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+          <DrawerFooter className="pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
             <Button
               type="button"
               size="lg"

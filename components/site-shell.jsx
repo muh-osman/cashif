@@ -52,7 +52,9 @@ export function SiteShell({ children, isLoggedIn = false }) {
     pathname === "/prices" ||
     pathname.startsWith("/prices/") ||
     pathname === "/login" ||
-    pathname.startsWith("/login/");
+    pathname.startsWith("/login/") ||
+    pathname === "/signup" ||
+    pathname.startsWith("/signup/");
 
   useEffect(() => {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";

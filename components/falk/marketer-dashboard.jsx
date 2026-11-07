@@ -82,6 +82,7 @@ export function FalkMarketerDashboard() {
   const [error, setError] = useState("");
   const [displayPoints, setDisplayPoints] = useState(0);
   const [displayCardCount, setDisplayCardCount] = useState(0);
+  const [opening, setOpening] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -180,7 +181,10 @@ export function FalkMarketerDashboard() {
   }, [loading, points, cardCount]);
 
   const handleWithdraw = () => {
+    if (opening) return;
+
     if (points >= MIN_WITHDRAWAL) {
+      setOpening("withdraw");
       router.push("/falk/transfer");
       return;
     }
@@ -267,16 +271,32 @@ export function FalkMarketerDashboard() {
 
             <div className="flex gap-3">
               <Button
-                className="flex-1 cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90"
+                className={cn(
+                  "flex-1 cursor-pointer rounded-4xl bg-[#174545] text-white hover:bg-[#174545]/90",
+                  opening && "pointer-events-none"
+                )}
+                aria-busy={opening === "withdraw"}
                 onClick={handleWithdraw}
               >
-                سحب الأرباح
+                {opening === "withdraw" ? <Loader2 className="h-5 w-5 animate-spin" /> : "سحب الأرباح"}
               </Button>
               <Link
                 href="/falk/history"
-                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "flex-1 rounded-4xl border-[#174545]/30 text-[#174545]")}
+                aria-busy={opening === "history"}
+                onClick={(event) => {
+                  if (opening) {
+                    event.preventDefault();
+                    return;
+                  }
+                  setOpening("history");
+                }}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "flex-1 rounded-4xl border-[#174545]/30 text-[#174545]",
+                  opening && "pointer-events-none"
+                )}
               >
-                السجل
+                {opening === "history" ? <Loader2 className="h-5 w-5 animate-spin" /> : "السجل"}
               </Link>
             </div>
           </CardContent>

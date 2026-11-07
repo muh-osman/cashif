@@ -27,6 +27,11 @@ const REPORTS_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.action === "report
 const FALK_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.action === "falk");
 const HOME_NAV_INDEX = MOBILE_NAV.findIndex((item) => item.label === "الرئيسية");
 
+const NAV_ACTIVE_GROW = 1.3;
+const NAV_INACTIVE_GROW = 0.925;
+const NAV_GROW_TOTAL = NAV_ACTIVE_GROW + NAV_INACTIVE_GROW * (MOBILE_NAV.length - 1);
+const NAV_PILL_EASE = "cubic-bezier(0.22,1,0.36,1)";
+
 const ACCOUNT_LINKS = [
   { label: "فروعنا", href: "/branches", icon: MapPin, activatesAccount: true },
   { label: "المدونة", href: "https://cashif.cc/blog/", icon: FileText, external: true },
@@ -70,14 +75,14 @@ function isHomePath(pathname) {
 function MobileNavItem({ icon: Icon, label, isActive, spinning = false }) {
   return (
     <>
-      <span className="flex h-8 w-14 items-center justify-center">
+      <span className="flex h-8 w-full items-center justify-center">
         <Icon
           className={`h-6 w-6 shrink-0 text-[#002623] transition-colors duration-200 group-hover:text-[#174545] ${spinning ? "animate-spin" : ""}`}
           strokeWidth={isActive ? 2.2 : 1.8}
         />
       </span>
       <span
-        className={`font-display text-[12px] leading-none tracking-wide transition-colors duration-200 ${
+        className={`w-full truncate text-center font-display text-[12px] leading-snug tracking-wide transition-colors duration-200 ${
           isActive ? "font-semibold text-[#002623]" : "font-medium text-[#002623] group-hover:text-[#174545]"
         }`}
       >
@@ -312,8 +317,11 @@ export function MobileBottomNav({ initialActive = 2 }) {
         <ul className="relative flex h-full items-stretch">
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 z-0 w-1/5 rounded-full border border-[#002623]/10 bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-            style={{ transform: `translateX(${highlightedIndex * -100}%)` }}
+            className="pointer-events-none absolute inset-y-0 z-0 rounded-full border border-[#002623]/10 bg-white shadow-sm transition-[width,right] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{
+              width: `${(NAV_ACTIVE_GROW / NAV_GROW_TOTAL) * 100}%`,
+              right: `${(highlightedIndex * NAV_INACTIVE_GROW / NAV_GROW_TOTAL) * 100}%`,
+            }}
           />
           {MOBILE_NAV.map(({ label, icon: Icon, href, action }, i) => {
             const isActive =
@@ -335,7 +343,15 @@ export function MobileBottomNav({ initialActive = 2 }) {
             };
 
             return (
-              <li key={label} className="relative z-10 flex min-w-0 flex-1">
+              <li
+                key={label}
+                className="relative z-10 flex min-w-0 overflow-x-clip transition-[flex-grow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{
+                  flexGrow: i === highlightedIndex ? NAV_ACTIVE_GROW : NAV_INACTIVE_GROW,
+                  flexBasis: 0,
+                  transitionTimingFunction: NAV_PILL_EASE,
+                }}
+              >
                 {action === "account" ? (
                   <button
                     type="button"

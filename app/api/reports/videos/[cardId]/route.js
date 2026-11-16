@@ -22,7 +22,7 @@ function normalizeVideo(video) {
 
   return {
     video_url,
-    title: text(video.documentTypeNameAr),
+    title: text(video.documentTypeNameAr) || text(video.video_type),
     subtitle: text(video.damageAr),
   };
 }

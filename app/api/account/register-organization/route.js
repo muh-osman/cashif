@@ -1,4 +1,4 @@
-import { forwardApiResponse, getApiUrl } from "@/lib/api-url";
+import { fetchApi, forwardApiResponse } from "@/lib/api-url";
 import { verifyRecaptchaToken } from "@/lib/recaptcha";
 
 export async function POST(request) {
@@ -21,7 +21,7 @@ export async function POST(request) {
   }
 
   try {
-    const response = await fetch(getApiUrl("api/Clients/RegisterCompanyClient"), {
+    const response = await fetchApi("api/Clients/RegisterCompanyClient", {
       method: "POST",
       headers: {
         "Content-Type": "application/json-patch+json",

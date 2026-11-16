@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { getPhoneNumberFromStore, hasAuthCookieFromStore } from "@/lib/auth";
-import { getApiUrl } from "@/lib/api-url";
+import { fetchApi } from "@/lib/api-url";
 import { buildManufacturerIndex, manufacturerForModel } from "@/lib/car-manufacturer";
 
 const ORDERS_API = "https://cashif.cc/payment-system/back-end/public/api/my-orders";
@@ -15,8 +15,8 @@ async function loadManufacturerIndex() {
   }
 
   const [marksResponse, manufacturersResponse] = await Promise.all([
-    fetch(getApiUrl("api/CarMark"), { cache: "no-store" }),
-    fetch(getApiUrl("api/CarManufacturer"), { cache: "no-store" }),
+    fetchApi("api/CarMark"),
+    fetchApi("api/CarManufacturer"),
   ]);
 
   if (!marksResponse.ok || !manufacturersResponse.ok) {

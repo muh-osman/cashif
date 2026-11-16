@@ -1,8 +1,8 @@
-import { getApiUrl } from "@/lib/api-url";
+import { fetchApi } from "@/lib/api-url";
 
 export async function GET() {
   try {
-    const response = await fetch(getApiUrl("api/CarManufacturer"), { cache: "no-store" });
+    const response = await fetchApi("api/CarManufacturer");
     const data = await response.json().catch(() => []);
 
     if (!response.ok) {

@@ -1,4 +1,4 @@
-import { forwardApiResponse, getApiUrl } from "@/lib/api-url";
+import { fetchApi, forwardApiResponse } from "@/lib/api-url";
 
 export async function POST(request) {
   const body = await request.json().catch(() => null);
@@ -8,7 +8,7 @@ export async function POST(request) {
   }
 
   try {
-    const response = await fetch(getApiUrl("api/Account/login"), {
+    const response = await fetchApi("api/Account/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json-patch+json",

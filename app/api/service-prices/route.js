@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/lib/api-url";
+import { fetchApi } from "@/lib/api-url";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -10,9 +10,8 @@ export async function GET(request) {
   }
 
   try {
-    const response = await fetch(
-      getApiUrl(`api/ServicePrices/ByYearAndMark?year=${encodeURIComponent(year)}&markId=${encodeURIComponent(markId)}`),
-      { cache: "no-store" }
+    const response = await fetchApi(
+      `api/ServicePrices/ByYearAndMark?year=${encodeURIComponent(year)}&markId=${encodeURIComponent(markId)}`
     );
     const data = await response.json().catch(() => []);
 

@@ -1,4 +1,4 @@
-import { forwardApiResponse, getApiUrl } from "@/lib/api-url";
+import { fetchApi, forwardApiResponse } from "@/lib/api-url";
 import { verifyRecaptchaToken } from "@/lib/recaptcha";
 
 export async function POST(request) {
@@ -16,9 +16,7 @@ export async function POST(request) {
   }
 
   try {
-    const response = await fetch(getApiUrl(`api/Account/sendOtp?phoneNumber=${encodeURIComponent(phoneNumber)}`), {
-      cache: "no-store",
-    });
+    const response = await fetchApi(`api/Account/sendOtp?phoneNumber=${encodeURIComponent(phoneNumber)}`);
     return forwardApiResponse(response);
   } catch (error) {
     return Response.json({ message: error.message || "حدث خطأ" }, { status: 500 });

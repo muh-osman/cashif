@@ -266,6 +266,10 @@ function toList(data) {
   return [];
 }
 
+function cardHasVideos(card) {
+  return Array.isArray(card?.videos) && card.videos.length > 0;
+}
+
 export default function ReportsPage() {
   const router = useRouter();
   const [tab, setTab] = useState("cashif");
@@ -395,7 +399,7 @@ export default function ReportsPage() {
         const data = await response.json().catch(() => ({}));
         if (!cancelled && response.ok) setVideoStatus(data?.data || {});
       } catch {
-        // Video buttons stay hidden if the check fails.
+        // The check is one source. A card can still show video from its own videos array.
       }
     }
 
@@ -778,7 +782,7 @@ function CashifReports({ loading, error, cards, videoStatus, cardIdsWithMojazRep
           { icon: CreditCard, label: "رقم الفحص", value: card.cardNumber },
           { icon: CalendarDays, label: "تاريخ الفحص", value: formatDate(card.createdDate) },
         ];
-        const hasVideo = videoStatus?.[String(card.cardNumber)] === true;
+        const hasVideo = cardHasVideos(card) || videoStatus?.[String(card.cardNumber)] === true;
         const canAskMojaz = !cardIdsWithMojazReport.has(card.id);
 
         return (

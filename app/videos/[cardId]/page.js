@@ -29,9 +29,12 @@ export default function ReportVideosPage() {
           throw new Error(data.message || "تعذر تحميل الفيديو");
         }
 
-        const urls = data?.success && Array.isArray(data?.data?.videos) ? data.data.videos.map((video) => video.video_url).filter(Boolean) : [];
+        const items =
+          data?.success && Array.isArray(data?.data?.videos)
+            ? data.data.videos.filter((video) => video?.video_url)
+            : [];
 
-        if (!cancelled) setVideos(urls);
+        if (!cancelled) setVideos(items);
       } catch (err) {
         if (!cancelled) {
           setVideos([]);
@@ -85,10 +88,16 @@ export default function ReportVideosPage() {
 
       {!loading && !error && videos.length > 0 ? (
         <ul className="mx-auto grid max-w-3xl gap-6">
-          {videos.map((url) => (
-            <li key={url}>
+          {videos.map((video) => (
+            <li key={video.video_url} className="space-y-3">
+              {video.title || video.subtitle ? (
+                <div className="space-y-1 px-2 text-start">
+                  {video.title ? <h2 className="text-lg font-semibold text-[#002623]">{video.title}</h2> : null}
+                  {video.subtitle ? <p className="text-sm text-[#757575]">{video.subtitle}</p> : null}
+                </div>
+              ) : null}
               <Card className="overflow-hidden rounded-[40px] border-none py-0 shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]">
-                <video src={url} controls playsInline className="aspect-video w-full bg-black" />
+                <video src={video.video_url} controls playsInline className="aspect-video w-full bg-black" />
               </Card>
             </li>
           ))}

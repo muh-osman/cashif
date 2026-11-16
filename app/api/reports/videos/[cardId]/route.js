@@ -8,12 +8,42 @@ function toList(data) {
   return [];
 }
 
-function videoUrl(video) {
-  if (typeof video === "string") return video;
-  return video?.video_url || video?.url || "";
+function text(value) {
+  return typeof value === "string" ? value.trim() : "";
 }
 
-async function cardVideoUrls(cookieStore, cardId) {
+function normalizeVideo(video) {
+  if (typeof video === "string") {
+    return video ? { video_url: video, title: "", subtitle: "" } : null;
+  }
+
+  const video_url = video?.video_url || video?.url || "";
+  if (!video_url) return null;
+
+  return {
+    video_url,
+    title: text(video.documentTypeNameAr),
+    subtitle: text(video.damageAr),
+  };
+}
+
+function addVideos(videosByUrl, videos) {
+  for (const video of videos) {
+    const item = normalizeVideo(video);
+    if (!item) continue;
+
+    const existing = videosByUrl.get(item.video_url);
+    if (!existing) {
+      videosByUrl.set(item.video_url, item);
+      continue;
+    }
+
+    if (!existing.title && item.title) existing.title = item.title;
+    if (!existing.subtitle && item.subtitle) existing.subtitle = item.subtitle;
+  }
+}
+
+async function cardVideos(cookieStore, cardId) {
   try {
     const userId = getUserIdFromStore(cookieStore);
     if (!userId) return [];
@@ -27,9 +57,7 @@ async function cardVideoUrls(cookieStore, cardId) {
     const data = await response.json().catch(() => null);
     const card = toList(data).find((item) => String(item?.cardNumber) === String(cardId) || String(item?.id) === String(cardId));
 
-    if (!Array.isArray(card?.videos)) return [];
-
-    return card.videos.map(videoUrl).filter(Boolean);
+    return Array.isArray(card?.videos) ? card.videos : [];
   } catch {
     return [];
   }
@@ -48,7 +76,8 @@ export async function GET(_request, { params }) {
     return Response.json({ message: "رقم التقرير مطلوب" }, { status: 400 });
   }
 
-  const urls = new Set(await cardVideoUrls(cookieStore, cardId));
+  const videosByUrl = new Map();
+  addVideos(videosByUrl, await cardVideos(cookieStore, cardId));
   let legacyError = "";
 
   try {
@@ -58,8 +87,7 @@ export async function GET(_request, { params }) {
     const data = await response.json().catch(() => ({}));
 
     if (response.ok) {
-      const videos = Array.isArray(data?.data?.videos) ? data.data.videos : [];
-      videos.map(videoUrl).filter(Boolean).forEach((url) => urls.add(url));
+      addVideos(videosByUrl, Array.isArray(data?.data?.videos) ? data.data.videos : []);
     } else {
       legacyError = "تعذر تحميل روابط الفيديو";
     }
@@ -67,14 +95,14 @@ export async function GET(_request, { params }) {
     legacyError = error.message || "تعذر تحميل روابط الفيديو";
   }
 
-  if (urls.size === 0 && legacyError) {
+  if (videosByUrl.size === 0 && legacyError) {
     return Response.json({ message: legacyError, success: false }, { status: 502 });
   }
 
   return Response.json({
     success: true,
     data: {
-      videos: [...urls].map((video_url) => ({ video_url })),
+      videos: [...videosByUrl.values()],
     },
   });
 }
